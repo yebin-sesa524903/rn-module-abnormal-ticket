@@ -1,0 +1,205 @@
+'use strict';
+
+import React, {Component} from 'react';
+import { Image } from 'react-native';
+import CacheableImage from './CacheableImage';
+import PropTypes from 'prop-types';
+
+import ViewTransformer from 'react-native-view-transformer';
+
+let DEV = false;
+
+export default class TransformableImage extends Component {
+
+  static enableDebug() {
+    DEV = true;
+  }
+
+  static propTypes = {
+    pixels: PropTypes.shape({
+      width: PropTypes.number,
+      height: PropTypes.number,
+    }),
+
+    defaultSource: Image.propTypes.source,
+
+    enableTransform: PropTypes.bool,
+    enableScale: PropTypes.bool,
+    enableTranslate: PropTypes.bool,
+    onTransformGestureReleased: PropTypes.func,
+    onViewTransformed: PropTypes.func
+  };
+
+  static defaultProps = {
+    enableTransform: true,
+    enableScale: true,
+    enableTranslate: true,
+    defaultSource: null
+  };
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      width: 0,
+      height: 0,
+
+      imageLoaded: false,
+      pixels: undefined,
+      keyAcumulator: 1
+    };
+  }
+
+  componentWillMount() {
+    if (!this.props.pixels) {
+      this.getImageSize(this.props.source);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // if (!sameSource(this.props.source, nextProps.source)) {
+      //image source changed, clear last image's pixels info if any
+    if(!sameSource(nextProps.source,this.props.source)) {
+      this.setState({pixels: undefined, keyAcumulator: this.state.keyAcumulator + 1})
+      this.getImageSize(nextProps.source);
+    }
+
+    // }
+  }
+
+  render() {
+    let maxScale = 1;
+    let contentAspectRatio = undefined;
+    let width, height; //pixels
+
+    // console.warn('render TransformableImage...',this.props.pixels);
+    if (this.props.pixels) {
+      //if provided via props
+      width = this.props.pixels.width;
+      height = this.props.pixels.height;
+    } else if (this.state.pixels) {
+      //if got using Image.getSize()
+      width = this.state.pixels.width;
+      height = this.state.pixels.height;
+    }
+
+    if (width && height) {
+      contentAspectRatio = width / height;
+      if (this.state.width && this.state.height) {
+        maxScale = Math.max(width / this.state.width, height / this.state.height);
+        maxScale = Math.max(1, maxScale);
+      }
+    }
+
+
+    return (
+      <ViewTransformer
+        ref='viewTransformer'
+        key={'viewTransformer#' + this.state.keyAcumulator} //when image source changes, we should use a different node to avoid reusing previous transform state
+        enableTransform={this.props.enableTransform && this.state.imageLoaded} //disable transform until image is loaded
+        enableScale={this.props.enableScale}
+        enableTranslate={this.props.enableTranslate}
+        enableResistance={true}
+        onTransformGestureReleased={this.props.onTransformGestureReleased}
+        onViewTransformed={this.props.onViewTransformed}
+        maxScale={maxScale}
+        contentAspectRatio={contentAspectRatio}
+        onLayout={this.onLayout.bind(this)}
+        style={this.props.style}>
+        <CacheableImage
+          {...this.props}
+          style={[this.props.style, {backgroundColor: 'transparent'}]}
+          resizeMode={'contain'}
+          defaultSource={this.props.defaultSource}
+          onLoadStart={this.onLoadStart.bind(this)}
+          onLoad={this.onLoad.bind(this)}
+          capInsets={{left: 0.1, top: 0.1, right: 0.1, bottom: 0.1}} //on iOS, use capInsets to avoid image downsampling
+        />
+      </ViewTransformer>
+    );
+  }
+
+  onLoadStart(e) {
+    this.props.onLoadStart && this.props.onLoadStart(e);
+    this.setState({
+      imageLoaded: false
+    });
+  }
+
+  onLoad(e) {
+    this.props.onLoad && this.props.onLoad(e);
+    this.setState({
+      imageLoaded: true
+    });
+  }
+
+  onLayout(e) {
+    let {width, height} = e.nativeEvent.layout;
+    if (this.state.width !== width || this.state.height !== height) {
+      this.setState({
+        width: width,
+        height: height
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    //防止在ummount后还继续更新页面
+    this.setState = ()=>{};
+  }
+
+  getImageSize(source) {
+    if(!source) return;
+
+    // DEV && console.log('getImageSize...' + JSON.stringify(source));
+
+    if (typeof Image.getSize === 'function') {
+      if (source && source.uri) {
+        //如果本地有缓存，从本地缓存中取尺寸
+        CacheableImage.getFilepathFromSource({uri:source.uri}).then(res=>{
+          let url=source.uri;
+          console.warn(res,url);
+          if(res){
+            url=res;
+          }
+          Image.getSize(
+            url,
+            (width, height) => {
+              //DEV && console.log('getImageSize...width=' + width + ', height=' + height);
+              if (width && height) {
+                if(this.state.pixels && this.state.pixels.width === width && this.state.pixels.height === height) {
+                  //no need to update state
+                } else {
+                  this.setState({pixels: {width, height}});
+                }
+              }
+            },
+            (error) => {
+              console.warn('getImageSize...error=' + JSON.stringify(error) + ', source=' + JSON.stringify(source));
+            })
+        });
+
+      } else {
+        console.warn('getImageSize...please provide pixels prop for local images');
+      }
+    } else {
+      console.warn('getImageSize...Image.getSize function not available before react-native v0.28');
+    }
+  }
+
+  getViewTransformerInstance() {
+    return this.refs['viewTransformer'];
+  }
+}
+
+function sameSource(source, nextSource) {
+  if (source === nextSource) {
+    return true;
+  }
+  if (source && nextSource) {
+    if (source.uri && nextSource.uri) {
+      return source.uri === nextSource.uri;
+    }
+  }
+  return false;
+}
