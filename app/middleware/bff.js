@@ -5,7 +5,7 @@ import privilegeHelper from "../utils/privilegeHelper";
 import {localStr} from "../utils/Localizations/localization";
 import {DeviceEventEmitter} from "react-native";
 let _BASEURL = "https://micro-to.energymost.com/bff/comp-ticket/rest/";
-_BASEURL = 'https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
+_BASEURL = 'http://starbucks-xt.eh.energymost.com/bff/comp-ticket/rest/'//https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
 //生产环境地址
 let prodUrl = 'https://micro.energymost.com/bff/comp-ticket/rest/';
 
@@ -54,7 +54,7 @@ let defaultFetch = async function(options){
       body: body,
     })
     .then((response)=>{
-      console.log('<<<<response',body,response.status,response,url)
+      // console.log('<<<<response',body,headers,response.status,response,url)
       if(response.status === 204){
         return new Promise((resolve)=>{
           resolve({code:response.status,msg:localStr('lang_server_error')});
@@ -106,7 +106,7 @@ let defaultFetch = async function(options){
       //   console.log('data',data)
       //   return data//reader.result;
       // }
-      console.log(options.url,body,data)
+      console.log(url,body,headers,data)
       return data;
     }).catch(err => {
       return new Promise((resolve)=>{
@@ -204,7 +204,6 @@ export async function apiQueryTicketList(filter) {
       locationType:100
     }
   ]
-
   return await defaultFetch({
     url:'ticket/daysTicketList',
     verb:'post',
@@ -217,7 +216,8 @@ export async function configCookie(data) {
   sysId = data.sysId;
   userId = data.userId;
   userName = data.userName
-  // token = data.token;
+  token = data.token;
+  setCookie = data.token;
   // tokenKey = data.tokenKey;
   hierarchyId = data.hierarchyId;
   prod = data.prod;
@@ -227,11 +227,11 @@ export async function configCookie(data) {
     userId,userName,sysId
   }
   body.prod = null;
-  return await defaultFetch({
-    url:'getCookie',
-    verb:'post',
-    body:body
-  })
+  // return await defaultFetch({
+  //   url:'getCookie',
+  //   verb:'post',
+  //   body:body
+  // })
 }
 
 //获取工单详情

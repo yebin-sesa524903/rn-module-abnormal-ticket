@@ -16,7 +16,7 @@ import {apiGetExecutorData, apiGetTicketExecutors} from "./middleware/bff";
 import TouchFeedback from "./components/TouchFeedback";
 import Icon from "./components/Icon";
 import {GRAY, GREEN} from "./styles/color";
-const CODE_OK = '200';
+const CODE_OK = '0';
 
 export default class TicketSelectExecutors extends Component{
   constructor(props){
