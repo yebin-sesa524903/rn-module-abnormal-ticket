@@ -2,7 +2,7 @@ import React,{Component} from 'react';
 import {connect} from 'react-redux';
 import {
   DeviceEventEmitter,
-  Image,
+  Image, InteractionManager,
   Modal,
   Platform,
   RefreshControl,
@@ -32,6 +32,7 @@ import moment from "moment";
 
 import {isPhoneX} from "./utils";
 import privilegeHelper, {CodeMap} from "./utils/privilegeHelper";
+import Loading from "rn-module-abnormal-ticket/app/components/Loading";
 
 const MP=Platform.OS==='ios'? (isPhoneX()?0:10) : 36;
 const CODE_OK = '0';
@@ -50,23 +51,26 @@ export default class TicketList extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {refreshing:false,
+    this.state = {refreshing:true,
       hasPermission:privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) || privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_VIEW)}
   }
 
   componentDidMount() {
-    if(privilegeHelper.hasCodes()) {
-      this.loadTicketList(new Date(),1);
-      let start = moment().add(-1,'months').format(DAY_FORMAT);
-      let end = moment().add(1,'months').format(DAY_FORMAT);
-      this.loadTicketCount(start,end);
-    } else {
-      this.setState({refreshing:true,hasPermission:true})
-    }
-    this._initListener = DeviceEventEmitter.addListener('TICKET_INIT_OK',()=>{
-      this.setState({hasPermission:privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) || privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_VIEW)})
-      this.loadTicketList(new Date(),1);
-    })
+    InteractionManager.runAfterInteractions((()=>{
+      if(privilegeHelper.hasCodes()) {
+        this.loadTicketList(new Date(),1);
+        let start = moment().add(-1,'months').format(DAY_FORMAT);
+        let end = moment().add(1,'months').format(DAY_FORMAT);
+        this.loadTicketCount(start,end);
+      } else {
+        this.setState({refreshing:true,hasPermission:true})
+      }
+      this._initListener = DeviceEventEmitter.addListener('TICKET_INIT_OK',()=>{
+        this.setState({hasPermission:privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) || privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_VIEW)})
+        this.loadTicketList(new Date(),1);
+      })
+    }))
+
   }
 
   componentWillUnmount() {
@@ -310,6 +314,7 @@ export default class TicketList extends Component {
 
   _getView() {
     if(this.state.showEmpty) return this._renderEmpty();
+    if(!this.state.ticketData || this.state.ticketData.length === 0)  return <Loading />
     return (
       <SectionList style={{flex:1,paddingHorizontal:16,backgroundColor:LIST_BG}} sections={this.state.ticketData}
                    contentContainerStyle={{flex:(this.state.ticketData && this.state.ticketData.length>0)?undefined:1}}
