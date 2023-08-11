@@ -5,13 +5,17 @@ import privilegeHelper from "../utils/privilegeHelper";
 import {localStr} from "../utils/Localizations/localization";
 import {DeviceEventEmitter} from "react-native";
 let _BASEURL = "https://micro-to.energymost.com/bff/comp-ticket/rest/";
-_BASEURL = 'http://starbucks-xt.eh.energymost.com/bff/comp-ticket/rest/'//https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
+_BASEURL = ''//http://starbucks-xt.eh.energymost.com/bff/comp-ticket/rest/'//https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
 //生产环境地址
 let prodUrl = 'https://micro.energymost.com/bff/comp-ticket/rest/';
 
 export function getBaseUri() {
-  if(prod) return prodUrl;
+  // if(prod) return prodUrl;
   return _BASEURL;
+}
+
+export function getCookie() {
+  return setCookie;
 }
 
 let defaultFetch = async function(options){
@@ -25,7 +29,7 @@ let defaultFetch = async function(options){
   //headers[tokenKey] = token;
   //headers['Cookie'] = token;
   if(setCookie) {
-    headers['cookie'] = setCookie;
+    headers['Cookie'] = setCookie;
   }
   let url = baseUrl + options.url
   if(options.url.includes('http')) url = options.url;
@@ -217,6 +221,7 @@ export async function configCookie(data) {
   userId = data.userId;
   userName = data.userName
   token = data.token;
+  _BASEURL = data.host;
   setCookie = data.token;
   // tokenKey = data.tokenKey;
   hierarchyId = data.hierarchyId;
