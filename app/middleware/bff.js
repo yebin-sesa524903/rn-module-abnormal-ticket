@@ -143,12 +143,7 @@ export async function apiTicketList(date,pageNo) {
     body:{
       searchDate:date,
       pageNo,
-      locations:[
-        {
-          locationId:hierarchyId,
-          locationType:100
-        }
-      ]
+      ticketTypes:[10]
     }
   })
 }
@@ -170,12 +165,12 @@ export async function apiTicketCount(start,end) {
     body:{
       startDate:start,
       endDate:end,
-      locations:[
-        {
-          locationId:hierarchyId,
-          locationType:100
-        }
-      ]
+      // locations:[
+      //   {
+      //     locationId:hierarchyId,
+      //     locationType:100
+      //   }
+      // ]
     }
   })
 }
@@ -202,12 +197,12 @@ export async function apiQueryTicketList(filter) {
     data.endDate = moment(filter.EndTime).format(DAY_FORMAT);
   }
   if(filter.ticketName) data.title = filter.ticketName;
-  data.locations=[
-    {
-      locationId:hierarchyId,
-      locationType:100
-    }
-  ]
+  // data.locations=[
+  //   {
+  //     locationId:hierarchyId,
+  //     locationType:100
+  //   }
+  // ]
   return await defaultFetch({
     url:'ticket/daysTicketList',
     verb:'post',
