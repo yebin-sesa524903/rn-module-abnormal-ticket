@@ -143,7 +143,7 @@ export async function apiTicketList(date,pageNo) {
     body:{
       searchDate:date,
       pageNo,
-      ticketTypes:[10]
+      ticketType:10
     }
   })
 }
@@ -165,6 +165,7 @@ export async function apiTicketCount(start,end) {
     body:{
       startDate:start,
       endDate:end,
+      ticketType:10
       // locations:[
       //   {
       //     locationId:hierarchyId,
@@ -177,7 +178,9 @@ export async function apiTicketCount(start,end) {
 
 export async function apiQueryTicketList(filter) {
   //这里对filter做一次处理
-  let data = {}
+  let data = {
+    ticketType:10
+  }
   if(filter.selectStatus && filter.selectStatus.length > 0) {
     data.ticketState = filter.selectStatus.map(item => {
       switch (item) {
