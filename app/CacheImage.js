@@ -2,7 +2,7 @@ import React,{Component} from 'react';
 import {Image, ActivityIndicator, Platform, View} from 'react-native';
 import RNFS, { DocumentDirectoryPath,ExternalDirectoryPath } from 'react-native-fs';
 import Loading from './components/Loading';
-import {getBaseUri} from './middleware/bff';
+import {getBaseUri, getCookie} from './middleware/bff';
 import RNFetchBlob from 'react-native-fetch-blob'
 
 const dirPath = Platform.OS === 'ios' ? DocumentDirectoryPath : ExternalDirectoryPath
@@ -67,17 +67,23 @@ export default class CacheImage extends Component {
             if (this.jobId) {
               this._stopDownload();
             }
-            RNFetchBlob
-              .config({
-                fileCache : true,
-                path:filePath
-              })
-              .fetch('GET', getBaseUri()+'document/get?id='+cacheKey, {
-                //some headers ..
-              })
+            let downUrl = getBaseUri()+'document/get?id='+cacheKey;
+            // var headers={};
+            // headers[TOKENHEADER]=token;
+            // headers[HEADERDEVICEID]=deviceid;
+            // let encodeImageUri = encodeURI(imageUri);
+            let downloadOptions = {
+              fromUrl: downUrl,
+              toFile: filePath,
+              headers:{
+                Cookie:getCookie()
+              }
+            };
+
+            RNFS.downloadFile(downloadOptions).promise
               .then((res) => {
                 // the temp file path
-                if(res.respInfo.status === 200) {
+                if(res.statusCode === 200) {
                   //成功了
                   if(this.props.onLoad) this.props.onLoad();
                   this.setState({cacheable: true, cachedImagePath: filePath});

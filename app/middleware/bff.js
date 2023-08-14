@@ -5,13 +5,17 @@ import privilegeHelper from "../utils/privilegeHelper";
 import {localStr} from "../utils/Localizations/localization";
 import {DeviceEventEmitter} from "react-native";
 let _BASEURL = "https://micro-to.energymost.com/bff/comp-ticket/rest/";
-_BASEURL = 'http://starbucks-xt.eh.energymost.com/bff/comp-ticket/rest/'//https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
+_BASEURL = ''//http://starbucks-xt.eh.energymost.com/bff/comp-ticket/rest/'//https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
 //生产环境地址
 let prodUrl = 'https://micro.energymost.com/bff/comp-ticket/rest/';
 
 export function getBaseUri() {
-  if(prod) return prodUrl;
+  // if(prod) return prodUrl;
   return _BASEURL;
+}
+
+export function getCookie() {
+  return setCookie;
 }
 
 let defaultFetch = async function(options){
@@ -25,7 +29,7 @@ let defaultFetch = async function(options){
   //headers[tokenKey] = token;
   //headers['Cookie'] = token;
   if(setCookie) {
-    headers['cookie'] = setCookie;
+    headers['Cookie'] = setCookie;
   }
   let url = baseUrl + options.url
   if(options.url.includes('http')) url = options.url;
@@ -139,12 +143,7 @@ export async function apiTicketList(date,pageNo) {
     body:{
       searchDate:date,
       pageNo,
-      locations:[
-        {
-          locationId:hierarchyId,
-          locationType:100
-        }
-      ]
+      ticketType:10
     }
   })
 }
@@ -166,19 +165,22 @@ export async function apiTicketCount(start,end) {
     body:{
       startDate:start,
       endDate:end,
-      locations:[
-        {
-          locationId:hierarchyId,
-          locationType:100
-        }
-      ]
+      ticketType:10
+      // locations:[
+      //   {
+      //     locationId:hierarchyId,
+      //     locationType:100
+      //   }
+      // ]
     }
   })
 }
 
 export async function apiQueryTicketList(filter) {
   //这里对filter做一次处理
-  let data = {}
+  let data = {
+    ticketType:10
+  }
   if(filter.selectStatus && filter.selectStatus.length > 0) {
     data.ticketState = filter.selectStatus.map(item => {
       switch (item) {
@@ -198,12 +200,12 @@ export async function apiQueryTicketList(filter) {
     data.endDate = moment(filter.EndTime).format(DAY_FORMAT);
   }
   if(filter.ticketName) data.title = filter.ticketName;
-  data.locations=[
-    {
-      locationId:hierarchyId,
-      locationType:100
-    }
-  ]
+  // data.locations=[
+  //   {
+  //     locationId:hierarchyId,
+  //     locationType:100
+  //   }
+  // ]
   return await defaultFetch({
     url:'ticket/daysTicketList',
     verb:'post',
@@ -217,6 +219,7 @@ export async function configCookie(data) {
   userId = data.userId;
   userName = data.userName
   token = data.token;
+  _BASEURL = data.host;
   setCookie = data.token;
   // tokenKey = data.tokenKey;
   hierarchyId = data.hierarchyId;
