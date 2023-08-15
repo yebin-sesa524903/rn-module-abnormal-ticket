@@ -4,13 +4,9 @@ import RNFetchBlobFile from "react-native-fetch-blob/class/RNFetchBlobFile";
 import privilegeHelper from "../utils/privilegeHelper";
 import {localStr} from "../utils/Localizations/localization";
 import {DeviceEventEmitter} from "react-native";
-let _BASEURL = "https://micro-to.energymost.com/bff/comp-ticket/rest/";
-_BASEURL = ''//http://starbucks-xt.eh.energymost.com/bff/comp-ticket/rest/'//https://micro-sup.energymost.com/bff/comp-ticket/rest/' //sup环境
-//生产环境地址
-let prodUrl = 'https://micro.energymost.com/bff/comp-ticket/rest/';
+let _BASEURL = "";
 
 export function getBaseUri() {
-  // if(prod) return prodUrl;
   return _BASEURL;
 }
 
