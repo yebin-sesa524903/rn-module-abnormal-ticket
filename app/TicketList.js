@@ -411,9 +411,6 @@ export default class TicketList extends Component {
         <View style={{marginTop:MP}}>
           <View style={{flexDirection:'row',paddingTop:4,justifyContent:'center',alignItems:'center'}}>
             <Text style={{fontSize:17,color:'#333',fontWeight:'500'}}>{localStr('lang_ticket_filter')}</Text>
-            <TouchableOpacity  onPress={this._goBack} style={{position:'absolute',left:16}}>
-              <Icon name="left-square" size={24} color={'#666'} />
-            </TouchableOpacity>
             <View style={{position:'absolute',right:16+(this.props.paddingRight||0)}}>
               <TouchFeedback onPress={this._clickFilter}>
                 <Icon name="filter" size={24} color={'#333'} />
@@ -448,10 +445,12 @@ export default class TicketList extends Component {
           }}
           weekStartsOn={1} // 0,1,2,3,4,5,6 for S M T W T F S, defaults to 0
         />
-        <TouchableOpacity  onPress={this._goBack} style={{position:'absolute',left:16}}>
-          <Icon name="left-square" size={24} color={'#666'} />
-        </TouchableOpacity>
         {this._renderRightButton()}
+        <View style={{ position: 'absolute', left: 16, top: 0 }}>
+          <TouchFeedback onPress={this._goBack}>
+            <Image style={{ tintColor: '#333', width: 20, height: 20 }} source={require('./images/back_arrow/back_arrow.png')} />
+          </TouchFeedback>
+        </View>
       </View>
     )
   }
