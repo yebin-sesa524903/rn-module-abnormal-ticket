@@ -1,5 +1,5 @@
 'use strict';
-import React,{Component} from 'react';
+import React, { Component } from 'react';
 
 import {
   Modal,
@@ -14,43 +14,43 @@ import TouchFeedback from '../TouchFeedback';
 import Text from '../Text';
 import PropTypes from 'prop-types';
 
-import {isPhoneX} from '../../utils';
-let toBottom=0;
-if(isPhoneX()) toBottom=34;
+import { isPhoneX } from '../../utils';
+import { localStr } from '../../utils/Localizations/localization';
+let toBottom = 0;
+if (isPhoneX()) toBottom = 34;
 
 export default class SchActionSheet extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
   }
 
-  _getTitleView()
-  {
+  _getTitleView() {
     if (!this.props.title) {
       return;
     }
     return (
       <View style={{
-          height:45,backgroundColor:'transparent',
-          justifyContent:'center',alignItems:'center',
-          borderBottomColor:'#4d4d4d22',borderBottomWidth:1,
-        }}>
-        <Text style={{fontSize:13,color:'#8e8e9c'}}>
+        height: 45, backgroundColor: 'transparent',
+        justifyContent: 'center', alignItems: 'center',
+        borderBottomColor: '#4d4d4d22', borderBottomWidth: 1,
+      }}>
+        <Text style={{ fontSize: 13, color: '#8e8e9c' }}>
           {this.props.title}
         </Text>
       </View>
     )
   }
   render() {
-    var {arrActions}=this.props;
-    var itemsView=arrActions.map((item,index)=>{
+    var { arrActions } = this.props;
+    var itemsView = arrActions.map((item, index) => {
       return (
         <View key={index} style={{}}>
-          <TouchFeedback onPress={()=>this.props.onSelect(item)}>
+          <TouchFeedback onPress={() => this.props.onSelect(item)}>
             <View style={{
-                height:55,backgroundColor:'transparent',justifyContent:'center',alignItems:'center',
-                borderTopColor:'#4d4d4d22',borderTopWidth:index===0?0:1,
-              }}>
-              <Text style={{fontSize:18,color:item.select?'#0d0d0d':'#0076ff'}}>
+              height: 55, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center',
+              borderTopColor: '#4d4d4d22', borderTopWidth: index === 0 ? 0 : 1,
+            }}>
+              <Text style={{ fontSize: 18, color: item.select ? '#0d0d0d' : '#0076ff' }}>
                 {item.title}
               </Text>
             </View>
@@ -68,12 +68,14 @@ export default class SchActionSheet extends Component {
           <View style={styles.modalContainer}>
 
             <TouchableOpacity style={styles.container} onPress={this.props.onCancel}></TouchableOpacity>
-              <View style={{backgroundColor:'white',marginBottom:8,
-              borderRadius:12,marginHorizontal:10}}>
-                {this._getTitleView()}
-                {itemsView}
-              </View>
-            <Button onPress={this.props.onCancel} text={this.props.buttonText || "取消"} />
+            <View style={{
+              backgroundColor: 'white', marginBottom: 8,
+              borderRadius: 12, marginHorizontal: 10
+            }}>
+              {this._getTitleView()}
+              {itemsView}
+            </View>
+            <Button onPress={this.props.onCancel} text={this.props.buttonText || localStr('lang_ticket_filter_cancel')} />
           </View>
         </Modal>
       </FadeInView>
@@ -82,9 +84,9 @@ export default class SchActionSheet extends Component {
 }
 
 SchActionSheet.propTypes = {
-  arrActions:PropTypes.array,
-  onSelect:PropTypes.func,
-  title:PropTypes.string,
+  arrActions: PropTypes.array,
+  onSelect: PropTypes.func,
+  title: PropTypes.string,
 }
 
 var styles = StyleSheet.create({
