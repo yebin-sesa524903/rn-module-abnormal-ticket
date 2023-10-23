@@ -780,7 +780,7 @@ export default class TicketDetail extends Component {
           <Text style={{ fontSize: 16, color: '#333', fontWeight: '600' }}>{localStr('lang_ticket_detail_reject_reason')}</Text>
         </View>
         <View style={{ height: 1, backgroundColor: '#f2f2f2', marginRight: -16, marginTop: 16, marginBottom: 12 }} />
-        <Text style={{ fontSize: 17, color: '#333', lineHeight: 28 }}>{reason}</Text>
+        <Text style={{ fontSize: 16, color: '#666', lineHeight: 28 }}>{reason}</Text>
         <Text style={{ fontSize: 12, color: '#b2b2b2', marginTop: 10 }}>{`${RejectUser}  ${rejectTime}`}</Text>
       </View>
     )
