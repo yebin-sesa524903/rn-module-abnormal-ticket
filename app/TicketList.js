@@ -35,7 +35,7 @@ import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
 
-const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 36;
+const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 0;
 const CODE_OK = '0';
 const DAY_FORMAT = 'YYYY-MM-DD';
 
@@ -319,7 +319,7 @@ export default class TicketList extends Component {
     if (this.state.showEmpty) return this._renderEmpty();
     if (!this.state.ticketData || this.state.ticketData.length === 0) return <Loading />
     return (
-      <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: 'white' }} sections={this.state.ticketData}
+      <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: '#f2f2f2' }} sections={this.state.ticketData}
         contentContainerStyle={{ flex: (this.state.ticketData && this.state.ticketData.length > 0) ? undefined : 1 }}
         refreshControl={
           <RefreshControl
@@ -370,7 +370,7 @@ export default class TicketList extends Component {
 
   _renderClearView() {
     return (
-      <View style={{ alignItems: 'center', backgroundColor: LIST_BG, paddingTop: 20 }}>
+      <View style={{ alignItems: 'center', backgroundColor: LIST_BG, paddingTop: 12 }}>
         <TouchFeedback onPress={this._clearFilter}>
           <View style={{
             paddingHorizontal: 12,
@@ -413,14 +413,14 @@ export default class TicketList extends Component {
       return (
         <View style={{ marginTop: MP, backgroundColor: '#3DCD58' }}>
           <View style={{ flexDirection: 'row', paddingTop: 4, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 17, color: '#333', fontWeight: '500' }}>{localStr('lang_ticket_filter')}</Text>
+            <Text style={{ fontSize: 17, color: '#fff', fontWeight: '500' }}>{localStr('lang_ticket_filter')}</Text>
             <View style={{ position: 'absolute', right: 16 + (this.props.paddingRight || 0) }}>
               <TouchFeedback onPress={this._clickFilter}>
                 <Icon name="filter" size={24} color={'#fff'} />
               </TouchFeedback>
             </View>
           </View>
-          <View style={{ height: 10, backgroundColor: '#fff' }} />
+          <View style={{ height: 10, }} />
           {this._renderClearView()}
         </View>
       )
@@ -473,9 +473,11 @@ export default class TicketList extends Component {
     }
 
     return (
-      <SafeAreaView style={{ flex: 1, }}>
-        <StatusBar barStyle="dark-content" translucent={false} backgroundColor={'#3DCD58'} />
+      <SafeAreaView style={{ flex: 1, marginTop: 0 }}>
+        <StatusBar translucent={true} backgroundColor={'#00000022'} />
+        <View style={{ height: StatusBar.currentHeight, backgroundColor: GREEN }} />
         <View style={{ flex: 1 }}>
+          <View style={{ height: 6, backgroundColor: GREEN }} />
           {this._renderTop()}
           {this._getView()}
         </View>
