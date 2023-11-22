@@ -83,7 +83,7 @@ let defaultFetch = async function (options) {
         setCookie = setCookie.split(';')[0]
         setCookie = setCookie + ','//+setCookie;
         //初始化成功了，发个通知
-        DeviceEventEmitter.emit('TICKET_INIT_OK');
+        DeviceEventEmitter.emit('TICKET_ABNORMAL_INIT_OK');
       }
 
       if (options.url === 'document/get' || options.debug) {
@@ -139,7 +139,7 @@ export async function apiTicketList(date, pageNo) {
     body: {
       searchDate: date,
       pageNo,
-      ticketTypes: [10]
+      ticketTypes: [9, 10]
     }
   })
 }

@@ -28,7 +28,7 @@ export default ({ isChinese, weekStartsOn }) => {
           justifyContent: 'center',
         }} key={day}>
           <Text style={{
-            color: '#666',
+            color: '#BDF2C1',
             fontSize: 14,
           }}>{day}</Text>
         </View>

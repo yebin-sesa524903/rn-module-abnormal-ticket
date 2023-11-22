@@ -8,6 +8,7 @@ import {
   RefreshControl,
   SafeAreaView,
   SectionList,
+  StatusBar,
   Text,
   TouchableOpacity,
   View
@@ -67,7 +68,7 @@ export default class TicketList extends Component {
       } else {
         this.setState({ refreshing: true, hasPermission: true })
       }
-      this._initListener = DeviceEventEmitter.addListener('TICKET_INIT_OK', () => {
+      this._initListener = DeviceEventEmitter.addListener('TICKET_ABNORMAL_INIT_OK', () => {
         this.setState({ hasPermission: privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) || privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_VIEW) })
         this.loadTicketList(new Date(), 1);
       })
@@ -214,7 +215,7 @@ export default class TicketList extends Component {
         <View style={{ flexDirection: 'row', marginRight: -6 }}>
           {
             <TouchableOpacity style={{ padding: 6 }} onPress={this._clickFilter}>
-              <Icon name="filter" size={24} color={'#333'} />
+              <Icon name="filter" size={24} color={'#fff'} />
             </TouchableOpacity>
           }
 
@@ -222,7 +223,7 @@ export default class TicketList extends Component {
             <TouchableOpacity style={{ padding: 6 }} onPress={() => {
               if (this.props.onCreateTicket) this.props.onCreateTicket();
             }}>
-              <Icon name="plus" size='sm' color="#333" />
+              <Icon name="plus" size='sm' color="#fff" />
             </TouchableOpacity>
           }
         </View>
@@ -318,7 +319,7 @@ export default class TicketList extends Component {
     if (this.state.showEmpty) return this._renderEmpty();
     if (!this.state.ticketData || this.state.ticketData.length === 0) return <Loading />
     return (
-      <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: LIST_BG }} sections={this.state.ticketData}
+      <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: 'white' }} sections={this.state.ticketData}
         contentContainerStyle={{ flex: (this.state.ticketData && this.state.ticketData.length > 0) ? undefined : 1 }}
         refreshControl={
           <RefreshControl
@@ -331,7 +332,7 @@ export default class TicketList extends Component {
           />
         }
         stickySectionHeadersEnabled={true}
-        renderSectionHeader={this._renderSection}
+        // renderSectionHeader={this._renderSection}
         renderItem={this._renderRow}
         ListEmptyComponent={() => this._renderEmpty()}
         refreshing={this.state.refreshing}
@@ -410,12 +411,12 @@ export default class TicketList extends Component {
     //如果是工单筛选，显示工单筛选，否则显示日历
     if (this.state.showFilterResult) {
       return (
-        <View style={{ marginTop: MP }}>
+        <View style={{ marginTop: MP, backgroundColor: '#3DCD58' }}>
           <View style={{ flexDirection: 'row', paddingTop: 4, justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontSize: 17, color: '#333', fontWeight: '500' }}>{localStr('lang_ticket_filter')}</Text>
             <View style={{ position: 'absolute', right: 16 + (this.props.paddingRight || 0) }}>
               <TouchFeedback onPress={this._clickFilter}>
-                <Icon name="filter" size={24} color={'#333'} />
+                <Icon name="filter" size={24} color={'#fff'} />
               </TouchFeedback>
             </View>
           </View>
@@ -425,7 +426,7 @@ export default class TicketList extends Component {
       )
     }
     return (
-      <View style={{ marginTop: MP }}>
+      <View style={{ marginTop: MP, backgroundColor: '#3DCD58' }}>
         <CalendarStrip
           isChinese={getLanguage() === 'zh'}
           selectedDate={this.state.selectedDate || new Date()}
@@ -448,11 +449,11 @@ export default class TicketList extends Component {
           weekStartsOn={1} // 0,1,2,3,4,5,6 for S M T W T F S, defaults to 0
         />
         {this._renderRightButton()}
-        <View style={{ position: 'absolute', left: 16, top: Platform.OS === 'ios' ? 0 : 4 }}>
+        {/* <View style={{ position: 'absolute', left: 16, top: Platform.OS === 'ios' ? 0 : 4 }}>
           <TouchFeedback onPress={this._goBack}>
             <Image style={{ tintColor: '#333', width: 20, height: 20 }} source={require('./images/back_arrow/back_arrow.png')} />
           </TouchFeedback>
-        </View>
+        </View> */}
       </View>
     )
   }
@@ -472,7 +473,8 @@ export default class TicketList extends Component {
     }
 
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <SafeAreaView style={{ flex: 1, }}>
+        <StatusBar barStyle="dark-content" translucent={false} backgroundColor={'#3DCD58'} />
         <View style={{ flex: 1 }}>
           {this._renderTop()}
           {this._getView()}
