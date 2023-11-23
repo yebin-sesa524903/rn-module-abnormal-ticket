@@ -205,8 +205,9 @@ export default class TicketList extends Component {
         })
         this.setState({ ticketData: section, markedDate, error: null })
       } else {
-        //请求失败
-        this.setState({ ticketData: [], error: data.msg })
+        let udpate = { ticketData: [], error: data.msg, }
+        if (data.code === '401') udpate.hasPermission = false;
+        this.setState(udpate)
       }
     });
   }
