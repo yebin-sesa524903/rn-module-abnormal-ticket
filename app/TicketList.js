@@ -54,7 +54,9 @@ export default class TicketList extends Component {
     super(props);
     this.state = {
       refreshing: true,
-      hasPermission: privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) || privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_VIEW)
+      hasPermission: (privilegeHelper.hasAuth(CodeMap.OMTicketExecute) ||
+        privilegeHelper.hasAuth(CodeMap.OMTicketFull) ||
+        privilegeHelper.hasAuth(CodeMap.OMTicketRead))
     }
   }
 
@@ -69,7 +71,11 @@ export default class TicketList extends Component {
         this.setState({ refreshing: true, hasPermission: true })
       }
       this._initListener = DeviceEventEmitter.addListener('TICKET_ABNORMAL_INIT_OK', () => {
-        this.setState({ hasPermission: privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) || privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_VIEW) })
+        this.setState({
+          hasPermission: (privilegeHelper.hasAuth(CodeMap.OMTicketExecute) ||
+            privilegeHelper.hasAuth(CodeMap.OMTicketFull) ||
+            privilegeHelper.hasAuth(CodeMap.OMTicketRead))
+        })
         this.loadTicketList(new Date(), 1);
       })
     }))
