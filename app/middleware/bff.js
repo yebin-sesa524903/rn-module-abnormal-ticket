@@ -106,7 +106,7 @@ let defaultFetch = async function (options) {
       //   console.log('data',data)
       //   return data//reader.result;
       // }
-      console.log(url, body, headers, data)
+      console.log(url, body, headers, data, JSON.stringify(data))
       return data;
     }).catch(err => {
       return new Promise((resolve) => {

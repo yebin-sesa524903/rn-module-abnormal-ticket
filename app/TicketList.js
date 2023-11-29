@@ -360,11 +360,16 @@ export default class TicketList extends Component {
   }
 
   _doFilter = () => {
+    let resFilter = getTicketFilter().filter;
     this.setState({
       openFilter: false,
       showFilterResult: true
     })
-    this.queryTicketList(getTicketFilter().filter)
+    if (!resFilter.selectStatus && !resFilter.selectTypes){
+      this._clearFilter();
+    }else {
+      this.queryTicketList(resFilter)
+    }
   }
 
   _clearFilter = () => {
