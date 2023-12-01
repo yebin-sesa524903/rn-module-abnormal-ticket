@@ -1,6 +1,6 @@
 
 'use strict';
-import React,{Component} from 'react';
+import React, { Component } from 'react';
 
 import {
   View,
@@ -17,15 +17,15 @@ import {
 import Toolbar from './components/Toolbar';
 import Icon from './components/Icon';
 
-import {BLACK,GRAY,LIST_BG,PICBORDERCOLOR,DOCBKGCOLOR,ADDICONCOLOR} from './styles/color.js';
+import { BLACK, GRAY, LIST_BG, PICBORDERCOLOR, DOCBKGCOLOR, ADDICONCOLOR } from './styles/color.js';
 
 import TouchFeedback from './components/TouchFeedback.js';
 
 import ImagePicker from "./components/ImagePicker";
-import RNFS, {DocumentDirectoryPath} from "react-native-fs";
-import {apiCreateLog, apiDownloadFile, apiDownloadFile2, apiUploadFile} from "./middleware/bff";
+import RNFS, { DocumentDirectoryPath } from "react-native-fs";
+import { apiCreateLog, apiDownloadFile, apiDownloadFile2, apiUploadFile } from "./middleware/bff";
 import CacheImage from "./CacheImage";
-import {localStr} from "./utils/Localizations/localization";
+import { localStr } from "./utils/Localizations/localization";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import Loading from './components/Loading';
 
@@ -33,42 +33,42 @@ const CODE_OK = '0'
 
 let uploadImages = [];
 
-export default class LogEditView extends Component{
-  constructor(props){
+export default class LogEditView extends Component {
+  constructor(props) {
     super(props);
-    var {width} = Dimensions.get('window');
-    var picWid = parseInt((width-46)/4.0);
+    var { width } = Dimensions.get('window');
+    var picWid = parseInt((width - 46) / 4.0);
     uploadImages = [];
-    let log = {pictures:[]};
-    if(this.props.log) {
+    let log = { pictures: [] };
+    if (this.props.log) {
       log = {
         ...this.props.log,
       }
       log.pictures = [].concat(log.pictures);
     }
-    this.state = {imageWidth:picWid,imageHeight:picWid,autoFocus:true,log};
+    this.state = { imageWidth: picWid, imageHeight: picWid, autoFocus: true, log };
   }
 
-  _logChanged(text){
+  _logChanged(text) {
     let log = this.state.log;
     log.content = text;
-    this.setState({log})
+    this.setState({ log })
   }
-  _showAuth(){
+  _showAuth() {
     return this.props.checkAuth();
   }
-  _openImagePicker(){
+  _openImagePicker() {
     this.props.navigator.push({
-      id:'imagePicker',
-      component:ImagePicker,
-      passProps:{
-        max:20-this.state.log.pictures.length,
-        onBack:()=>this.props.navigator.pop(),
-        done:(data)=>{
+      id: 'imagePicker',
+      component: ImagePicker,
+      passProps: {
+        max: 20 - this.state.log.pictures.length,
+        onBack: () => this.props.navigator.pop(),
+        done: (data) => {
           this.props.navigator.pop();
           let log = this.state.log;
           log.pictures = log.pictures.concat(data)
-          this.setState({log})
+          this.setState({ log })
           this._uploadImages();
         }
       }
@@ -76,23 +76,23 @@ export default class LogEditView extends Component{
   }
 
   _uploadImages() {
-    if(this._uploading) return null;
+    if (this._uploading) return null;
     let upload = () => {
       let pictures = this.state.log.pictures;
       let find = pictures.find(item => item.uri && !item.key && !item.error);
       let readAndUpload = (file) => {
         // console.log('file:',file)
-        RNFS.readFile(file,'base64').then(str => {
+        RNFS.readFile(file, 'base64').then(str => {
           //这里调用接口处理
           apiUploadFile({
-            content:str,
-            name:find.filename
+            content: str,
+            name: find.filename
           }).then(ret => {
-            if(ret.code === CODE_OK) {
+            if (ret.code === CODE_OK) {
               find.key = ret.data.key;
               this.setState({})
               upload();
-            }else {
+            } else {
               //上传失败，重新上传
               find.error = true;
               this.setState({})
@@ -102,21 +102,21 @@ export default class LogEditView extends Component{
           })
         });
       }
-      if(find) {
+      if (find) {
         //先找base64字符串
         let destFile = `${DocumentDirectoryPath}/${find.filename}`;
-        if(Platform.OS === 'ios') {
-          if(find.uri.startsWith('/')) {
+        if (Platform.OS === 'ios') {
+          if (find.uri.startsWith('/')) {
             readAndUpload(find.uri)
-          }else {
-            RNFS.copyAssetsFileIOS(find.uri, destFile,0,0).then(()=>{
+          } else {
+            RNFS.copyAssetsFileIOS(find.uri, destFile, 0, 0).then(() => {
               readAndUpload(destFile)
             });
           }
-        }else {
+        } else {
           readAndUpload(find.uri)
         }
-      }else {
+      } else {
         //说明都上传完了
         this._uploading = false;
       }
@@ -124,72 +124,74 @@ export default class LogEditView extends Component{
     upload();
   }
 
-  _goToDetail(index){
+  _goToDetail(index) {
     //查看照片详情
     this.props.navigator.push({
-      id:'ticket_log_edit',
-      component:PhotoShowView,
-      passProps:{
-        index:index,
-        onBack:()=>this.props.navigator.pop(),
-        data:this.state.log.pictures
+      id: 'ticket_log_edit',
+      component: PhotoShowView,
+      passProps: {
+        index: index,
+        onBack: () => this.props.navigator.pop(),
+        data: this.state.log.pictures
       }
     })
   }
-  _deleteImage(item,index){
+  _deleteImage(item, index) {
     Alert.alert(
       '',
       localStr('lang_ticket_log_del_img_confirm'),
       [
-        {text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-        {text: localStr('lang_ticket_log_del_ok'), onPress: async () => {
+        { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+        {
+          text: localStr('lang_ticket_log_del_ok'), onPress: async () => {
             let log = this.state.log;
-            this.state.log.pictures.splice(index,1)
+            this.state.log.pictures.splice(index, 1)
             log.pictures = [].concat(this.state.log.pictures);
-            this.setState({log})
-          }}
+            this.setState({ log })
+          }
+        }
       ])
   }
-  _imageLoadComplete(item){
-    this.props.dataChanged('image','uploaded',item);
+  _imageLoadComplete(item) {
+    this.props.dataChanged('image', 'uploaded', item);
   }
   _saveLog() {
     let data = {
-      id:this.props.tid,
-      content:this.state.log.content,
-      pictures:this.state.log.pictures.map(item => {
+      id: this.props.tid,
+      content: this.state.log.content,
+      pictures: this.state.log.pictures.map(item => {
         return {
-          key:item.key,
-          name:item.filename || item.name
+          key: item.key,
+          name: item.filename || item.name
         }
       })
     }
-    if(this.state.log.id) {
+    if (this.state.log.id) {
       data.logId = this.state.log.id;
     }
-    apiCreateLog(data,!this.state.log.id).then(res => {
-      if(res.code === CODE_OK) {
+    apiCreateLog(data, !this.state.log.id).then(res => {
+      if (res.code === CODE_OK) {
         this.props.callBack();
-      }else {
+      } else {
         //失败了
-        Alert.alert(localStr('lang_alert_title'),res.msg)
+        Alert.alert(localStr('lang_alert_title'), res.msg)
       }
     });
   }
 
 
   _getAddButton(index) {
-    if(this.state.log.pictures.length >=20) return null;
+    if (this.state.log.pictures.length >= 20) return null;
     return (
-      <View key={index} style={{padding:3}}>
-        <View style={{borderWidth:1,borderColor:ADDICONCOLOR}}
-              width={this.state.imageWidth}
-              height={this.state.imageHeight}>
+      <View key={index} style={{ padding: 3 }}>
+        <View style={{ borderWidth: 1, borderColor: ADDICONCOLOR }}
+          width={this.state.imageWidth}
+          height={this.state.imageHeight}>
           <TouchFeedback
-            style={{flex:1,backgroundColor:'transparent'}}
+            style={{ flex: 1, backgroundColor: 'transparent' }}
             key={index}
-            onPress={()=>this._openImagePicker()}>
-            <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
+            onPress={() => this._openImagePicker()}>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Icon type='icon_add' size={36} color={ADDICONCOLOR} />
             </View>
           </TouchFeedback>
@@ -197,32 +199,36 @@ export default class LogEditView extends Component{
       </View>
     );
   }
-  _getImageView(){
-    var images = this.state.log.pictures.map((item,index)=>{
+  _getImageView() {
+    var images = this.state.log.pictures.map((item, index) => {
       //判断是相册选中的图片，还是服务端缓存图片
       let child = null;
-      if(item.uri) {
+      if (item.uri) {
         //说明是本地图片
         child = (
-          <Image key={index} style={{width:this.state.imageWidth-2,
-            height:this.state.imageHeight-2}} source={{uri:item.uri}}/>
+          <Image key={index} style={{
+            width: this.state.imageWidth - 2,
+            height: this.state.imageHeight - 2
+          }} source={{ uri: item.uri }} />
         )
         //如果还没上传完，则给一个loading
-        if(!item.key) {
-          if(item.error) {
+        if (!item.key) {
+          if (item.error) {
             //说明上传失败，给一个提示重试
             child = (
-              <View style={{width:this.state.imageWidth-2,
-                height:this.state.imageHeight-2}}>
+              <View style={{
+                width: this.state.imageWidth - 2,
+                height: this.state.imageHeight - 2
+              }}>
                 {child}
-                <View style={{position:'absolute',top:0,left:0,right:0,bottom:0,justifyContent:'center',alignItems:'center'}}>
-                  <TouchableWithoutFeedback onPress={()=>{
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
+                  <TouchableWithoutFeedback onPress={() => {
                     item.error = null;
                     this.setState({})
                     this._uploadImages()
                   }}>
-                    <View style={{padding:6,backgroundColor:'#333333aa',borderRadius:6}}>
-                      <Icon type={'icon_sync'} color={'#fff'} size={16}/>
+                    <View style={{ padding: 6, backgroundColor: '#333333aa', borderRadius: 6 }}>
+                      <Icon type={'icon_sync'} color={'#fff'} size={16} />
                     </View>
                   </TouchableWithoutFeedback>
 
@@ -230,13 +236,15 @@ export default class LogEditView extends Component{
                 </View>
               </View>
             )
-          }else {
+          } else {
             child = (
-              <View style={{width:this.state.imageWidth-2,
-                height:this.state.imageHeight-2}}>
+              <View style={{
+                width: this.state.imageWidth - 2,
+                height: this.state.imageHeight - 2
+              }}>
                 {child}
-                <View style={{position:'absolute',top:(this.state.imageHeight-2)/2-10,right:(this.state.imageWidth-2)/2-10,width:10,height:10}}>
-                  <Loading/>
+                <View style={{ position: 'absolute', top: (this.state.imageHeight - 2) / 2 - 10, right: (this.state.imageWidth - 2) / 2 - 10, width: 10, height: 10 }}>
+                  <Loading />
                 </View>
               </View>
             )
@@ -244,10 +252,10 @@ export default class LogEditView extends Component{
 
         }
 
-      }else {
+      } else {
         //没有url,需要下载图片
         child = (
-          <CacheImage key={item.key} imageKey={item.key} width={this.state.imageWidth-2} height={this.state.imageWidth-2} />
+          <CacheImage key={item.key} imageKey={item.key} width={this.state.imageWidth - 2} height={this.state.imageWidth - 2} />
         )
       }
       return (
@@ -255,16 +263,17 @@ export default class LogEditView extends Component{
         <TouchFeedback
           //style={{flex:1,backgroundColor:'transparent'}}
           key={String(index)}
-          onPress={()=>this._goToDetail(index)}
-          onLongPress={()=>this._deleteImage(item,index)}>
-          <View key={index} style={{margin:3,
-            borderWidth:1,
-            borderColor:ADDICONCOLOR,
-            alignItems:'center',
-            justifyContent:'center',
-            backgroundColor:'gray',
-            width:this.state.imageWidth,
-            height:this.state.imageHeight
+          onPress={() => this._goToDetail(index)}
+          onLongPress={() => this._deleteImage(item, index)}>
+          <View key={index} style={{
+            margin: 3,
+            borderWidth: 1,
+            borderColor: ADDICONCOLOR,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'gray',
+            width: this.state.imageWidth,
+            height: this.state.imageHeight
           }}>
             {child}
           </View>
@@ -274,47 +283,47 @@ export default class LogEditView extends Component{
     });
     images.push(this._getAddButton('add'));
     return (
-      <View style={{flexDirection:'row',flexWrap:'wrap',padding:3}}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: 3 }}>
         {images}
       </View>
     );
   }
 
   _canEnable() {
-    if(!this.state.log.content || this.state.log.content.trim().length === 0) return false;
+    if (!this.state.log.content || this.state.log.content.trim().length === 0) return false;
     let pic = this.state.log.pictures;
-    if(!pic || pic.length === 0) return true;
+    if (!pic || pic.length === 0) return true;
     return !pic.find(item => item.uri && !item.key);
   }
 
-  _getToolbar(){
-    let actions  = [{title:localStr('lang_toolbar_submit'),show:'always',disable:!this._canEnable()}];
+  _getToolbar() {
+    let actions = [{ title: localStr('lang_toolbar_submit'), show: 'always', disable: !this._canEnable() }];
     return (
       <Toolbar
         title={this.props.title}
         navIcon="back"
         actions={actions}
         onIconClicked={this.props.onBack}
-        onActionSelected={[()=>{
+        onActionSelected={[() => {
           this._saveLog();
         }]} />
     );
   }
-  _getTextEditView(lines,content,inputStyle) {
+  _getTextEditView(lines, content, inputStyle) {
     return (
       <TextInput
         key={lines}
-        ref={(input)=>this._input=input}
-        style={[styles.input,inputStyle]}
+        ref={(input) => this._input = input}
+        style={[styles.input, inputStyle]}
         autoFocus={this.state.autoFocus}
         underlineColorAndroid={'transparent'}
         textAlign={'left'}
-        editable={Platform.OS === 'ios'?this.props.canEdit:true}
+        editable={Platform.OS === 'ios' ? this.props.canEdit : true}
         multiline={true}
         placeholderTextColor={GRAY}
         textAlignVertical={'top'}
         placeholder={localStr('lang_ticket_filter_input')}
-        onChangeText={(text)=>this._logChanged(text)}
+        onChangeText={(text) => this._logChanged(text)}
         value={content} />
     );
   }
@@ -324,24 +333,24 @@ export default class LogEditView extends Component{
     var imagesView = this._getImageView();
     var contentContainerStyle = {};
     var inputStyle = {};
-    if(!imagesView){
-      contentContainerStyle = {flex:1};
-      inputStyle = {flex:1}
+    if (!imagesView) {
+      contentContainerStyle = { flex: 1 };
+      inputStyle = { flex: 1 }
     }
     else {
-      inputStyle = {height:142}
+      inputStyle = { height: 142 }
     }
     return (
-      <View style={{flex:1,backgroundColor:LIST_BG}}>
+      <View style={{ flex: 1, backgroundColor: LIST_BG }}>
         {this._getToolbar()}
         <ScrollView
-          style={{flex:1,}}
-          contentContainerStyle={[contentContainerStyle,{backgroundColor:'white'}]}>
+          style={{ flex: 1, }}
+          contentContainerStyle={[contentContainerStyle, { backgroundColor: 'white' }]}>
           <View style={{}}>
-            {this._getTextEditView(lines,content)}
+            {this._getTextEditView(lines, content)}
           </View>
 
-          <View style={{marginHorizontal:8}}>
+          <View style={{ marginHorizontal: 8 }}>
             {imagesView}
           </View>
         </ScrollView>
@@ -354,22 +363,22 @@ export default class LogEditView extends Component{
 
 
 var styles = StyleSheet.create({
-  input:{
-    justifyContent:'flex-start',
-    alignItems:'flex-start',
-    textAlignVertical:'top',
-    fontSize:14,
-    color:BLACK,
-    padding:0,
-    margin:16,
+  input: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    textAlignVertical: 'top',
+    fontSize: 14,
+    color: BLACK,
+    padding: 0,
+    margin: 16,
     // backgroundColor:'gray'
   },
-  button:{
+  button: {
     // marginTop:20,
-    height:48,
-    flex:1,
-    marginHorizontal:16,
-    borderRadius:6,
+    height: 48,
+    flex: 1,
+    marginHorizontal: 16,
+    borderRadius: 6,
 
   },
 });

@@ -198,7 +198,7 @@ export default class TicketRow extends Component {
     // }
 
     let title = rowData.title;
-    let locationPath = rowData.assets.map((item) => item.assetName).join('、');
+    let locationPath = rowData?.locationInfo || '-';
     return (
       <TouchFeedback onPress={() => this.props.onRowClick(rowData)}>
         <View style={{

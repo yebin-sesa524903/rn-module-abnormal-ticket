@@ -34,6 +34,7 @@ import moment from "moment";
 import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
+import { apiHierarchyList } from "rn-module-inventory-ticket/app/middleware/bff";
 
 const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 0;
 const CODE_OK = '0';
@@ -161,13 +162,65 @@ export default class TicketList extends Component {
             section.push(group);
           }
         })
-        this.setState({ ticketData: section, hasMore })
-
+        this.setState({ ticketData: section, hasMore }, () => this._loadApiHierarchyList())
       } else {
         //请求失败
         this.setState({ ticketData: [], error: data.msg })
       }
     })
+  }
+
+  _loadApiHierarchyList() {
+    apiHierarchyList({
+      customerId: 1,
+      treeType: 'fmhc',
+      type: '1'
+    }).then((res) => {
+      let ticketData = this.state.ticketData;
+      for (const ticketDatum of ticketData) {
+        for (const dataObj of ticketDatum.data) {
+          for (const re of res.data) {
+            if (re.id == dataObj.objectId) {
+              dataObj.locationInfo = this._getLocationInfo(res.data, re.id);
+            }
+          }
+        }
+      }
+      this.setState({
+        ticketData: this.state.ticketData
+      })
+    }).catch((reason) => {
+
+    })
+  }
+
+  _getLocationInfo(hierarchies, locationId) {
+    let locationMsg = '';
+    let parentName = '';
+    let parentParentName = '';
+    let parentId = 0;
+    for (let hierarchy of hierarchies) {
+      if (locationId == hierarchy.id) {
+        locationMsg = hierarchy.name;
+        parentId = hierarchy.parentId;
+        break;
+      }
+    }
+    let parParentId = 0;
+    for (let hierarchy of hierarchies) {
+      if (parentId == hierarchy.id) {
+        parentName = hierarchy.name;
+        parParentId = hierarchy.parentId;
+        break;
+      }
+    }
+    for (let hierarchy of hierarchies) {
+      if (parParentId == hierarchy.id) {
+        parentParentName = hierarchy.name;
+        break;
+      }
+    }
+    return parentParentName + '/' + parentName + '/' + locationMsg;
   }
 
   loadTicketList(date, pageNo) {
@@ -203,7 +256,7 @@ export default class TicketList extends Component {
             section.push(group);
           }
         })
-        this.setState({ ticketData: section, markedDate, error: null })
+        this.setState({ ticketData: section, markedDate, error: null }, () => this._loadApiHierarchyList())
       } else {
         let udpate = { ticketData: [], error: data.msg, }
         if (data.code === '401') udpate.hasPermission = false;
@@ -365,9 +418,9 @@ export default class TicketList extends Component {
       openFilter: false,
       showFilterResult: true
     })
-    if (!resFilter.selectStatus && !resFilter.selectTypes){
+    if (!resFilter.selectStatus && !resFilter.selectTypes) {
       this._clearFilter();
-    }else {
+    } else {
       this.queryTicketList(resFilter)
     }
   }
