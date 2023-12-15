@@ -252,7 +252,7 @@ export default class TicketFilter extends Component {
 
   render() {
     let status = localStr('lang_ticket_status_type')
-    let ticket_types = ['诊断', '行为异常'];//localStr('lang_ticket_status_type')
+    let ticket_types = ['诊断', '行为异常','报警'];//localStr('lang_ticket_status_type')
     let list = (
       <View style={{ flex: 1 }}>
         <ScrollView ref="sv" style={{ flex: 1 }} onScroll={(event) => {
