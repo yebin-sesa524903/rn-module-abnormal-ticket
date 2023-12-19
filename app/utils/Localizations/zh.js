@@ -5,14 +5,14 @@ export default {
   lang_ticket_list_no_permission: '您没有这一项的操作权限，请联系系统管理员',
   lang_load_more: '加载中，请稍后...',
 
-  lang_status_1: '未开始',
+  lang_status_1: '待执行',
   lang_status_2: '执行中',
   lang_status_3: '待审批',
   lang_status_4: '已驳回',
-  lang_status_5: '已关闭',
+  lang_status_5: '已完成',
   lang_status_6: '已忽略',
 
-  lang_ticket_status_type: ['未开始', '执行中', '已提交', '已驳回', '已关闭', '已忽略'],
+  lang_ticket_status_type: ['待执行', '执行中', '待审批', '已驳回', '已完成', '已忽略'],
   lang_ticket_name: '工单名称',
   lang_ticket_filter_time: '时间',
   lang_ticket_filter_ok: '确定',

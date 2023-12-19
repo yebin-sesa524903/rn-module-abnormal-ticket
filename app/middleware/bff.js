@@ -106,7 +106,7 @@ let defaultFetch = async function (options) {
       //   console.log('data',data)
       //   return data//reader.result;
       // }
-      console.log(url, body, headers, data)
+      console.log('\n请求参数:' + body + '\n请求地址:' + url + '\n请求结果:' + JSON.stringify(data) + '\n\n');
       return data;
     }).catch(err => {
       return new Promise((resolve) => {
@@ -139,7 +139,7 @@ export async function apiTicketList(date, pageNo) {
     body: {
       searchDate: date,
       pageNo,
-      ticketTypes: [9, 10]
+      ticketTypes: [9, 10, 2]
     }
   })
 }
@@ -161,7 +161,7 @@ export async function apiTicketCount(start, end) {
     body: {
       startDate: start,
       endDate: end,
-      ticketTypes: [9, 10]
+      ticketTypes: [9, 10, 2]
       // locations:[
       //   {
       //     locationId:hierarchyId,
@@ -175,13 +175,14 @@ export async function apiTicketCount(start, end) {
 export async function apiQueryTicketList(filter) {
   //这里对filter做一次处理
   let data = {
-    ticketTypes: [9, 10]
+    ticketTypes: [9, 10, 2]
   }
   if (filter.selectTypes && filter.selectTypes.length > 0) {
     data.ticketTypes = filter.selectTypes.map(item => {
       switch (item) {
         case 0: return 9;
         case 1: return 10;
+        case 2: return 2;
       }
     })
   }
@@ -368,6 +369,15 @@ export async function apiRejectTicket(data) {
 export async function apiCloseTicket(data) {
   return await defaultFetch({
     url: `ticket/accept`,
+    verb: 'post',
+    body: data
+  })
+}
+
+
+export async function apiHierarchyList(data) {
+  return await defaultFetch({
+    url: '/bff/eh/rest/common/hierarchyList',
     verb: 'post',
     body: data
   })
