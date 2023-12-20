@@ -503,7 +503,7 @@ export default class TicketDetail extends Component {
         </View>
       </TouchFeedback>
     );
-    if ((this.state.isExecutor && status === STATE_NOT_START && privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL)) && !isScollView) {
+    if ((this.state.isExecutor && status === STATE_NOT_START && privilegeHelper.hasAuth(CodeMap.OMTicketExecute)) && !isScollView) {
       let btnLabel = localStr('lang_ticket_detail_begin_execute');
       //还需要判断是否是创建者和有工单执行权限
       return (
@@ -532,11 +532,11 @@ export default class TicketDetail extends Component {
       );
     }
 
-    if (status === STATE_PENDING_AUDIT && privilegeHelper.hasAuth(CodeMap.TICKET_ADULT_FULL)) {//表示已提交工单
+    if (status === STATE_PENDING_AUDIT && privilegeHelper.hasAuth(CodeMap.OMTicketFull)) {//表示已提交工单
       return this._renderSubmittedButton();
     }
     //执行中和已驳回操作一样
-    if (this.state.isExecutor && (status === STATE_STARTING || status === STATE_REJECTED) && privilegeHelper.hasAuth(CodeMap.TICKET_MANAGEMENT_FULL) && !isScollView) {
+    if (this.state.isExecutor && (status === STATE_STARTING || status === STATE_REJECTED) && privilegeHelper.hasAuth(CodeMap.OMTicketExecute) && !isScollView) {
       return (
         <Bottom borderColor={'#f2f2f2'} height={54} backgroundColor={'#fff'}>
           <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -592,7 +592,7 @@ export default class TicketDetail extends Component {
         //   })
       }
       if ((status === STATE_NOT_START || status === STATE_STARTING || status === STATE_REJECTED)
-        && (privilegeHelper.hasAuth(CodeMap.TICKET_EDIT_FULL))) {
+        && (privilegeHelper.hasAuth(CodeMap.OMTicketFull))) {
         this._actions.push({
           title: localStr('lang_ticket_detail_edit'),
           iconType: 'edit',
