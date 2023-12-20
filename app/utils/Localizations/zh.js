@@ -87,5 +87,9 @@ export default {
   lang_network_error: '加载失败，请检查您的网络设置',
   lang_server_error: '服务器异常',
   lang_http_no_content: '无内容',
-  lang_http_401: '未授权'
+  lang_http_401: '未授权',
+
+  lang_ticket_item_suggest_time:'建议执行时间：',
+  lang_ticket_filter_types:['诊断', '行为异常','报警'],
+  lang_ticket_filter_show_type:'工单类型',
 };

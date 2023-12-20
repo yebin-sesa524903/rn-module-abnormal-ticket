@@ -217,7 +217,7 @@ export default class TicketRow extends Component {
           <View style={{ flexDirection: 'row', marginTop: 8 }} >
             <Text style={{
               fontSize: 12, color: '#595959',
-            }}>{'建议执行时间：'}</Text>
+            }}>{localStr('lang_ticket_item_suggest_time')}</Text>
             <Text style={{
               fontSize: 12, color: (isExpire ? '#ff4d4d' : '#595959'),
             }}>{this._getDateDisplay()}</Text>

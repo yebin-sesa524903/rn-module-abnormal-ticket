@@ -252,7 +252,7 @@ export default class TicketFilter extends Component {
 
   render() {
     let status = localStr('lang_ticket_status_type')
-    let ticket_types = ['诊断', '行为异常','报警'];//localStr('lang_ticket_status_type')
+    let ticket_types = localStr('lang_ticket_filter_types');//localStr('lang_ticket_status_type')
     let list = (
       <View style={{ flex: 1 }}>
         <ScrollView ref="sv" style={{ flex: 1 }} onScroll={(event) => {
@@ -268,7 +268,7 @@ export default class TicketFilter extends Component {
             <View style={{ height: 20 }} />
             <View ref="类型" onLayout={onLayout}>
               <StatableSelectorGroup
-                title={localStr('工单类型')}
+                title={localStr('lang_ticket_filter_show_type')}
                 key={2}
                 data={ticket_types}
                 titleColor={'#888'}
