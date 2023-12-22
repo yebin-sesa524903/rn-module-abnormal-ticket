@@ -35,7 +35,7 @@ import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
 import { apiHierarchyList } from "rn-module-inventory-ticket/app/middleware/bff";
-
+import Colors from "../../../app/utils/const/Colors";
 const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 0;
 const CODE_OK = '0';
 const DAY_FORMAT = 'YYYY-MM-DD';
@@ -111,16 +111,16 @@ export default class TicketList extends Component {
   _renderEmpty() {
     if (!this.state.refreshing && this.state.error) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f2f2f2' }}>
-          <Text style={{ fontSize: 15, color: '#888', marginTop: 8 }}>{this.state.error}</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.seBgContainer }}>
+          <Text style={{ fontSize: 15, color: Colors.seTextDisabled, marginTop: 8 }}>{this.state.error}</Text>
         </View>
       )
     }
     if (this.state.refreshing) return null;
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f2f2f2' }}>
-        <Image source={require('./images/empty_box/empty_box.png')} style={{ width: 60, height: 40 }} />
-        <Text style={{ fontSize: 15, color: '#888', marginTop: 8 }}>{localStr('lang_empty_data')}</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.seBgContainer }}>
+        <Image source={require('./images/empty_box/empty_box.png')} style={{ width: 60, height: 40, tintColor: Colors.seTextDisabled }} />
+        <Text style={{ fontSize: 15, color: Colors.seTextDisabled, marginTop: 8 }}>{localStr('lang_empty_data')}</Text>
       </View>
     )
   }
@@ -377,9 +377,14 @@ export default class TicketList extends Component {
 
   _getView() {
     if (this.state.showEmpty) return this._renderEmpty();
-    if (!this.state.ticketData || this.state.ticketData.length === 0) return <Loading />
+    if (!this.state.ticketData || this.state.ticketData.length === 0)
+      return (
+          <View style={{flex:1, backgroundColor: Colors.seBgContainer}}>
+            <Loading />
+          </View>
+      )
     return (
-      <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: '#f2f2f2' }} sections={this.state.ticketData}
+      <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: Colors.seBgLayout }} sections={this.state.ticketData}
         contentContainerStyle={{ flex: (this.state.ticketData && this.state.ticketData.length > 0) ? undefined : 1 }}
         refreshControl={
           <RefreshControl
@@ -435,19 +440,20 @@ export default class TicketList extends Component {
 
   _renderClearView() {
     return (
-      <View style={{ alignItems: 'center', backgroundColor: LIST_BG, paddingTop: 12 }}>
+      <View style={{ alignItems: 'center', backgroundColor: Colors.seBrandNomarl, paddingTop: 12 }}>
         <TouchFeedback onPress={this._clearFilter}>
           <View style={{
             paddingHorizontal: 12,
             height: 31,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: CLEAN_FILTER_BG,
+            backgroundColor: Colors.seTextInverse,
             borderColor: CLEAN_FILTER_BORDER,
-            borderWidth: 1,
+            borderWidth: 0,
+            marginBottom:12,
             borderRadius: 14
           }}>
-            <Text style={{ fontSize: 14, color: '#333' }}>{localStr('lang_ticket_clear_filter')}</Text>
+            <Text style={{ fontSize: 14, color: Colors.seBrandNomarl }}>{localStr('lang_ticket_clear_filter')}</Text>
           </View>
         </TouchFeedback>
       </View>
@@ -476,12 +482,12 @@ export default class TicketList extends Component {
     //如果是工单筛选，显示工单筛选，否则显示日历
     if (this.state.showFilterResult) {
       return (
-        <View style={{ marginTop: MP, backgroundColor: '#3DCD58' }}>
+        <View style={{ marginTop: MP, backgroundColor: Colors.seBrandNomarl }}>
           <View style={{ flexDirection: 'row', paddingTop: 4, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 17, color: '#fff', fontWeight: '500' }}>{localStr('lang_ticket_filter')}</Text>
+            <Text style={{ fontSize: 17, color: Colors.seTextInverse, fontWeight: '500' }}>{localStr('lang_ticket_filter')}</Text>
             <View style={{ position: 'absolute', right: 16 + (this.props.paddingRight || 0) }}>
               <TouchFeedback onPress={this._clickFilter}>
-                <Icon name="filter" size={24} color={'#fff'} />
+                <Icon name="filter" size={24} color={Colors.seTextInverse} />
               </TouchFeedback>
             </View>
           </View>
@@ -491,7 +497,7 @@ export default class TicketList extends Component {
       )
     }
     return (
-      <View style={{ marginTop: MP, backgroundColor: '#3DCD58' }}>
+      <View style={{ marginTop: MP, backgroundColor: Colors.seBrandNomarl }}>
         <CalendarStrip
           isChinese={getLanguage() === 'zh'}
           selectedDate={this.state.selectedDate || new Date()}
@@ -540,9 +546,9 @@ export default class TicketList extends Component {
     return (
       <SafeAreaView style={{ flex: 1, marginTop: 0 }}>
         <StatusBar translucent={true} backgroundColor={'#00000022'} />
-        <View style={{ height: StatusBar.currentHeight, backgroundColor: GREEN }} />
+        <View style={{ height: StatusBar.currentHeight, backgroundColor: Colors.seBrandNomarl }} />
         <View style={{ flex: 1 }}>
-          <View style={{ height: 6, backgroundColor: GREEN }} />
+          <View style={{ height: 6, backgroundColor: Colors.seBrandNomarl }} />
           {this._renderTop()}
           {this._getView()}
         </View>

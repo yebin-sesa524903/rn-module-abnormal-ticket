@@ -40,6 +40,7 @@ const TODAY = new Date(_year, _month, _day); // FORMAT: Wed May 16 2018 00:00:00
 
 import moment from 'moment';
 import { localStr } from "../../utils/Localizations/localization";
+import Colors from "../../../../../app/utils/const/Colors";
 
 class DateItem extends PureComponent {
   render() {
@@ -69,16 +70,16 @@ class DateItem extends PureComponent {
           <View style={[
             styles.itemView,
             { paddingTop: showLunar ? 0 : 0 },
-            { backgroundColor: !highlight ? highlightBgColor : normalBgColor }
+            { backgroundColor: !highlight ? Colors.seBrandNomarl : Colors.seTextInverse }
           ]}>
             <Text style={[
               styles.itemDateText,
-              { color: !highlight ? hightlightTextColor : normalTextColor }
+              { color: !highlight ? Colors.seTextInverse : Colors.seBrandNomarl }
             ]}>{solar}</Text>
             {marked &&
               <View style={[
                 styles.itemBottomDot,
-                { backgroundColor: !highlight ? 'white' : '#3dcd58' }
+                { backgroundColor: !highlight ? Colors.seTextInverse : Colors.seBrandNomarl }
               ]} />
             }
           </View>
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   container: {
     width,
     paddingBottom: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderBottomColor: '#e6e6e6'
     // height: 30+30+50,
   },
@@ -376,24 +377,24 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   headerDate: {
-    color: '#fff',
+    color: Colors.seTextInverse,
     fontWeight: 'bold',
     fontSize: 18,
   },
   headerDateWeek: {
-    color: '#3D6DCF',
+    color: Colors.seTextInverse,
     fontSize: 14,
   },
   headerGoTodayButton: {
     borderRadius: 10,
     paddingHorizontal: 4, height: 20,
-    backgroundColor: 'white',
+    backgroundColor: Colors.seTextInverse,
     marginLeft: 8,
     justifyContent: 'center', alignItems: 'center',
   },
   todayText: {
     fontSize: 12,
-    color: '#3dcd58',
+    color: Colors.seBrandNomarl,
     backgroundColor: 'white'
   },
   itemContainer: {

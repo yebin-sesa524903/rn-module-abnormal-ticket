@@ -19,6 +19,7 @@ import { isPhoneX } from './utils'
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { localStr } from "./utils/Localizations/localization";
 import { getTicketFilter, setTicketFilter } from './store'
+import Colors from "../../../app/utils/const/Colors";
 
 let statusBarHeight = 28;
 if (Platform.OS === 'ios') {
@@ -140,36 +141,36 @@ export default class TicketFilter extends Component {
 
   _renderDate(rid) {
     let beginTime = localStr('lang_ticket_filter_start_time');
-    let beginColor = '#d0d0d0';
+    let beginColor = Colors.seTextDisabled;
     let filter = this.state.filter;
     if (filter.StartTime) {
-      beginColor = '#333';
+      beginColor = Colors.seTextTitle;
       beginTime = moment(filter.StartTime).format("YYYY-MM-DD")
     }
     let endTime = localStr('lang_ticket_filter_end_time');
-    let endColor = '#d0d0d0';
+    let endColor = Colors.seTextDisabled;
     if (filter.EndTime) {
-      endColor = '#333';
+      endColor = Colors.seTextTitle;
       endTime = moment(filter.EndTime).format("YYYY-MM-DD");
     }
     return (
       <View key={rid}>
-        <Text numberOfLines={1} style={{ fontSize: 13, color: '#888' }}>
+        <Text numberOfLines={1} style={{ fontSize: 13, color: Colors.seTextSecondary }}>
           {localStr('lang_ticket_filter_time')}
         </Text>
         <View style={{ flex: 1, flexDirection: 'row', height: 30, alignItems: 'center', marginTop: 10 }}>
           <TouchFeedback style={{ flex: 1 }} onPress={() => this._clickBeginTime()}>
             <View style={{
-              flex: 1, borderColor: '#e6e6e6', height: 30, borderWidth: 1, borderRadius: 2,
+              flex: 1, borderColor: Colors.seBorderBase, height: 30, borderWidth: 1, borderRadius: 2,
               justifyContent: 'center', alignItems: 'center'
             }}>
               <Text style={{ fontSize: 13, color: beginColor }}>{beginTime}</Text>
             </View>
           </TouchFeedback>
-          <View style={{ width: 8, height: 1, backgroundColor: '#d0d0d0', marginHorizontal: 10 }} />
+          <View style={{ width: 8, height: 1, backgroundColor: Colors.seTextTitle, marginHorizontal: 10 }} />
           <TouchFeedback style={{ flex: 1 }} onPress={() => this._clickEndTime()}>
             <View style={{
-              flex: 1, borderColor: '#e6e6e6', borderWidth: 1, height: 30, borderRadius: 2,
+              flex: 1, borderColor: Colors.seBorderBase, borderWidth: 1, height: 30, borderRadius: 2,
               justifyContent: 'center', alignItems: 'center'
             }}>
               <Text style={{ fontSize: 13, color: endColor }}>{endTime}</Text>
@@ -183,15 +184,15 @@ export default class TicketFilter extends Component {
   _renderTicketName() {
     return (
       <View key={'ticketName'}>
-        <Text numberOfLines={1} style={{ fontSize: 13, color: '#888' }}>
+        <Text numberOfLines={1} style={{ fontSize: 13, color: Colors.seTextSecondary }}>
           {localStr('lang_ticket_name')}
         </Text>
         <View style={{
-          flex: 1, borderColor: '#e6e6e6', height: 28, borderWidth: 1, borderRadius: 2,
+          flex: 1, borderColor: Colors.seBorderBase, height: 28, borderWidth: 1, borderRadius: 2,
           justifyContent: 'center', alignItems: 'center', marginVertical: 10, marginBottom: 20, flexDirection: 'row'
         }}>
-          <TextInput style={{ fontSize: 13, color: '#333', height: 23, padding: 0, flex: 1, paddingHorizontal: 12 }}
-            placeholderTextColor={'#d0d0d0'}
+          <TextInput style={{ fontSize: 13, color: Colors.seTextTitle, height: 23, padding: 0, flex: 1, paddingHorizontal: 12 }}
+            placeholderTextColor={Colors.seTextDisabled}
             underlineColorAndroid={'transparent'}
             onChangeText={text => {
               let filter = this.state.filter;
@@ -235,15 +236,15 @@ export default class TicketFilter extends Component {
   _getBottom() {
     let toBottom = isPhoneX() ? 34 : 0;
     return (
-      <View style={{ flexDirection: 'row', height: 57, borderTopColor: LINE, borderTopWidth: 1, marginBottom: 0 }}>
+      <View style={{ flexDirection: 'row', height: 57, borderTopColor: Colors.seBorderSplit, borderTopWidth: 1, marginBottom: 0 }}>
         <TouchFeedback style={{ flex: 1 }} onPress={this._doReset}>
-          <View style={{ backgroundColor: 'white', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: '#666', fontSize: 16 }}>{localStr('lang_ticket_filter_reset')}</Text>
+          <View style={{ backgroundColor: Colors.seBgElevated, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: Colors.seTextPrimary, fontSize: 16 }}>{localStr('lang_ticket_filter_reset')}</Text>
           </View>
         </TouchFeedback>
         <TouchFeedback style={{ flex: 1 }} onPress={this._doFilter}>
-          <View style={{ backgroundColor: GREEN, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontSize: 16 }}>{localStr('lang_ticket_filter_ok')}</Text>
+          <View style={{ backgroundColor: Colors.seBrandNomarl, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: Colors.seTextTitle, fontSize: 16 }}>{localStr('lang_ticket_filter_ok')}</Text>
           </View>
         </TouchFeedback>
       </View>
@@ -254,7 +255,7 @@ export default class TicketFilter extends Component {
     let status = localStr('lang_ticket_status_type')
     let ticket_types = localStr('lang_ticket_filter_types');//localStr('lang_ticket_status_type')
     let list = (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor:Colors.seBgElevated }}>
         <ScrollView ref="sv" style={{ flex: 1 }} onScroll={(event) => {
           this._y = event.nativeEvent.contentOffset.y;
         }}>
@@ -271,15 +272,15 @@ export default class TicketFilter extends Component {
                 title={localStr('lang_ticket_filter_show_type')}
                 key={2}
                 data={ticket_types}
-                titleColor={'#888'}
+                titleColor={Colors.seTextSecondary}
                 titleFontSize={13}
                 fontSize={13}
-                checkedBg={'#3dcd5822'}
+                checkedBg={Colors.seBrandBg}
                 borderWidth={-1}
-                unCheckedBg={'#f2f2f2'}
-                checkedFontColor={GREEN}
+                unCheckedBg={Colors.seFill3}
+                checkedFontColor={Colors.seBrandNomarl}
                 borderRadius={2}
-                unCheckedFontColor={'#333'}
+                unCheckedFontColor={Colors.seTextTitle}
                 selectedIndexes={this.state.filter.selectTypes || []}
                 onChanged={sel => {
                   let arr = this.state.filter.selectTypes || []
@@ -301,15 +302,15 @@ export default class TicketFilter extends Component {
                 title={localStr('lang_ticket_filter_status')}
                 key={2}
                 data={status}
-                titleColor={'#888'}
+                titleColor={Colors.seTextSecondary}
                 titleFontSize={13}
                 fontSize={13}
-                checkedBg={'#3dcd5822'}
+                checkedBg={Colors.seBrandBg}
                 borderWidth={-1}
-                unCheckedBg={'#f2f2f2'}
-                checkedFontColor={GREEN}
+                unCheckedBg={Colors.seFill3}
+                checkedFontColor={Colors.seBrandNomarl}
                 borderRadius={2}
-                unCheckedFontColor={'#333'}
+                unCheckedFontColor={Colors.seTextTitle}
                 selectedIndexes={this.state.filter.selectStatus || []}
                 onChanged={sel => {
                   let arr = this.state.filter.selectStatus || []

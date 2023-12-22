@@ -13,7 +13,7 @@ import { GRAY, BLACK, ALARM_RED } from './styles/color';
 import moment from 'moment';
 import TouchFeedback from "./components/TouchFeedback";
 import { localStr } from "./utils/Localizations/localization";
-
+import Colors from "../../../app/utils/const/Colors";
 /**
  * D9d9d9
 F5f5f5
@@ -37,29 +37,29 @@ F0fff0
  */
 const STATUS_COLORS = [
   {
-    border: '#D9d9d9',
-    bg: '#F5f5f5',
-    text: '#1f1f1f'
+    border: Colors.seBorderBase,
+    bg: Colors.seFill3,
+    text: Colors.seTextTitle
   },
   {
-    border: '#9fd4fd',
-    bg: '#E8f7ff',
-    text: '#3491fa'
+    border: Colors.seInfoNormal,
+    bg: Colors.seInfoBg,
+    text: Colors.seInfoNormal
   },
   {
-    border: '#Ffcf8b',
-    bg: '#Fff7eb',
-    text: '#Faad14'
+    border: Colors.seWarningBorder,
+    bg: Colors.seWarningBg,
+    text: Colors.seWarningNormal
   },
   {
-    border: '#Ffa39e',
-    bg: '#Fff1f0',
-    text: '#f5222d'
+    border: Colors.seErrorBorder,
+    bg: Colors.seErrorBg,
+    text: Colors.seErrorNormal
   },
   {
-    border: '#3dcd58',
-    bg: '#F0fff0',
-    text: '#3dcd58'
+    border: Colors.seBrandNomarl,
+    bg: Colors.seBrandBg,
+    text: Colors.seBrandNomarl
   }
 
 ]
@@ -202,37 +202,37 @@ export default class TicketRow extends Component {
     return (
       <TouchFeedback onPress={() => this.props.onRowClick(rowData)}>
         <View style={{
-          padding: 16, backgroundColor: '#fff', marginTop: 8, borderRadius: 12,
+          padding: 16, backgroundColor: Colors.seBgContainer, marginTop: 8, borderRadius: 12,
         }}>
           <View style={{
             flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12, marginHorizontal: -16, marginBottom: -12, marginVertical: -16, alignItems: 'center', justifyContent: 'space-between',
             borderTopLeftRadius: 2, borderTopRightRadius: 2
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 }}>
-              <Text style={{ color: '#333', fontSize: 16, fontWeight: '500', flexShrink: 1, marginRight: 3 }} numberOfLines={1}>{title}</Text>
+              <Text style={{ color: Colors.seTextTitle, fontSize: 16, fontWeight: '500', flexShrink: 1, marginRight: 3 }} numberOfLines={1}>{title}</Text>
             </View>
             {/* 这里现在显示状态 */}
             {this._renderTicketStatus()}
           </View>
           <View style={{ flexDirection: 'row', marginTop: 8 }} >
             <Text style={{
-              fontSize: 12, color: '#595959',
+              fontSize: 12, color: Colors.seTextPrimary,
             }}>{localStr('lang_ticket_item_suggest_time')}</Text>
             <Text style={{
-              fontSize: 12, color: (isExpire ? '#ff4d4d' : '#595959'),
+              fontSize: 12, color: (isExpire ? Colors.seErrorNormal : Colors.seTextPrimary),
             }}>{this._getDateDisplay()}</Text>
           </View>
 
           {/*<View style={{height:1,backgroundColor:'#f2f2f2',marginVertical:12}}/>*/}
           <View style={{
             flexDirection: 'row', alignItems: 'center', marginTop: 12,
-            paddingTop: 12, borderTopColor: '#d9d9d9', borderTopWidth: 1
+            paddingTop: 12, borderTopColor: Colors.seBorderBase, borderTopWidth: 1
           }}>
-            <Icon type="icon_asset_location" color="#595959" size={12} />
-            <Text style={{ marginLeft: 8, color: '#595959', fontSize: 13, flex: 1 }}
+            <Icon type="icon_asset_location" color={Colors.seTextPrimary} size={12} />
+            <Text style={{ marginLeft: 8, color: Colors.seTextPrimary, fontSize: 13, flex: 1 }}
               numberOfLines={1} lineBreakModel='charWrapping'>{locationPath}</Text>
-            <Icon type={'icon_ticket_tag'} color={'#595959'} size={12} />
-            <Text style={{ fontSize: 12, marginLeft: 6, color: '#595959' }}>{this.props.rowData.ticketTypeLabel}</Text>
+            <Icon type={'icon_ticket_tag'} color={Colors.seTextPrimary} size={12} />
+            <Text style={{ fontSize: 12, marginLeft: 6, color: Colors.seTextPrimary }}>{this.props.rowData.ticketTypeLabel}</Text>
           </View>
         </View>
       </TouchFeedback>
