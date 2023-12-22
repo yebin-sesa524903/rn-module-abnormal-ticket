@@ -16,6 +16,7 @@ import moment from 'moment';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import backHelper from './utils/backHelper';
 import {localStr} from "./utils/Localizations/localization";
+import Colors from "../../../app/utils/const/Colors";
 
 export default class TicketSelectTime extends Component{
   constructor(props){
@@ -51,9 +52,9 @@ export default class TicketSelectTime extends Component{
     return (
       <TouchFeedback enabled={enable} onPress={()=>cb()}>
         <View style={{flexDirection:'row',height:56,marginLeft:16,paddingRight:16,alignItems:'center',
-          borderBottomColor:'#e6e6e6',borderBottomWidth:1}}>
-          <Text style={{fontSize:17,color:'#333',flex:1}}>{title}</Text>
-          <Text style={{fontSize:17,color:'#888',marginRight:6}}>{value}</Text>
+          borderBottomColor:Colors.seBorderSplit,borderBottomWidth:1}}>
+          <Text style={{fontSize:17,color:Colors.seTextTitle,flex:1}}>{title}</Text>
+          <Text style={{fontSize:17,color:Colors.seTextPrimary,marginRight:6}}>{value}</Text>
           {iconRight}
         </View>
       </TouchFeedback>
@@ -155,7 +156,7 @@ export default class TicketSelectTime extends Component{
   render() {
 
     return (
-      <View style={{flex:1,backgroundColor:'white'}}>
+      <View style={{flex:1,backgroundColor:Colors.seBgLayout}}>
         <Toolbar
           title={this.props.title}
           navIcon="back"

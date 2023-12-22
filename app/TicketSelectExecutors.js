@@ -5,7 +5,7 @@ import React,{Component} from 'react';
 import {
   View,
   Text,
-  Alert, Image, FlatList,StyleSheet
+  Alert, Image, FlatList, StyleSheet, TouchableOpacity
 } from 'react-native';
 
 import Toolbar from './components/Toolbar';
@@ -16,6 +16,7 @@ import {apiGetExecutorData, apiGetTicketExecutors} from "./middleware/bff";
 import TouchFeedback from "./components/TouchFeedback";
 import Icon from "./components/Icon";
 import {GRAY, GREEN} from "./styles/color";
+import Colors from "../../../app/utils/const/Colors";
 const CODE_OK = '0';
 
 export default class TicketSelectExecutors extends Component{
@@ -78,7 +79,7 @@ export default class TicketSelectExecutors extends Component{
     if(item.isSelect){
       return (
         <View style={styles.selectView}>
-          <Icon type='icon_check' size={10} color='white' />
+          <Icon type='icon_check' size={10} color={Colors.seTextInverse} />
         </View>
       )
     }else {
@@ -91,7 +92,7 @@ export default class TicketSelectExecutors extends Component{
 
   _renderItem = ({item}) => {
     return (
-      <TouchFeedback style={{flex:1}} onPress={()=>{
+      <TouchableOpacity style={{flex:1}} onPress={()=>{
         item.isSelect = !item.isSelect
         this.setState({data:[].concat(this.state.data)})
       }}>
@@ -106,7 +107,7 @@ export default class TicketSelectExecutors extends Component{
             </Text>
           </View>
         </View>
-      </TouchFeedback>
+      </TouchableOpacity>
     )
   }
 
@@ -132,7 +133,7 @@ export default class TicketSelectExecutors extends Component{
       }
     }
     return (
-      <View style={{flex:1,backgroundColor:'white'}}>
+      <View style={{flex:1,backgroundColor:Colors.seBgLayout}}>
         <Toolbar
           title={this.props.title}
           navIcon="back"
@@ -151,28 +152,28 @@ export default class TicketSelectExecutors extends Component{
   }
 }
 
-let styles = StyleSheet.create({
+let styles = global.amStyleProxy(()=>StyleSheet.create({
   rowContent:{
     //height:62,
     flexDirection:'row',
     // justifyContent:'space-between',
     alignItems:'center',
-    backgroundColor:'white',
+    backgroundColor:Colors.seBgContainer,
     paddingHorizontal:16,
     paddingVertical:12,
-    borderBottomColor:'#f2f2f2',
+    borderBottomColor:Colors.seBorderSplit,
     borderBottomWidth:1
   },
   titleText:{
     marginLeft:16,
     fontSize:17,
     flex:1,
-    color:'#333'//BLACK
+    color:Colors.seTextTitle//BLACK
   },
   subTitleText:{
     marginLeft:16,
     fontSize:15,
-    color:'#888',//BLACK,
+    color:Colors.seTextPrimary,//BLACK,
     backgroundColor:'red',
     width:80
   },
@@ -180,7 +181,7 @@ let styles = StyleSheet.create({
     width:18,
     height:18,
     borderRadius:10,
-    backgroundColor:GREEN,
+    backgroundColor:Colors.seBrandNomarl,
     justifyContent:'center',
     alignItems:'center'
   },
@@ -188,10 +189,10 @@ let styles = StyleSheet.create({
     width:18,
     height:18,
     borderRadius:10,
-    borderColor:GRAY,
+    borderColor:Colors.seTextTitle,
     borderWidth:1,
     // marginRight:16,
     justifyContent:'center',
     alignItems:'center'
   },
-});
+}));
