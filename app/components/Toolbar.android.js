@@ -9,6 +9,7 @@ import TouchFeedback from './TouchFeedback';
 import privilegeHelper from '../utils/privilegeHelper.js';
 import Icon from './Icon';
 import { IconOutline } from "@ant-design/icons-react-native";
+import Colors from "../../../../app/utils/const/Colors";
 
 const height = 56 + StatusBar.currentHeight;//80;
 const statusBarHeight = StatusBar.currentHeight;//24;
@@ -36,7 +37,7 @@ export default class Toolbar extends Component {
       navView = (
         <TouchFeedback style={{}} onPress={onIconClicked}>
           <View style={{ paddingHorizontal: 16, height: navHeight, marginLeft, justifyContent: 'center', }}>
-            <Image style={{ tintColor: titleColor ? tintColor : '#333', width, height: width }} source={navImage} />
+            <Image style={{ tintColor: titleColor ? tintColor : Colors.seTextInverse, width, height: width }} source={navImage} />
           </View>
         </TouchFeedback>
       );
@@ -74,17 +75,17 @@ export default class Toolbar extends Component {
             item.icon = require('../images/share/screen_share.png');
           }
           imageOrText = (
-            <Image style={{ tintColor: '#333', width: 18, height: 18 }} source={item.icon} />
+            <Image style={{ tintColor: Colors.seTextInverse, width: 18, height: 18 }} source={item.icon} />
           );
         } else if (item.isFontIcon) {
-          imageOrText = <Icon type={item.type} color={enabled ? '#333' : '#33333380'} size={16} />
+          imageOrText = <Icon type={item.type} color={enabled ? Colors.seTextInverse : Colors.seTextDisabled} size={16} />
         } else if (item.isAntIcon) {
-          imageOrText = <IconOutline name={item.type} size={20} color={GRAY} />
+          imageOrText = <IconOutline name={item.type} size={20} color={Colors.seTextInverse} />
         }
         else {
           width = null;
           imageOrText = (
-            <Text style={{ color: enabled ? '#333' : '#33333380', fontSize: 15, textAlign: 'right', marginRight: 8 }}>{item.title}</Text>
+            <Text style={{ color: enabled ? Colors.seTextInverse : Colors.seTextDisabled, fontSize: 15, textAlign: 'right', marginRight: 8 }}>{item.title}</Text>
           );
         }
         if (!enabled) {
@@ -123,9 +124,9 @@ export default class Toolbar extends Component {
 
     var titleStyle = [styles.titleText];
     if (titleColor) {
-      titleStyle.push({ color: titleColor });
+      titleStyle.push({ color: Colors.seTextInverse });
     } else {
-      titleStyle.push({ color: '#333' });
+      titleStyle.push({ color: Colors.seTextInverse });
     }
 
     if (color === 'transparent') {
@@ -139,7 +140,7 @@ export default class Toolbar extends Component {
     // }
 
     return (
-      <View style={[styles.navSty, { backgroundColor: color, borderColor: borderColor }]}>
+      <View style={[styles.navSty, { backgroundColor: Colors.seBrandNomarl, borderColor: Colors.seBorderSplit }]}>
         <View style={{
           flexDirection: 'row',
           flex: 1, alignItems: "center",
@@ -241,13 +242,13 @@ var styles = StyleSheet.create({
     fontSize: 17,
     // fontWeight: '500',
     // textAlign: 'center',
-    color: 'white',
+    color: Colors.seTextInverse,
     flexShrink: 1
   },
   titleSuffixText: {
     fontSize: 15,
     textAlign: 'center',
-    color: '#888',
+    color: Colors.seTextInverse,
     marginLeft: 4
   }
 });

@@ -4,6 +4,7 @@ import RNFS, { DocumentDirectoryPath,ExternalDirectoryPath } from 'react-native-
 import Loading from './components/Loading';
 import {getBaseUri, getCookie} from './middleware/bff';
 import RNFetchBlob from 'react-native-fetch-blob'
+import Colors from "../../../app/utils/const/Colors";
 
 const dirPath = Platform.OS === 'ios' ? DocumentDirectoryPath : ExternalDirectoryPath
 const pathPre = Platform.OS === 'ios' ? '' : 'file://';
@@ -131,7 +132,7 @@ export default class CacheImage extends Component {
     if(this.state.cacheable && this.state.cachedImagePath) {
       //说明本地有缓存文件
       return (
-        <View style={{borderWidth:this.props.borderWidth||0,borderColor:'#f2f2f2',borderRadius:2,marginRight:this.props.space || 0,marginTop:this.props.space || 0}}>
+        <View style={{borderWidth:this.props.borderWidth||0,borderColor:Colors.seBorderSplit,borderRadius:2,marginRight:this.props.space || 0,marginTop:this.props.space || 0}}>
           <Image resizeMode={this.props.mode || 'cover'} source={{uri:pathPre+this.state.cachedImagePath}} style={{width:this.props.width,height:this.props.height}}/>
         </View>
       )

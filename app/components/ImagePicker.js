@@ -28,6 +28,7 @@ import Loading from './Loading';
 var {ImagePickerManager} = NativeModules;
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {localStr} from "../utils/Localizations/localization";
+import Colors from "../../../../app/utils/const/Colors";
 
 export default class ImagePicker extends Component {
   // static propTypes = {
@@ -433,12 +434,12 @@ export default class ImagePicker extends Component {
   }
   render() {
     var whStyle = {width:this._imageSize,height:this._imageSize,
-      margin:4,
+      margin:4,backgroundColor:Colors.seBgContainer,
       marginLeft:0,
       marginTop:0,};
     if(!this.state.rollPermissionExists&&Platform.OS==='android'){
       return (
-        <View style={{flex:1}}>
+        <View style={{flex:1,backgroundColor:Colors.seBgLayout}}>
           {this._getToolbar()}
           {this.renderPaginationWaitingView()}
         </View>
@@ -446,11 +447,11 @@ export default class ImagePicker extends Component {
     }
 
     return (
-      <View style={{flex:1}}>
+      <View style={{flex:1,backgroundColor:Colors.seBgLayout}}>
         {this._getToolbar()}
         <CameraRollPicker
           groupName={Platform.OS==='ios'?'All Photos':undefined}
-          selected={this.state.chosenImages}
+          selected={this.state.chosenImages} backgroundColor={Colors.seBgLayout}
           callback={(selected, image)=>{
             this._imagePressed(image,selected);
           }}
@@ -459,8 +460,8 @@ export default class ImagePicker extends Component {
               <View key={'add'} style={[styles.addStyle,whStyle]}>
                 <TouchFeedback onPress={()=>ImagePicker._takePhoto((imgs)=>this._takeFinish(imgs))} style={{flex:1}}>
                   <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-                    <Icon type="photo" color={'white'} size={whStyle.width/3} />
-                    <Text style={{color:'white',marginTop:6}}>{localStr('lang_image_take_photo')}</Text>
+                    <Icon type="photo" color={Colors.seTextTitle} size={whStyle.width/3} />
+                    <Text style={{color:Colors.seTextTitle,marginTop:6}}>{localStr('lang_image_take_photo')}</Text>
                   </View>
                 </TouchFeedback>
               </View>

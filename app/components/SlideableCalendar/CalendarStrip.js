@@ -28,7 +28,7 @@ import {
 // import ChineseLunar from 'chinese-lunar';
 // import ChineseLocale from 'date-fns/locale/zh_cn';
 
-import {Icon} from '@ant-design/react-native';
+import { Icon } from '@ant-design/react-native';
 
 const width = Dimensions.get('window').width;
 const ITEM_LENGTH = width / 7;
@@ -39,7 +39,8 @@ const _day = _today.getDate();
 const TODAY = new Date(_year, _month, _day); // FORMAT: Wed May 16 2018 00:00:00 GMT+0800 (CST)
 
 import moment from 'moment';
-import {localStr} from "../../utils/Localizations/localization";
+import { localStr } from "../../utils/Localizations/localization";
+import Colors from "../../../../../app/utils/const/Colors";
 
 class DateItem extends PureComponent {
   render() {
@@ -56,15 +57,9 @@ class DateItem extends PureComponent {
     const highlightBgColor = '#3dcd58';
     const normalBgColor = 'white';
     const hightlightTextColor = '#fff';
-    const normalTextColor = 'rgba(0,0,0,0.9)';
-    const isToday=format(item,'YYYY-MM-DD')===format(new Date(),'YYYY-MM-DD');
-    let todayStyle={};
-    if(isToday&&!highlight){
-      todayStyle={
-        borderColor:'#3dcd58',
-        borderWidth:1
-      }
-    }
+    const normalTextColor = '#3dcd58';
+    const isToday = format(item, 'YYYY-MM-DD') === format(new Date(), 'YYYY-MM-DD');
+
     return (
       <View style={styles.itemContainer}>
         <TouchableOpacity
@@ -74,17 +69,17 @@ class DateItem extends PureComponent {
         >
           <View style={[
             styles.itemView,
-            { paddingTop: showLunar ? 0 : 0 },todayStyle,
-            {backgroundColor: highlight ? highlightBgColor : normalBgColor}
+            { paddingTop: showLunar ? 0 : 0 },
+            { backgroundColor: !highlight ? Colors.seBrandNomarl : Colors.seTextInverse }
           ]}>
             <Text style={[
               styles.itemDateText,
-              {color: highlight ? hightlightTextColor : normalTextColor}
+              { color: !highlight ? Colors.seTextInverse : Colors.seBrandNomarl }
             ]}>{solar}</Text>
             {marked &&
               <View style={[
                 styles.itemBottomDot,
-                {backgroundColor: highlight ? 'white' : '#3dcd58'}
+                { backgroundColor: !highlight ? Colors.seTextInverse : Colors.seBrandNomarl }
               ]} />
             }
           </View>
@@ -118,7 +113,7 @@ class CalendarStrip extends Component {
         }
         return false;
       },
-      onPanResponderRelease: () => {},
+      onPanResponderRelease: () => { },
     });
     // this._panResponder = {};
   }
@@ -129,7 +124,7 @@ class CalendarStrip extends Component {
   //   }, 100);
   // }
 
-  shouldComponentUpdate(nextProps,nextState){
+  shouldComponentUpdate(nextProps, nextState) {
     //如何判断是否需要更新
     // if(nextProps.selectedDate===this.props.selectedDate&&
     //   nextState.datas===this.state.datas&&
@@ -139,7 +134,7 @@ class CalendarStrip extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    let begin=Date.now();
+    let begin = Date.now();
     if (isSameDay(nextProps.selectedDate, this.props.selectedDate)) return;
     const nextSelectedDate = nextProps.selectedDate;
     if (!this.currentPageDatesIncludes(nextSelectedDate)) {
@@ -162,7 +157,7 @@ class CalendarStrip extends Component {
             datas: days,
             isTodayVisible: false,
           }, () => {
-            const page = ~~(days.length/7 - 1);
+            const page = ~~(days.length / 7 - 1);
             // to last page
             this.scrollToPage(page);
           });
@@ -180,21 +175,21 @@ class CalendarStrip extends Component {
         }
       }
     }
-    console.warn('calender nextProps use time:',Date.now()-begin);
+    console.warn('calender nextProps use time:', Date.now() - begin);
   }
 
-  scrollToPage = (page, animated=true) => {
+  scrollToPage = (page, animated = true) => {
     this._calendar.scrollToIndex({ animated, index: 7 * page });
   }
 
   currentPageDatesIncludes = (date) => {
     const { currentPage } = this.state;
-    const currentPageDates = this.state.datas.slice(7*currentPage, 7*(currentPage+1));
+    const currentPageDates = this.state.datas.slice(7 * currentPage, 7 * (currentPage + 1));
     // dont use currentPageDates.includes(date); because can't compare Date in it
     return !!currentPageDates.find(d => isSameDay(d, date));
   }
 
-  getInitialDates(weekStartsOn=0) {
+  getInitialDates(weekStartsOn = 0) {
     // const todayInWeek = getDay(TODAY);
     const last2WeekOfToday = subDays(TODAY, 7 * 2);
     const next2WeekOfToday = addDays(TODAY, 7 * 2);
@@ -206,38 +201,38 @@ class CalendarStrip extends Component {
 
   loadNextTwoWeek(originalDates) {
     const originalFirstDate = originalDates[0];
-    const originalLastDate = originalDates[originalDates.length-1];
+    const originalLastDate = originalDates[originalDates.length - 1];
     const lastDayOfNext2Week = addDays(originalLastDate, 7 * 2);
     const eachDays = eachDay(originalFirstDate, lastDayOfNext2Week);
-    this.props.loadTicketCount(eachDays[0],eachDays[eachDays.length-1]);
+    this.props.loadTicketCount(eachDays[0], eachDays[eachDays.length - 1]);
     this.setState({ datas: eachDays });
   }
 
   loadPreviousTwoWeek(originalDates) {
     const originalFirstDate = originalDates[0];
-    const originalLastDate = originalDates[originalDates.length-1];
+    const originalLastDate = originalDates[originalDates.length - 1];
     const firstDayOfPrevious2Week = subDays(originalFirstDate, 7 * 2);
     const eachDays = eachDay(firstDayOfPrevious2Week, originalLastDate);
-    this.props.loadTicketCount(eachDays[0],eachDays[eachDays.length-1]);
+    this.props.loadTicketCount(eachDays[0], eachDays[eachDays.length - 1]);
     this.setState(prevState => ({
       datas: eachDays,
-      currentPage: prevState.currentPage+2,
-      pageOfToday: prevState.pageOfToday+2,
+      currentPage: prevState.currentPage + 2,
+      pageOfToday: prevState.pageOfToday + 2,
     }), () => {
       this.scrollToPage(2, false);
     });
   }
 
   _renderHeader = () => {
-    const { selectedDate, onPressGoToday, isChinese, showWeekNumber,showCreate,showSync,showDownload,enableDownload } = this.props;
-    const dateFormatted_zh = format(selectedDate, 'YYYY/MM/DD', );
+    const { selectedDate, onPressGoToday, isChinese, showWeekNumber, showCreate, showSync, showDownload, enableDownload } = this.props;
+    const dateFormatted_zh = format(selectedDate, 'YYYY/MM/DD',);
     const dateFormatted_en = format(selectedDate, 'YYYY/MM/DD');
     const dateFormatted = isChinese ? dateFormatted_zh : dateFormatted_en;
     const weekNumber = getISOWeek(selectedDate);
 
-    let isSelectToday=false;
-    if(moment().format('YYYY-MM-DD')===moment(this.props.selectedDate).format('YYYY-MM-DD')){
-      isSelectToday=true;
+    let isSelectToday = false;
+    if (moment().format('YYYY-MM-DD') === moment(this.props.selectedDate).format('YYYY-MM-DD')) {
+      isSelectToday = true;
     }
 
     return (
@@ -248,7 +243,7 @@ class CalendarStrip extends Component {
         }
 
         {(!isSelectToday) &&
-          <TouchableOpacity style={[styles.headerGoTodayButton,{zIndex:1000}]} onPress={() => {
+          <TouchableOpacity style={[styles.headerGoTodayButton, { zIndex: 1000 }]} onPress={() => {
             const page = this.state.pageOfToday;
             onPressGoToday && onPressGoToday(TODAY);
             this.scrollToPage(page);
@@ -266,7 +261,7 @@ class CalendarStrip extends Component {
     const dateArr = dateString.split('-');
     const [y, m, d] = dateArr.map(ds => parseInt(ds, 10));
     // CAVEAT: Jan is 0
-    return new Date(y, m-1, d);
+    return new Date(y, m - 1, d);
   };
 
 
@@ -294,14 +289,14 @@ class CalendarStrip extends Component {
           onMomentumScrollEnd={this.momentumEnd}
           scrollEventThrottle={500}
           getItemLayout={(data, index) => (
-            {length: ITEM_LENGTH, offset: ITEM_LENGTH * index, index}
+            { length: ITEM_LENGTH, offset: ITEM_LENGTH * index, index }
           )}
-          onEndReached={() => { this.onEndReached(); } }
+          onEndReached={() => { this.onEndReached(); }}
           onEndReachedThreshold={0.01}
           data={this.state.datas}
           extraData={this.state}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) =>
+          renderItem={({ item }) =>
             <DateItem
               item={item}
               showLunar={showChineseLunar}
@@ -368,38 +363,39 @@ CalendarStrip.defaultProps = {
 const styles = StyleSheet.create({
   container: {
     width,
-    paddingBottom:10,
-    borderBottomWidth:1,
-    borderBottomColor:'#e6e6e6'
+    paddingBottom: 10,
+    borderBottomWidth: 0,
+    borderBottomColor: '#e6e6e6'
     // height: 30+30+50,
   },
   header: {
     height: 30,
-      marginBottom:0,
+    marginBottom: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    marginBottom: 12,
   },
   headerDate: {
-    color: '#666',
-    fontSize: 15,
+    color: Colors.seTextInverse,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
   headerDateWeek: {
-    color: '#3D6DCF',
+    color: Colors.seTextInverse,
     fontSize: 14,
   },
   headerGoTodayButton: {
     borderRadius: 10,
-    paddingHorizontal:4, height: 20,
-    backgroundColor: '#3dcd58',
-    marginLeft:8,
-    // position: 'absolute', top: 5, right: 50,
+    paddingHorizontal: 4, height: 20,
+    backgroundColor: Colors.seTextInverse,
+    marginLeft: 8,
     justifyContent: 'center', alignItems: 'center',
   },
   todayText: {
     fontSize: 12,
-    color: 'white',
+    color: Colors.seBrandNomarl,
+    backgroundColor: 'white'
   },
   itemContainer: {
     width: width / 7,
@@ -421,7 +417,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
   },
   itemDateText: {
-    fontSize: 17,
+    fontSize: 18,
     // lineHeight: Platform.OS === 'ios' ? 19 : 15,
   },
   itemLunarText: {

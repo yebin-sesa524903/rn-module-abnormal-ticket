@@ -1,9 +1,10 @@
 import React,{} from 'react'
 import TicketList from './app/TicketList'
+import TicketDetail from './app/TicketDetail'
 import {configCookie} from './app/middleware/bff'
 
 export  {
-  TicketList,configCookie
+  TicketList,configCookie, TicketDetail
 }
 
 

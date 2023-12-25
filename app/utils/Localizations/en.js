@@ -87,5 +87,9 @@ export default {
   lang_network_error:'Failed to load, please check your network setting',
   lang_server_error:'Server exception',
   lang_http_no_content:'No Content',
-  lang_http_401:'Unauthorized'
+  lang_http_401:'Unauthorized',
+
+  lang_ticket_item_suggest_time:'Suggest Time：',
+  lang_ticket_filter_types:['Diagnosis', 'Behavior','Alarm'],
+  lang_ticket_filter_show_type:'Type',
 };

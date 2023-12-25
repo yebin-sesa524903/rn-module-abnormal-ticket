@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 
 import { isPhoneX } from '../../utils';
 import { localStr } from '../../utils/Localizations/localization';
+import Colors from "../../../../../app/utils/const/Colors";
 let toBottom = 0;
 if (isPhoneX()) toBottom = 34;
 
@@ -32,9 +33,9 @@ export default class SchActionSheet extends Component {
       <View style={{
         height: 45, backgroundColor: 'transparent',
         justifyContent: 'center', alignItems: 'center',
-        borderBottomColor: '#4d4d4d22', borderBottomWidth: 1,
+        borderBottomColor: Colors.seTextDisabled, borderBottomWidth: 1,
       }}>
-        <Text style={{ fontSize: 13, color: '#8e8e9c' }}>
+        <Text style={{ fontSize: 13, color: Colors.seTextTitle }}>
           {this.props.title}
         </Text>
       </View>
@@ -48,9 +49,9 @@ export default class SchActionSheet extends Component {
           <TouchFeedback onPress={() => this.props.onSelect(item)}>
             <View style={{
               height: 55, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center',
-              borderTopColor: '#4d4d4d22', borderTopWidth: index === 0 ? 0 : 1,
+              borderTopColor: Colors.seTextDisabled, borderTopWidth: index === 0 ? 0 : 1,
             }}>
-              <Text style={{ fontSize: 18, color: item.select ? '#0d0d0d' : '#0076ff' }}>
+              <Text style={{ fontSize: 18, color: item.select ? Colors.seTextTitle : Colors.seTextPrimary }}>
                 {item.title}
               </Text>
             </View>
@@ -69,7 +70,7 @@ export default class SchActionSheet extends Component {
 
             <TouchableOpacity style={styles.container} onPress={this.props.onCancel}></TouchableOpacity>
             <View style={{
-              backgroundColor: 'white', marginBottom: 8,
+              backgroundColor: Colors.seBgElevated, marginBottom: 8,
               borderRadius: 12, marginHorizontal: 10
             }}>
               {this._getTitleView()}

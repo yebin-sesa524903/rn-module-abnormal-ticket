@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import {BLACK,GREEN} from '../styles/color.js';
 import TouchFeedback from './TouchFeedback';
 import Icon from './Icon.js';
+import Colors from "../../../../app/utils/const/Colors";
 
 //匹配url的正则表达式
 const REG=/https?:\/\/[A-Za-z0-9-_%&\?\/.=]+/g;
@@ -44,13 +45,13 @@ export default class MoreContent extends Component {
   _getMoreButton(){
     if(this.state.needMoreButton){
       return (
-        <View style={{flex:1,marginTop:10,backgroundColor:'white'}}>
+        <View style={{flex:1,marginTop:10,backgroundColor:Colors.seBgContainer}}>
           <TouchFeedback onPress={()=>{
               this.setState({lines:null,needMoreButton:false})
             }} style={{flex:1,}} >
             <View style={{flex:1,
                 alignItems:'center',justifyContent:'center',height:24,}}>
-              <Icon type={'icon_arrow_down'} size={16} color={GREEN} />
+              <Icon type={'icon_arrow_down'} size={16} color={Colors.seBrandNomarl} />
             </View>
           </TouchFeedback>
         </View>
@@ -98,7 +99,7 @@ export default class MoreContent extends Component {
       <View style={this.props.style}>
         <View style={{flex:1,marginBottom,position:'relative'}}>
           <Text
-            style={[{fontSize:15,color:'#666',lineHeight:24,marginRight},this.props.titleStyle]}
+            style={[{fontSize:15,color:Colors.seTextTitle,lineHeight:24,marginRight},this.props.titleStyle]}
             numberOfLines={this.state.lines}
             onLayout={(e)=>{this._checkHeight(e)}}>
             <Text>

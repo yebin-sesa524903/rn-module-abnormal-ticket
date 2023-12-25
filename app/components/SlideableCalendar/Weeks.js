@@ -4,6 +4,7 @@ import {
   Text,
   Dimensions
 } from 'react-native';
+import Colors from "../../../../../app/utils/const/Colors";
 const width = Dimensions.get('window').width;
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 const WEEK_en = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -28,7 +29,7 @@ export default ({ isChinese, weekStartsOn }) => {
           justifyContent: 'center',
         }} key={day}>
           <Text style={{
-            color: '#666',
+            color: Colors.seTextInverse,
             fontSize: 14,
           }}>{day}</Text>
         </View>
