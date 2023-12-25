@@ -89,7 +89,7 @@ export default {
   lang_http_no_content:'No Content',
   lang_http_401:'Unauthorized',
 
-  lang_ticket_item_suggest_time:'建议执行时间：',
-  lang_ticket_filter_types:['诊断', '行为异常','报警'],
-  lang_ticket_filter_show_type:'工单类型',
+  lang_ticket_item_suggest_time:'Suggest Time：',
+  lang_ticket_filter_types:['Diagnosis', 'Behavior','Alarm'],
+  lang_ticket_filter_show_type:'Type',
 };

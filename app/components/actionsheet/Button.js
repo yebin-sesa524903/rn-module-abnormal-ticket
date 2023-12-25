@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import Text from '../Text';
 
 import TouchFeedback from '../TouchFeedback';
+import Colors from "../../../../../app/utils/const/Colors";
 
 export default class Button extends Component {
   render(){
@@ -30,20 +31,20 @@ export default class Button extends Component {
   }
 }
 
-var styles = StyleSheet.create({
+var styles = global.amStyleProxy(()=>StyleSheet.create({
   buttonText: {
-    color: '#0d0d0d',//'#0076ff',
+    color: Colors.seInfoNormal,//'#0076ff',
     alignSelf: 'center',
     fontSize: 18
   },
   button: {
     height: 55,
-    backgroundColor: 'white',
+    backgroundColor: Colors.seBgElevated,
     borderColor: 'white',
-    borderWidth: 1,
+    borderWidth: 0,
     borderRadius: 12,
     marginBottom: 9,
     alignSelf: 'stretch',
     justifyContent: 'center'
   }
-});
+}));

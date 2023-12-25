@@ -28,6 +28,7 @@ import CacheImage from "./CacheImage";
 import { localStr } from "./utils/Localizations/localization";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import Loading from './components/Loading';
+import Colors from "../../../app/utils/const/Colors";
 
 const CODE_OK = '0'
 
@@ -184,7 +185,7 @@ export default class LogEditView extends Component {
     if (this.state.log.pictures.length >= 20) return null;
     return (
       <View key={index} style={{ padding: 3 }}>
-        <View style={{ borderWidth: 1, borderColor: ADDICONCOLOR }}
+        <View style={{ borderWidth: 1, borderColor: Colors.seTextDisabled }}
           width={this.state.imageWidth}
           height={this.state.imageHeight}>
           <TouchFeedback
@@ -192,7 +193,7 @@ export default class LogEditView extends Component {
             key={index}
             onPress={() => this._openImagePicker()}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon type='icon_add' size={36} color={ADDICONCOLOR} />
+              <Icon type='icon_add' size={36} color={Colors.seTextSecondary} />
             </View>
           </TouchFeedback>
         </View>
@@ -268,7 +269,7 @@ export default class LogEditView extends Component {
           <View key={index} style={{
             margin: 3,
             borderWidth: 1,
-            borderColor: ADDICONCOLOR,
+            borderColor: Colors.seBorderSplit,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: 'gray',
@@ -320,7 +321,7 @@ export default class LogEditView extends Component {
         textAlign={'left'}
         editable={Platform.OS === 'ios' ? this.props.canEdit : true}
         multiline={true}
-        placeholderTextColor={GRAY}
+        placeholderTextColor={Colors.seTextPrimary}
         textAlignVertical={'top'}
         placeholder={localStr('lang_ticket_filter_input')}
         onChangeText={(text) => this._logChanged(text)}
@@ -341,11 +342,11 @@ export default class LogEditView extends Component {
       inputStyle = { height: 142 }
     }
     return (
-      <View style={{ flex: 1, backgroundColor: LIST_BG }}>
+      <View style={{ flex: 1, backgroundColor: Colors.seBgLayout }}>
         {this._getToolbar()}
         <ScrollView
           style={{ flex: 1, }}
-          contentContainerStyle={[contentContainerStyle, { backgroundColor: 'white' }]}>
+          contentContainerStyle={[contentContainerStyle, { backgroundColor: Colors.seBgContainer }]}>
           <View style={{}}>
             {this._getTextEditView(lines, content)}
           </View>
@@ -362,13 +363,13 @@ export default class LogEditView extends Component {
 
 
 
-var styles = StyleSheet.create({
+var styles = global.amStyleProxy(()=>StyleSheet.create({
   input: {
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     textAlignVertical: 'top',
     fontSize: 14,
-    color: BLACK,
+    color: Colors.seTextTitle,
     padding: 0,
     margin: 16,
     // backgroundColor:'gray'
@@ -381,4 +382,4 @@ var styles = StyleSheet.create({
     borderRadius: 6,
 
   },
-});
+}));

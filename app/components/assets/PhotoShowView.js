@@ -13,6 +13,7 @@ import Toolbar from '../Toolbar';
 import Gallery from './Gallery';
 import PhotoRow from './PhotoRow.js';
 import {localStr} from "../../utils/Localizations/localization";
+import Colors from "../../../../../app/utils/const/Colors";
 
 export default class PhotoShowView extends Component{
   constructor(props){
@@ -56,7 +57,7 @@ export default class PhotoShowView extends Component{
       return (
         <Gallery
           ref='galleryRef'
-          style={{flex: 1, backgroundColor: 'black',zIndex:2}}
+          style={{flex: 1, backgroundColor: Colors.seBgLayout,zIndex:2}}
           index={this.state.currIndex}
           images={images}
           thumbImageInfo={this.props.thumbImageInfo}

@@ -12,6 +12,7 @@ import Orientation from 'react-native-orientation';
 
 import { isPhoneX } from '../utils';
 import {IconOutline} from "@ant-design/icons-react-native";
+import Colors from "../../../../app/utils/const/Colors";
 
 var dH=isPhoneX()?20:0;
 
@@ -46,7 +47,7 @@ export default class Toolbar extends Component {
       navView = (
         <TouchFeedback style={{width:sideWidth,height:navHeight}} onPress={onIconClicked}>
           <View style={{marginHorizontal:marginLeft,flex:1,justifyContent:'center',}}>
-            <Image style={{tintColor:tintColor?tintColor:'#333',width,height:width}} source={navImage}  />
+            <Image style={{tintColor:Colors.seTextInverse,width,height:width}} source={navImage}  />
           </View>
         </TouchFeedback>
 
@@ -85,17 +86,17 @@ export default class Toolbar extends Component {
             item.icon = require('../images/share/screen_share.png');
           }
           imageOrText = (
-            <Image style={{tintColor, width, height: width}} source={item.icon}/>
+            <Image style={{tintColor: Colors.seTextInverse, width, height: width}} source={item.icon}/>
           );
         } else if (item.isFontIcon) {
-          imageOrText = <Icon type={item.type} color={enabled ? tintColor : 'rgba(0, 0, 0, .12)'} size={16}/>
+          imageOrText = <Icon type={item.type} color={enabled ? Colors.seTextInverse : Colors.seTextDisabled } size={16}/>
         }else if(item.isAntIcon){
-          imageOrText = <IconOutline name={item.type} size={20} color={GRAY}/>
+          imageOrText = <IconOutline name={item.type} size={20} color={Colors.seTextInverse}/>
         }
         else {
           width = null;
           imageOrText = (
-            <Text style={{color: enabled ? tintColor : '#33333380', fontSize: 15}}>{item.title}</Text>
+            <Text style={{color: enabled ? Colors.seTextInverse : Colors.seTextDisabled, fontSize: 15}}>{item.title}</Text>
           );
         }
         if (!enabled) {
@@ -133,9 +134,9 @@ export default class Toolbar extends Component {
     var titleStyle = [styles.titleText];
     // titleColor='#333';
     if(titleColor){
-      titleStyle.push({color:titleColor});
+      titleStyle.push({color:Colors.seTextInverse});
     }else{
-      titleStyle.push({color:'#333'});
+      titleStyle.push({color:Colors.seTextInverse});
     }
 
     if(color === 'transparent'){
@@ -154,7 +155,7 @@ export default class Toolbar extends Component {
       height=navHeight;
     }
     return (
-      <View style={[styles.navSty,landscapeStyle,{backgroundColor:color,borderColor:borderColor,
+      <View style={[styles.navSty,landscapeStyle,{backgroundColor:Colors.seBrandNomarl,borderColor:Colors.seBorderSplit,
         paddingTop:top,height:height}]}>
         <View style={{
             flexDirection:'row',
