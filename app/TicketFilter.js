@@ -17,7 +17,7 @@ import TouchFeedback from './components/TouchFeedback';
 import moment from 'moment';
 import { isPhoneX } from './utils'
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import { localStr } from "./utils/Localizations/localization";
+import {getLanguage, localStr} from "./utils/Localizations/localization";
 import { getTicketFilter, setTicketFilter } from './store'
 import Colors from "../../../app/utils/const/Colors";
 
@@ -81,7 +81,7 @@ export default class TicketFilter extends Component {
   _renderPickerView() {
     return (
       <DateTimePicker
-        is24Hour={true}
+        is24Hour={true} locale={getLanguage()}
         titleIOS={localStr('lang_ticket_filter_select_date')}
         headerTextIOS={localStr('lang_ticket_filter_select_date')}
         titleStyle={{ fontSize: 17, color: '#333' }}

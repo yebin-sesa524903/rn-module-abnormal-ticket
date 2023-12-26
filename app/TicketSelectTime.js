@@ -15,7 +15,7 @@ import Icon from './components/Icon';
 import moment from 'moment';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import backHelper from './utils/backHelper';
-import {localStr} from "./utils/Localizations/localization";
+import {getLanguage, localStr} from "./utils/Localizations/localization";
 import Colors from "../../../app/utils/const/Colors";
 
 export default class TicketSelectTime extends Component{
@@ -64,7 +64,7 @@ export default class TicketSelectTime extends Component{
   _renderPickerView() {
     return (
       <DateTimePicker
-        is24Hour={true}
+        is24Hour={true} locale={getLanguage()}
         titleIOS={localStr('lang_ticket_filter_select_date')}
         headerTextIOS={localStr('lang_ticket_filter_select_date')}
         titleStyle={{fontSize: 17, color: '#333'}}
