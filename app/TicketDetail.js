@@ -8,7 +8,7 @@ import {
   ScrollView,
   Platform,
   DeviceEventEmitter,
-  Text, Dimensions, Alert, TouchableOpacity, TouchableWithoutFeedback, Modal
+  Text, Dimensions, TouchableOpacity, TouchableWithoutFeedback, Modal
 } from 'react-native';
 
 import Toolbar from './components/Toolbar';
@@ -63,6 +63,7 @@ import { ImageViewer } from "./ImageViewer";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Colors from "../../../app/utils/const/Colors";
+import SndAlert from "../../../app/utils/components/SndAlert";
 // import Share from "react-native-share";
 
 class Avatar extends Component {
@@ -285,9 +286,9 @@ export default class TicketDetail extends Component {
       }, {
         title: localStr('lang_ticket_detail_del_log'),
         click: () => {
-          Alert.alert(
-            '',
+          SndAlert.alert(
             localStr('lang_ticket_log_del_confirm'),
+            '',
             [
               { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
               {
@@ -302,7 +303,7 @@ export default class TicketDetail extends Component {
                       rowData.ticketLogs = [].concat(rowData.ticketLogs);
                       this.setState({ rowData })
                     } else {
-                      Alert.alert(localStr('lang_alert_title'), res.msg);
+                      SndAlert.alert(localStr('lang_alert_title'), res.msg);
                     }
                   })
                 }
@@ -368,9 +369,9 @@ export default class TicketDetail extends Component {
   }
 
   _closeTicket() {
-    Alert.alert(
-      '',
+    SndAlert.alert(
       localStr('lang_ticket_close_confirm'),
+      '',
       [
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {
@@ -382,7 +383,7 @@ export default class TicketDetail extends Component {
                 this.showToast(localStr('lang_ticket_close_toast'))
                 this._loadTicketDetail();
               } else {
-                Alert.alert(localStr('lang_alert_title'), ret.msg);
+                SndAlert.alert(localStr('lang_alert_title'), ret.msg);
               }
             })
           }
@@ -427,7 +428,7 @@ export default class TicketDetail extends Component {
         this.showToast(localStr('lang_ticket_execute_toast'))
         this._loadTicketDetail();
       } else {
-        Alert.alert(localStr('lang_alert_title'), ret.msg);
+        SndAlert.alert(localStr('lang_alert_title'), ret.msg);
       }
     })
   }
@@ -449,9 +450,9 @@ export default class TicketDetail extends Component {
   }
 
   _doIgnore() {
-    Alert.alert(
-      '',
+    SndAlert.alert(
       localStr('lang_ticket_detail_ignore_confirm'),
+      '',
       [
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {
@@ -463,7 +464,7 @@ export default class TicketDetail extends Component {
                 this.props.ticketChanged && this.props.ticketChanged();
                 this._loadTicketDetail();
               } else {
-                Alert.alert(localStr('lang_alert_title'), ret.msg);
+                SndAlert.alert(localStr('lang_alert_title'), ret.msg);
               }
             })
           }
@@ -474,7 +475,7 @@ export default class TicketDetail extends Component {
   _submitTicket() {
     let ticketLogs = this.state.rowData.ticketLogs;
     if (!ticketLogs || ticketLogs.length === 0) {
-      Alert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
       return;
     }
     apiSubmitTicket({ id: this.state.rowData.id }).then(ret => {
@@ -487,7 +488,7 @@ export default class TicketDetail extends Component {
         // rowData.ticketState = STATE_PENDING_AUDIT;
         // this.setState({rowData})
       } else {
-        Alert.alert(localStr('lang_alert_title'), ret.msg);
+        SndAlert.alert(localStr('lang_alert_title'), ret.msg);
       }
     })
   }
@@ -634,7 +635,7 @@ export default class TicketDetail extends Component {
                           this._loadTicketDetail();
                         } else {
                           //出错信息
-                          Alert.alert(localStr('lang_alert_title'), ret.msg)
+                          SndAlert.alert(localStr('lang_alert_title'), ret.msg)
                         }
                       })
                     },
@@ -666,7 +667,7 @@ export default class TicketDetail extends Component {
                           this.props.ticketChanged && this.props.ticketChanged();
                           this._loadTicketDetail();
                         } else {
-                          Alert.alert(localStr('lang_alert_title'), res.msg)
+                          SndAlert.alert(localStr('lang_alert_title'), res.msg)
                         }
                       })
                     },
