@@ -450,6 +450,7 @@ export default class ImagePicker extends Component {
       <View style={{flex:1,backgroundColor:Colors.seBgLayout}}>
         {this._getToolbar()}
         <CameraRollPicker
+          loadingText={{loading:localStr('lang_loading_waiting')}}
           groupName={Platform.OS==='ios'?'All Photos':undefined}
           selected={this.state.chosenImages} backgroundColor={Colors.seBgLayout}
           callback={(selected, image)=>{
