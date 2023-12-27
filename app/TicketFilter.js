@@ -226,12 +226,7 @@ export default class TicketFilter extends Component {
   }
 
   _doReset = () => {
-    let filter = {
-      StartTime: new Date(),
-      EndTime: moment().add(1, 'months').toDate()
-    }
-
-    this.setState({ filter })
+    this.props.doReset()
   }
 
   _getBottom() {

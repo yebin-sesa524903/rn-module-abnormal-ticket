@@ -414,7 +414,7 @@ export default class TicketList extends Component {
   }
 
   _doReset = () => {
-
+    this._clearFilter();
   }
 
   _doFilter = () => {
@@ -423,16 +423,13 @@ export default class TicketList extends Component {
       openFilter: false,
       showFilterResult: true
     })
-    if (!resFilter.selectStatus && !resFilter.selectTypes) {
-      this._clearFilter();
-    } else {
-      this.queryTicketList(resFilter)
-    }
+    this.queryTicketList(getTicketFilter().filter)
   }
 
   _clearFilter = () => {
     this.setState({
-      showFilterResult: false
+      showFilterResult: false,
+      openFilter:false,
     })
     setTicketFilter({})
     this.loadTicketList(this.state.selectedDate, 1)

@@ -177,6 +177,18 @@ export default class TicketRow extends Component {
     )
   }
 
+  getTicketTypeLable(ticketType) {
+    let localTypes = localStr('lang_ticket_filter_types')
+    switch (ticketType) {
+      case 2:
+        return localTypes[2]
+      case 9:
+        return localTypes[0]
+      case 10:
+        return localTypes[1]
+    }
+    return ''
+  }
 
   render() {
     var { rowData } = this.props;
@@ -229,10 +241,10 @@ export default class TicketRow extends Component {
             paddingTop: 12, borderTopColor: Colors.seBorderBase, borderTopWidth: 1
           }}>
             <Icon type="icon_asset_location" color={Colors.seTextPrimary} size={12} />
-            <Text style={{ marginLeft: 8, color: Colors.seTextPrimary, fontSize: 13, flex: 1 }}
+            <Text style={{ marginHorizontal: 8, color: Colors.seTextPrimary, fontSize: 13, flex: 1 }}
               numberOfLines={1} lineBreakModel='charWrapping'>{locationPath}</Text>
             <Icon type={'icon_ticket_tag'} color={Colors.seTextPrimary} size={12} />
-            <Text style={{ fontSize: 12, marginLeft: 6, color: Colors.seTextPrimary }}>{this.props.rowData.ticketTypeLabel}</Text>
+            <Text style={{ fontSize: 12, marginLeft: 6, color: Colors.seTextPrimary }}>{this.getTicketTypeLable(this.props.rowData.ticketType)}</Text>
           </View>
         </View>
       </TouchFeedback>
