@@ -107,9 +107,22 @@ export default class TicketDetail extends Component {
     this.state = { toolbarOpacity: 0, showToolbar: false, forceStoped: false, };
   }
 
+  getTicketTypeLable(ticketType) {
+    let localTypes = localStr('lang_ticket_filter_types')
+    switch (ticketType) {
+      case 2:
+        return localTypes[2]
+      case 9:
+        return localTypes[0]
+      case 10:
+        return localTypes[1]
+    }
+    return ''
+  }
+
   _getAssetView() {
     let rowData = this.state.rowData;
-    var type = rowData.ticketTypeLabel;//localStr('lang_ticket_diagnose')//rowData.get('TicketType');
+    var type = this.getTicketTypeLable(rowData.ticketType);//localStr('lang_ticket_diagnose')//rowData.get('TicketType');
 
     var startTime = moment(rowData.startTime).format('MM-DD'),
       endTime = moment(rowData.endTime).format('MM-DD');
@@ -503,7 +516,7 @@ export default class TicketDetail extends Component {
         }}>
         <View style={{ minWidth: 50, minHeight: 50, justifyContent: 'center', alignItems: 'center' }}>
           <Icon type='icon_ticket_log' size={16} color={Colors.seTextTitle} />
-          <Text style={{ fontSize: 12, color: Colors.seTextTitle, marginTop: 3 }}>{localStr('lang_ticket_detail_write_log')}</Text>
+          <Text style={{ fontSize: 10, color: Colors.seTextTitle, marginTop: 3 }}>{localStr('lang_ticket_detail_write_log')}</Text>
         </View>
       </TouchFeedback>
     );
