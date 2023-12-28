@@ -35,7 +35,7 @@ f5222d
 F0fff0
 3dcd58
  */
-const STATUS_COLORS = [
+const STATUS_COLORS = ()=>[
   {
     border: Colors.seBorderBase,
     bg: Colors.seFill3,
@@ -152,19 +152,19 @@ export default class TicketRow extends Component {
     }[this.props.rowData.ticketState];
     switch (this.props.rowData.ticketState) {
       case 10:
-        c = STATUS_COLORS[0]
+        c = STATUS_COLORS()[0]
         break;
       case 20:
-        c = STATUS_COLORS[1]
+        c = STATUS_COLORS()[1]
         break;
       case 30:
-        c = STATUS_COLORS[2]
+        c = STATUS_COLORS()[2]
         break;
       case 40:
-        c = STATUS_COLORS[3]
+        c = STATUS_COLORS()[3]
         break;
       case 50:
-        c = STATUS_COLORS[4]
+        c = STATUS_COLORS()[4]
         break;
     }
     return (
@@ -221,7 +221,7 @@ export default class TicketRow extends Component {
             borderTopLeftRadius: 2, borderTopRightRadius: 2
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 }}>
-              <Text style={{ color: Colors.seTextTitle, fontSize: 16, fontWeight: '500', flexShrink: 1, marginRight: 3 }} numberOfLines={1}>{title}</Text>
+              <Text style={{ color: Colors.seTextTitle, fontSize: 16, fontWeight: 'bold', flexShrink: 1, marginRight: 3 }} numberOfLines={1}>{title}</Text>
             </View>
             {/* 这里现在显示状态 */}
             {this._renderTicketStatus()}

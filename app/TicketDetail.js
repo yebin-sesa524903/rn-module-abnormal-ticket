@@ -140,10 +140,10 @@ export default class TicketDetail extends Component {
       executor = (
         <View style={{ flex: 1, flexDirection: 'row', marginLeft: 0, marginTop: 8 }}>
           <View style={{ marginTop: 3, }}>
-            <Icon type={'icon_person'} size={13} color={Colors.seTextTitle} />
+            <Icon type={'icon_person'} size={13} color={Colors.seTextPrimary} />
           </View>
           <View style={{ flex: 1, marginLeft: 4, }}>
-            <Text numberOfLines={10} style={[{ fontSize: 13, color: Colors.seTextTitle, lineHeight: 20, }]}>
+            <Text numberOfLines={10} style={[{ fontSize: 13, color: Colors.seTextPrimary, lineHeight: 20, }]}>
               {names.join('、')}
             </Text>
           </View>
@@ -165,21 +165,21 @@ export default class TicketDetail extends Component {
           </View>
         </View>
         <View style={styles.moreContent}>
-          <Text style={{ fontSize: 15, color: Colors.seTextTitle }}>{localStr('lang_ticket_detail_assets') + ':' + assetNames}</Text>
+          <Text style={{ fontSize: 15, color: Colors.seTextPrimary }}>{localStr('lang_ticket_detail_assets') + ':' + assetNames}</Text>
         </View>
 
         <View style={{ paddingHorizontal: 16, backgroundColor: '' }}>
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <View style={{ minWidth: 115, flexDirection: 'row' }}>
-              <Icon type={'icon_date'} size={13} color={Colors.seTextTitle} />
+              <Icon type={'icon_date'} size={13} color={Colors.seTextPrimary} />
               <View style={{ flex: 1, marginLeft: 4, }}>
-                <Text numberOfLines={1} style={[{ fontSize: 13, color: Colors.seTextTitle }]}>{`${startTime} ${localStr('lang_ticket_to')} ${endTime}`}</Text>
+                <Text numberOfLines={1} style={[{ fontSize: 13, color: Colors.seTextPrimary }]}>{`${startTime} ${localStr('lang_ticket_to')} ${endTime}`}</Text>
               </View>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', marginLeft: 21, }}>
-              <Icon style={{ marginTop: 2 }} type={'arrow_location'} size={11} color={Colors.seTextTitle} />
+              <Icon style={{ marginTop: 2 }} type={'arrow_location'} size={11} color={Colors.seTextPrimary} />
               <View style={{ flex: 1, marginLeft: 4, }}>
-                <Text numberOfLines={1} style={[{ color: Colors.seTextTitle, fontSize: 13 }]}>{locationNames}</Text>
+                <Text numberOfLines={1} style={[{ color: Colors.seTextPrimary, fontSize: 13 }]}>{locationNames}</Text>
               </View>
             </View>
           </View>
