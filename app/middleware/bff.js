@@ -129,6 +129,7 @@ let sysId = 0;
 export let prod = null;
 export let userId = 90;
 export let userName = '1'
+export let customerId = 1;
 let token = '';
 let tokenKey = '';
 let hierarchyId = 0;
@@ -228,6 +229,9 @@ export async function apiQueryTicketList(filter) {
   })
 }
 
+export function updateAbnormalCustomerId(id){
+  customerId = id;
+}
 
 export async function configCookie(data) {
   sysId = data.sysId;
@@ -239,6 +243,7 @@ export async function configCookie(data) {
   // tokenKey = data.tokenKey;
   hierarchyId = data.hierarchyId;
   prod = data.prod;
+  customerId = data.customerId;
   privilegeHelper.setPrivilegeCodes(data.privileges);
   let body = {
     ...data,
@@ -387,7 +392,7 @@ export async function apiCloseTicket(data) {
 
 export async function apiHierarchyList(data) {
   return await defaultFetch({
-    url: '/bff/eh/rest/common/hierarchyList',
+    url: 'common/hierarchyList',
     verb: 'post',
     body: data
   })
