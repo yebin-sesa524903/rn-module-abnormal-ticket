@@ -27,14 +27,14 @@ import TicketDetail from "./TicketDetail";
 import {
   apiQueryTicketList,
   apiTicketCount,
-  apiTicketList,
+  apiTicketList, customerId,
 } from "./middleware/bff";
 import moment from "moment";
 
 import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
-import { apiHierarchyList } from "rn-module-inventory-ticket/app/middleware/bff";
+import { apiHierarchyList } from "./middleware/bff";
 import Colors, {isDarkMode} from "../../../app/utils/const/Colors";
 const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 0;
 const CODE_OK = '0';
@@ -172,7 +172,7 @@ export default class TicketList extends Component {
 
   _loadApiHierarchyList() {
     apiHierarchyList({
-      customerId: 1,
+      customerId: customerId,
       treeType: 'fmhc',
       type: '1'
     }).then((res) => {
