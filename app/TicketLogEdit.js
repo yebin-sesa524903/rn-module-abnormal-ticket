@@ -60,7 +60,7 @@ export default class LogEditView extends Component {
     return this.props.checkAuth();
   }
   _openImagePicker() {
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'imagePicker',
       component: ImagePicker,
       passProps: {
@@ -128,7 +128,7 @@ export default class LogEditView extends Component {
 
   _goToDetail(index) {
     //查看照片详情
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'ticket_log_edit',
       component: PhotoShowView,
       passProps: {

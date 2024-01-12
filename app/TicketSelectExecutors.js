@@ -26,7 +26,7 @@ export default class TicketSelectExecutors extends Component{
   }
 
   componentDidMount() {
-    backHelper.init(this.props.navigator,this.props.route.id);
+    backHelper.init(this.props.navigation,this.props.route.id);
     apiGetTicketExecutors(this.props.assets).then(ret => {
       if(ret.code === CODE_OK) {
         if(ret.data && ret.data.length === 0) {
@@ -141,7 +141,7 @@ export default class TicketSelectExecutors extends Component{
           onActionSelected={[()=>{
             let users = this.state.data.filter(item => item.isSelect);
             this.props.onChangeExecutors(users);
-            this.props.navigator.pop();
+            this.props.navigation.pop();
           }]}
           onIconClicked={this.props.onBack} />
         {
