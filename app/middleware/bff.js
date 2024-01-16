@@ -4,6 +4,7 @@ import RNFetchBlobFile from "react-native-fetch-blob/class/RNFetchBlobFile";
 import privilegeHelper from "../utils/privilegeHelper";
 import { localStr } from "../utils/Localizations/localization";
 import { DeviceEventEmitter } from "react-native";
+import {getLanguage} from "../../../../app/utils/Localizations/localization";
 let _BASEURL = "";
 
 export function getBaseUri() {
@@ -14,13 +15,22 @@ export function getCookie() {
   return setCookie;
 }
 
+function configLan(){
+  let lan = getLanguage()
+  if(lan === 'en') {
+    return `en-US`
+  }
+  return `zh-CN`
+}
+
 let defaultFetch = async function (options) {
 
   let baseUrl = getBaseUri();
   let headers = {
     "Content-Type": "application/json",
     'Accept': 'application/json',
-    'Cache-Control': 'no-store'
+    'Cache-Control': 'no-store',
+    'Accept-Language':configLan(),
   };
   //headers[tokenKey] = token;
   //headers['Cookie'] = token;
@@ -39,7 +49,8 @@ let defaultFetch = async function (options) {
     } else {
       body = {
         ...options.body,
-        sysId, userId
+        sysId, userId,
+        customerId
       }
     }
 
@@ -119,6 +130,7 @@ let sysId = 0;
 export let prod = null;
 export let userId = 90;
 export let userName = '1'
+export let customerId = 1;
 let token = '';
 let tokenKey = '';
 let hierarchyId = 0;
@@ -218,6 +230,9 @@ export async function apiQueryTicketList(filter) {
   })
 }
 
+export function updateAbnormalCustomerId(id){
+  customerId = id;
+}
 
 export async function configCookie(data) {
   sysId = data.sysId;
@@ -229,6 +244,7 @@ export async function configCookie(data) {
   // tokenKey = data.tokenKey;
   hierarchyId = data.hierarchyId;
   prod = data.prod;
+  customerId = data.customerId;
   privilegeHelper.setPrivilegeCodes(data.privileges);
   let body = {
     ...data,
@@ -377,7 +393,7 @@ export async function apiCloseTicket(data) {
 
 export async function apiHierarchyList(data) {
   return await defaultFetch({
-    url: '/bff/eh/rest/common/hierarchyList',
+    url: 'common/hierarchyList',
     verb: 'post',
     body: data
   })

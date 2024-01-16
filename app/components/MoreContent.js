@@ -99,7 +99,7 @@ export default class MoreContent extends Component {
       <View style={this.props.style}>
         <View style={{flex:1,marginBottom,position:'relative'}}>
           <Text
-            style={[{fontSize:15,color:Colors.seTextTitle,lineHeight:24,marginRight},this.props.titleStyle]}
+            style={[{fontSize:15,color:Colors.seTextPrimary,lineHeight:24,marginRight},this.props.titleStyle]}
             numberOfLines={this.state.lines}
             onLayout={(e)=>{this._checkHeight(e)}}>
             <Text>

@@ -8,7 +8,7 @@ import {
   ScrollView,
   Platform,
   DeviceEventEmitter,
-  Text, Dimensions, Alert, TouchableOpacity, TouchableWithoutFeedback, Modal
+  Text, Dimensions, TouchableOpacity, TouchableWithoutFeedback, Modal
 } from 'react-native';
 
 import Toolbar from './components/Toolbar';
@@ -63,6 +63,7 @@ import { ImageViewer } from "./ImageViewer";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Colors from "../../../app/utils/const/Colors";
+import SndAlert from "../../../app/utils/components/SndAlert";
 // import Share from "react-native-share";
 
 class Avatar extends Component {
@@ -106,9 +107,22 @@ export default class TicketDetail extends Component {
     this.state = { toolbarOpacity: 0, showToolbar: false, forceStoped: false, };
   }
 
+  getTicketTypeLable(ticketType) {
+    let localTypes = localStr('lang_ticket_filter_types')
+    switch (ticketType) {
+      case 2:
+        return localTypes[2]
+      case 9:
+        return localTypes[0]
+      case 10:
+        return localTypes[1]
+    }
+    return ''
+  }
+
   _getAssetView() {
     let rowData = this.state.rowData;
-    var type = rowData.ticketTypeLabel;//localStr('lang_ticket_diagnose')//rowData.get('TicketType');
+    var type = this.getTicketTypeLable(rowData.ticketType);//localStr('lang_ticket_diagnose')//rowData.get('TicketType');
 
     var startTime = moment(rowData.startTime).format('MM-DD'),
       endTime = moment(rowData.endTime).format('MM-DD');
@@ -126,10 +140,10 @@ export default class TicketDetail extends Component {
       executor = (
         <View style={{ flex: 1, flexDirection: 'row', marginLeft: 0, marginTop: 8 }}>
           <View style={{ marginTop: 3, }}>
-            <Icon type={'icon_person'} size={13} color={Colors.seTextTitle} />
+            <Icon type={'icon_person'} size={13} color={Colors.seTextPrimary} />
           </View>
           <View style={{ flex: 1, marginLeft: 4, }}>
-            <Text numberOfLines={10} style={[{ fontSize: 13, color: Colors.seTextTitle, lineHeight: 20, }]}>
+            <Text numberOfLines={10} style={[{ fontSize: 13, color: Colors.seTextPrimary, lineHeight: 20, }]}>
               {names.join('、')}
             </Text>
           </View>
@@ -151,21 +165,21 @@ export default class TicketDetail extends Component {
           </View>
         </View>
         <View style={styles.moreContent}>
-          <Text style={{ fontSize: 15, color: Colors.seTextTitle }}>{localStr('lang_ticket_detail_assets') + ':' + assetNames}</Text>
+          <Text style={{ fontSize: 15, color: Colors.seTextPrimary }}>{localStr('lang_ticket_detail_assets') + ':' + assetNames}</Text>
         </View>
 
         <View style={{ paddingHorizontal: 16, backgroundColor: '' }}>
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <View style={{ minWidth: 115, flexDirection: 'row' }}>
-              <Icon type={'icon_date'} size={13} color={Colors.seTextTitle} />
+              <Icon type={'icon_date'} size={13} color={Colors.seTextPrimary} />
               <View style={{ flex: 1, marginLeft: 4, }}>
-                <Text numberOfLines={1} style={[{ fontSize: 13, color: Colors.seTextTitle }]}>{`${startTime} ${localStr('lang_ticket_to')} ${endTime}`}</Text>
+                <Text numberOfLines={1} style={[{ fontSize: 13, color: Colors.seTextPrimary }]}>{`${startTime} ${localStr('lang_ticket_to')} ${endTime}`}</Text>
               </View>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', marginLeft: 21, }}>
-              <Icon style={{ marginTop: 2 }} type={'arrow_location'} size={11} color={Colors.seTextTitle} />
+              <Icon style={{ marginTop: 2 }} type={'arrow_location'} size={11} color={Colors.seTextPrimary} />
               <View style={{ flex: 1, marginLeft: 4, }}>
-                <Text numberOfLines={1} style={[{ color: Colors.seTextTitle, fontSize: 13 }]}>{locationNames}</Text>
+                <Text numberOfLines={1} style={[{ color: Colors.seTextPrimary, fontSize: 13 }]}>{locationNames}</Text>
               </View>
             </View>
           </View>
@@ -267,7 +281,7 @@ export default class TicketDetail extends Component {
       arrActions: [{
         title: localStr('lang_ticket_detail_edit_log'),
         click: () => {
-          this.props.navigator.push({
+          this.props.navigation.push('PageWarpper',{
             id: 'ticket_log_edit',
             component: TicketLogEdit,
             passProps: {
@@ -285,9 +299,9 @@ export default class TicketDetail extends Component {
       }, {
         title: localStr('lang_ticket_detail_del_log'),
         click: () => {
-          Alert.alert(
-            '',
+          SndAlert.alert(
             localStr('lang_ticket_log_del_confirm'),
+            '',
             [
               { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
               {
@@ -302,7 +316,7 @@ export default class TicketDetail extends Component {
                       rowData.ticketLogs = [].concat(rowData.ticketLogs);
                       this.setState({ rowData })
                     } else {
-                      Alert.alert(localStr('lang_alert_title'), res.msg);
+                      SndAlert.alert(localStr('lang_alert_title'), res.msg);
                     }
                   })
                 }
@@ -320,7 +334,7 @@ export default class TicketDetail extends Component {
       let imgs = log.pictures.map((img, imgIndex) => {
         return (
           <TouchableWithoutFeedback key={imgIndex} onPress={() => {
-            this.props.navigator.push({
+            this.props.navigation.push('PageWarpper',{
               id: 'ticket_log_edit',
               component: PhotoShowView,
               passProps: {
@@ -368,9 +382,9 @@ export default class TicketDetail extends Component {
   }
 
   _closeTicket() {
-    Alert.alert(
-      '',
+    SndAlert.alert(
       localStr('lang_ticket_close_confirm'),
+      '',
       [
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {
@@ -382,7 +396,7 @@ export default class TicketDetail extends Component {
                 this.showToast(localStr('lang_ticket_close_toast'))
                 this._loadTicketDetail();
               } else {
-                Alert.alert(localStr('lang_alert_title'), ret.msg);
+                SndAlert.alert(localStr('lang_alert_title'), ret.msg);
               }
             })
           }
@@ -427,13 +441,13 @@ export default class TicketDetail extends Component {
         this.showToast(localStr('lang_ticket_execute_toast'))
         this._loadTicketDetail();
       } else {
-        Alert.alert(localStr('lang_alert_title'), ret.msg);
+        SndAlert.alert(localStr('lang_alert_title'), ret.msg);
       }
     })
   }
 
   _writeLog() {
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'ticket_log_edit',
       component: TicketLogEdit,
       passProps: {
@@ -449,9 +463,9 @@ export default class TicketDetail extends Component {
   }
 
   _doIgnore() {
-    Alert.alert(
-      '',
+    SndAlert.alert(
       localStr('lang_ticket_detail_ignore_confirm'),
+      '',
       [
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {
@@ -463,7 +477,7 @@ export default class TicketDetail extends Component {
                 this.props.ticketChanged && this.props.ticketChanged();
                 this._loadTicketDetail();
               } else {
-                Alert.alert(localStr('lang_alert_title'), ret.msg);
+                SndAlert.alert(localStr('lang_alert_title'), ret.msg);
               }
             })
           }
@@ -474,7 +488,7 @@ export default class TicketDetail extends Component {
   _submitTicket() {
     let ticketLogs = this.state.rowData.ticketLogs;
     if (!ticketLogs || ticketLogs.length === 0) {
-      Alert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
       return;
     }
     apiSubmitTicket({ id: this.state.rowData.id }).then(ret => {
@@ -487,7 +501,7 @@ export default class TicketDetail extends Component {
         // rowData.ticketState = STATE_PENDING_AUDIT;
         // this.setState({rowData})
       } else {
-        Alert.alert(localStr('lang_alert_title'), ret.msg);
+        SndAlert.alert(localStr('lang_alert_title'), ret.msg);
       }
     })
   }
@@ -502,7 +516,7 @@ export default class TicketDetail extends Component {
         }}>
         <View style={{ minWidth: 50, minHeight: 50, justifyContent: 'center', alignItems: 'center' }}>
           <Icon type='icon_ticket_log' size={16} color={Colors.seTextTitle} />
-          <Text style={{ fontSize: 12, color: Colors.seTextTitle, marginTop: 3 }}>{localStr('lang_ticket_detail_write_log')}</Text>
+          <Text style={{ fontSize: 10, color: Colors.seTextTitle, marginTop: 3 }}>{localStr('lang_ticket_detail_write_log')}</Text>
         </View>
       </TouchFeedback>
     );
@@ -607,7 +621,7 @@ export default class TicketDetail extends Component {
             arrActions: [{
               title: localStr('lang_ticket_detail_change_executors'),
               click: () => {
-                this.props.navigator.push({
+                this.props.navigation.push('PageWarpper',{
                   id: 'ticket_select_executors',
                   component: TicketSelectExecutors,
                   passProps: {
@@ -634,18 +648,18 @@ export default class TicketDetail extends Component {
                           this._loadTicketDetail();
                         } else {
                           //出错信息
-                          Alert.alert(localStr('lang_alert_title'), ret.msg)
+                          SndAlert.alert(localStr('lang_alert_title'), ret.msg)
                         }
                       })
                     },
-                    onBack: () => this.props.navigator.pop()
+                    onBack: () => this.props.navigation.pop()
                   }
                 })
               }
             }, {
               title: localStr('lang_ticket_detail_change_time'),
               click: () => {
-                this.props.navigator.push({
+                this.props.navigation.push('PageWarpper',{
                   id: 'ticket_select_time',
                   component: TicketSelectTime,
                   passProps: {
@@ -666,7 +680,7 @@ export default class TicketDetail extends Component {
                           this.props.ticketChanged && this.props.ticketChanged();
                           this._loadTicketDetail();
                         } else {
-                          Alert.alert(localStr('lang_alert_title'), res.msg)
+                          SndAlert.alert(localStr('lang_alert_title'), res.msg)
                         }
                       })
                     },
@@ -684,7 +698,7 @@ export default class TicketDetail extends Component {
         title={localStr('lang_ticket_detail')}
         navIcon="back"
         onIconClicked={() => {
-          this.props.navigator.pop()
+          this.props.navigation.pop()
         }}
         actions={this._actions}
         onActionSelected={actionSelected}

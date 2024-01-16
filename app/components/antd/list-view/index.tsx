@@ -96,7 +96,7 @@ class ListView<T> extends React.PureComponent<ListViewProps<T>, ListViewState> {
         keyExtractor={(_: any, index: number) => `item-${index}`} // this is required when you are using FlatList
         refreshableMode={Platform.OS === 'ios' ? 'basic' : 'basic'}
         numColumns={1}
-        waitingSpinnerText={locale.loading}
+        waitingSpinnerText={props.loading || locale.loading}
         allLoadedText={''}
         refreshableTitlePull={locale.refreshableTitlePull}
         refreshableTitleRelease={locale.refreshableTitleRelease}

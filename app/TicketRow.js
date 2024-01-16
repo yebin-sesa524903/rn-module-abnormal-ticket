@@ -35,7 +35,7 @@ f5222d
 F0fff0
 3dcd58
  */
-const STATUS_COLORS = [
+const STATUS_COLORS = ()=>[
   {
     border: Colors.seBorderBase,
     bg: Colors.seFill3,
@@ -152,19 +152,19 @@ export default class TicketRow extends Component {
     }[this.props.rowData.ticketState];
     switch (this.props.rowData.ticketState) {
       case 10:
-        c = STATUS_COLORS[0]
+        c = STATUS_COLORS()[0]
         break;
       case 20:
-        c = STATUS_COLORS[1]
+        c = STATUS_COLORS()[1]
         break;
       case 30:
-        c = STATUS_COLORS[2]
+        c = STATUS_COLORS()[2]
         break;
       case 40:
-        c = STATUS_COLORS[3]
+        c = STATUS_COLORS()[3]
         break;
       case 50:
-        c = STATUS_COLORS[4]
+        c = STATUS_COLORS()[4]
         break;
     }
     return (
@@ -177,6 +177,18 @@ export default class TicketRow extends Component {
     )
   }
 
+  getTicketTypeLable(ticketType) {
+    let localTypes = localStr('lang_ticket_filter_types')
+    switch (ticketType) {
+      case 2:
+        return localTypes[2]
+      case 9:
+        return localTypes[0]
+      case 10:
+        return localTypes[1]
+    }
+    return ''
+  }
 
   render() {
     var { rowData } = this.props;
@@ -209,7 +221,7 @@ export default class TicketRow extends Component {
             borderTopLeftRadius: 2, borderTopRightRadius: 2
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 }}>
-              <Text style={{ color: Colors.seTextTitle, fontSize: 16, fontWeight: '500', flexShrink: 1, marginRight: 3 }} numberOfLines={1}>{title}</Text>
+              <Text style={{ color: Colors.seTextTitle, fontSize: 16, fontWeight: 'bold', flexShrink: 1, marginRight: 3 }} numberOfLines={1}>{title}</Text>
             </View>
             {/* 这里现在显示状态 */}
             {this._renderTicketStatus()}
@@ -229,10 +241,10 @@ export default class TicketRow extends Component {
             paddingTop: 12, borderTopColor: Colors.seBorderBase, borderTopWidth: 1
           }}>
             <Icon type="icon_asset_location" color={Colors.seTextPrimary} size={12} />
-            <Text style={{ marginLeft: 8, color: Colors.seTextPrimary, fontSize: 13, flex: 1 }}
+            <Text style={{ marginHorizontal: 8, color: Colors.seTextPrimary, fontSize: 13, flex: 1 }}
               numberOfLines={1} lineBreakModel='charWrapping'>{locationPath}</Text>
             <Icon type={'icon_ticket_tag'} color={Colors.seTextPrimary} size={12} />
-            <Text style={{ fontSize: 12, marginLeft: 6, color: Colors.seTextPrimary }}>{this.props.rowData.ticketTypeLabel}</Text>
+            <Text style={{ fontSize: 12, marginLeft: 6, color: Colors.seTextPrimary }}>{this.getTicketTypeLable(this.props.rowData.ticketType)}</Text>
           </View>
         </View>
       </TouchFeedback>

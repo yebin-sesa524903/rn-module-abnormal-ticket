@@ -17,9 +17,10 @@ import TouchFeedback from './components/TouchFeedback';
 import moment from 'moment';
 import { isPhoneX } from './utils'
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import { localStr } from "./utils/Localizations/localization";
+import {getLanguage, localStr} from "./utils/Localizations/localization";
 import { getTicketFilter, setTicketFilter } from './store'
 import Colors from "../../../app/utils/const/Colors";
+import SndAlert from "../../../app/utils/components/SndAlert";
 
 let statusBarHeight = 28;
 if (Platform.OS === 'ios') {
@@ -81,7 +82,7 @@ export default class TicketFilter extends Component {
   _renderPickerView() {
     return (
       <DateTimePicker
-        is24Hour={true}
+        is24Hour={true} locale={getLanguage()}
         titleIOS={localStr('lang_ticket_filter_select_date')}
         headerTextIOS={localStr('lang_ticket_filter_select_date')}
         titleStyle={{ fontSize: 17, color: '#333' }}
@@ -216,7 +217,7 @@ export default class TicketFilter extends Component {
     let start = moment(moment(this.state.filter.StartTime).format('YYYY-MM-DD'))
     let end = moment(moment(this.state.filter.EndTime).format('YYYY-MM-DD'))
     if (start.isAfter(end)) {
-      Alert.alert(localStr('lang_alert_title'), localStr('lang_ticket_select_time_invalid'))
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_ticket_select_time_invalid'))
       return;
     }
     console.log('filter', this.state.filter)
@@ -225,12 +226,7 @@ export default class TicketFilter extends Component {
   }
 
   _doReset = () => {
-    let filter = {
-      StartTime: new Date(),
-      EndTime: moment().add(1, 'months').toDate()
-    }
-
-    this.setState({ filter })
+    this.props.doReset()
   }
 
   _getBottom() {

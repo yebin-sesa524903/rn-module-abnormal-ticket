@@ -29,6 +29,7 @@ import { localStr } from "./utils/Localizations/localization";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import Loading from './components/Loading';
 import Colors from "../../../app/utils/const/Colors";
+import SndAlert from "../../../app/utils/components/SndAlert";
 
 const CODE_OK = '0'
 
@@ -59,7 +60,7 @@ export default class LogEditView extends Component {
     return this.props.checkAuth();
   }
   _openImagePicker() {
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'imagePicker',
       component: ImagePicker,
       passProps: {
@@ -127,7 +128,7 @@ export default class LogEditView extends Component {
 
   _goToDetail(index) {
     //查看照片详情
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'ticket_log_edit',
       component: PhotoShowView,
       passProps: {
@@ -138,9 +139,9 @@ export default class LogEditView extends Component {
     })
   }
   _deleteImage(item, index) {
-    Alert.alert(
-      '',
+    SndAlert.alert(
       localStr('lang_ticket_log_del_img_confirm'),
+      '',
       [
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {

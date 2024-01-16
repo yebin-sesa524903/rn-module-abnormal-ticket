@@ -16,7 +16,7 @@ import {apiGetExecutorData, apiGetTicketExecutors} from "./middleware/bff";
 import TouchFeedback from "./components/TouchFeedback";
 import Icon from "./components/Icon";
 import {GRAY, GREEN} from "./styles/color";
-import Colors from "../../../app/utils/const/Colors";
+import Colors, {isDarkMode} from "../../../app/utils/const/Colors";
 const CODE_OK = '0';
 
 export default class TicketSelectExecutors extends Component{
@@ -26,7 +26,7 @@ export default class TicketSelectExecutors extends Component{
   }
 
   componentDidMount() {
-    backHelper.init(this.props.navigator,this.props.route.id);
+    backHelper.init(this.props.navigation,this.props.route.id);
     apiGetTicketExecutors(this.props.assets).then(ret => {
       if(ret.code === CODE_OK) {
         if(ret.data && ret.data.length === 0) {
@@ -68,9 +68,9 @@ export default class TicketSelectExecutors extends Component{
 
   _renderEmpty() {
     return (
-      <View style={{flex:1,justifyContent:'center',alignItems:'center',backgroundColor:'#f2f2f2'}}>
-        <Image source={require('./images/empty_box/empty_box.png')} style={{width:60,height:40}}/>
-        <Text style={{fontSize:15,color:'#888',marginTop:8}}>{localStr('lang_empty_data')}</Text>
+      <View style={{flex:1,justifyContent:'center',alignItems:'center',backgroundColor:Colors.seBgContainer}}>
+        <Image resizeMode={'contain'} source={isDarkMode() ? require('./images/empty_box/empty_box_dark.png') : require('./images/empty_box/empty_box.png')} style={{width: 128 * 0.5, height: 80 * 0.5}} />
+        <Text style={{fontSize:15,color:Colors.seTextDisabled,marginTop:8}}>{localStr('lang_empty_data')}</Text>
       </View>
     )
   }
@@ -102,7 +102,7 @@ export default class TicketSelectExecutors extends Component{
             <Text numberOfLines={1} style={styles.titleText}>
               {item.userName}
             </Text>
-            <Text numberOfLines={1} style={{fontSize:14,color:'#888'}}>
+            <Text numberOfLines={1} style={{fontSize:14,color:Colors.seTextSecondary}}>
               {`${localStr('lang_status_2')}:${item.inProcessTicketCount || 0}  ${localStr('lang_status_1')}:${item.notStartedTicketCount || 0}`}
             </Text>
           </View>
@@ -141,7 +141,7 @@ export default class TicketSelectExecutors extends Component{
           onActionSelected={[()=>{
             let users = this.state.data.filter(item => item.isSelect);
             this.props.onChangeExecutors(users);
-            this.props.navigator.pop();
+            this.props.navigation.pop();
           }]}
           onIconClicked={this.props.onBack} />
         {
@@ -168,7 +168,7 @@ let styles = global.amStyleProxy(()=>StyleSheet.create({
     marginLeft:16,
     fontSize:17,
     flex:1,
-    color:Colors.seTextTitle//BLACK
+    color:Colors.seTextPrimary//BLACK
   },
   subTitleText:{
     marginLeft:16,
@@ -189,7 +189,7 @@ let styles = global.amStyleProxy(()=>StyleSheet.create({
     width:18,
     height:18,
     borderRadius:10,
-    borderColor:Colors.seTextTitle,
+    borderColor:Colors.seBorderBase,
     borderWidth:1,
     // marginRight:16,
     justifyContent:'center',

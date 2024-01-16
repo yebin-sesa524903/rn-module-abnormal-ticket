@@ -221,7 +221,7 @@ class CameraRollPicker extends Component<
           },
         ]}
       >
-        <ListView
+        <ListView {...this.props.loadingText}
           ref={ref => this.listView = ref}
           onFetch={this.onFetch}
           refreshable={false}

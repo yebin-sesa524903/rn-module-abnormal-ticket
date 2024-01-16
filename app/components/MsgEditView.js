@@ -33,6 +33,7 @@ import Immutable from 'immutable';
 import moment from 'moment';
 
 import {checkFileNameIsImage} from '../utils/fileHelper.js';
+import SndAlert from "../../../../app/utils/components/SndAlert";
 // import NetworkText from './ticket/NetworkText.js';
 // import ImagePicker from './ImagePicker.js';
 
@@ -71,9 +72,9 @@ export default class MsgEditView extends Component{
     if(!this._showAuth()){
       return;
     }
-    Alert.alert(
-      '',
+    SndAlert.alert(
       checkFileNameIsImage(item.get('FileName'))?'删除这张图片吗？':'删除这个文件吗？',
+      '',
       [
         {text: '取消', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
         {text: '删除', onPress: () => {

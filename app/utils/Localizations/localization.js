@@ -46,9 +46,9 @@ function configLanguage(lan) {
 }
 
 //这里应该是根据配置文件来加载
-storage.getItem(KEY).then((lan)=>{
-  configLanguage(lan)
-})
+// storage.getItem(KEY).then((lan)=>{
+//   configLanguage(lan)
+// })
 
 export function localStr(key)
 {

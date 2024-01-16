@@ -15,8 +15,9 @@ import Icon from './components/Icon';
 import moment from 'moment';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import backHelper from './utils/backHelper';
-import {localStr} from "./utils/Localizations/localization";
+import {getLanguage, localStr} from "./utils/Localizations/localization";
 import Colors from "../../../app/utils/const/Colors";
+import SndAlert from "../../../app/utils/components/SndAlert";
 
 export default class TicketSelectTime extends Component{
   constructor(props){
@@ -64,7 +65,7 @@ export default class TicketSelectTime extends Component{
   _renderPickerView() {
     return (
       <DateTimePicker
-        is24Hour={true}
+        is24Hour={true} locale={getLanguage()}
         titleIOS={localStr('lang_ticket_filter_select_date')}
         headerTextIOS={localStr('lang_ticket_filter_select_date')}
         titleStyle={{fontSize: 17, color: '#333'}}
@@ -99,7 +100,7 @@ export default class TicketSelectTime extends Component{
               this.setState({
                 modalVisible: false
               },()=>{
-                Alert.alert(localStr('lang_alert_title'),localStr('lang_ticket_select_time_invalid'))
+                SndAlert.alert(localStr('lang_alert_title'),localStr('lang_ticket_select_time_invalid'))
               });
               return;
             }
@@ -114,7 +115,7 @@ export default class TicketSelectTime extends Component{
               this.setState({
                 modalVisible: false
               },()=>{
-                Alert.alert(localStr('lang_alert_title'),localStr('lang_ticket_select_time_invalid'))
+                SndAlert.alert(localStr('lang_alert_title'),localStr('lang_ticket_select_time_invalid'))
               });
               return;
             }

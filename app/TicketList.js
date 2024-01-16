@@ -27,15 +27,15 @@ import TicketDetail from "./TicketDetail";
 import {
   apiQueryTicketList,
   apiTicketCount,
-  apiTicketList,
+  apiTicketList, customerId,
 } from "./middleware/bff";
 import moment from "moment";
 
 import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
-import { apiHierarchyList } from "rn-module-inventory-ticket/app/middleware/bff";
-import Colors from "../../../app/utils/const/Colors";
+import { apiHierarchyList } from "./middleware/bff";
+import Colors, {isDarkMode} from "../../../app/utils/const/Colors";
 const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 0;
 const CODE_OK = '0';
 const DAY_FORMAT = 'YYYY-MM-DD';
@@ -119,8 +119,8 @@ export default class TicketList extends Component {
     if (this.state.refreshing) return null;
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.seBgContainer }}>
-        <Image source={require('./images/empty_box/empty_box.png')} style={{ width: 60, height: 40, tintColor: Colors.seTextDisabled }} />
-        <Text style={{ fontSize: 15, color: Colors.seTextDisabled, marginTop: 8 }}>{localStr('lang_empty_data')}</Text>
+        <Image resizeMode={'contain'} source={isDarkMode() ? require('./images/empty_box/empty_box_dark.png') : require('./images/empty_box/empty_box.png')} style={{width: 128 * 0.5, height: 80 * 0.5}} />
+        <Text style={{ fontSize: 14, color: Colors.seTextDisabled, marginTop: 8 }}>{localStr('lang_empty_data')}</Text>
       </View>
     )
   }
@@ -172,7 +172,7 @@ export default class TicketList extends Component {
 
   _loadApiHierarchyList() {
     apiHierarchyList({
-      customerId: 1,
+      customerId: customerId,
       treeType: 'fmhc',
       type: '1'
     }).then((res) => {
@@ -332,7 +332,7 @@ export default class TicketList extends Component {
 
   _gotoDetail = (rowData) => {
     console.log('rowData', rowData)
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'service_ticket_detail',
       component: TicketDetail,
       passProps: {
@@ -414,7 +414,7 @@ export default class TicketList extends Component {
   }
 
   _doReset = () => {
-
+    this._clearFilter();
   }
 
   _doFilter = () => {
@@ -423,16 +423,13 @@ export default class TicketList extends Component {
       openFilter: false,
       showFilterResult: true
     })
-    if (!resFilter.selectStatus && !resFilter.selectTypes) {
-      this._clearFilter();
-    } else {
-      this.queryTicketList(resFilter)
-    }
+    this.queryTicketList(getTicketFilter().filter)
   }
 
   _clearFilter = () => {
     this.setState({
-      showFilterResult: false
+      showFilterResult: false,
+      openFilter:false,
     })
     setTicketFilter({})
     this.loadTicketList(this.state.selectedDate, 1)
