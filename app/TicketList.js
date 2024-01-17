@@ -473,7 +473,7 @@ export default class TicketList extends Component {
     )
   }
 
-  _goBack = () => this.props.navigator.pop();
+  _goBack = () => this.props.navigation.pop();
 
   _renderTop() {
     //如果是工单筛选，显示工单筛选，否则显示日历

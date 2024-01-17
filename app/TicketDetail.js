@@ -289,10 +289,10 @@ export default class TicketDetail extends Component {
               tid: this.state.rowData.id,
               log,
               callBack: () => {
-                this.props.navigator.pop();
+                this.props.navigation.pop();
                 this._loadTicketDetail();
               },
-              onBack: () => this.props.navigator.pop()
+              onBack: () => this.props.navigation.pop()
             }
           })
         }
@@ -339,7 +339,7 @@ export default class TicketDetail extends Component {
               component: PhotoShowView,
               passProps: {
                 index: imgIndex,
-                onBack: () => this.props.navigator.pop(),
+                onBack: () => this.props.navigation.pop(),
                 data: log.pictures
               }
             })
@@ -454,10 +454,10 @@ export default class TicketDetail extends Component {
         title: localStr('lang_ticket_detail_add_log'),
         tid: this.state.rowData.id,
         callBack: () => {
-          this.props.navigator.pop();
+          this.props.navigation.pop();
           this._loadTicketDetail();
         },
-        onBack: () => this.props.navigator.pop()
+        onBack: () => this.props.navigation.pop()
       }
     })
   }
@@ -684,7 +684,7 @@ export default class TicketDetail extends Component {
                         }
                       })
                     },
-                    onBack: () => this.props.navigator.pop()
+                    onBack: () => this.props.navigation.pop()
                   }
                 })
               }

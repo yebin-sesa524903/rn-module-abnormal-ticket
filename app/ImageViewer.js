@@ -18,7 +18,6 @@ export class ImageViewer extends Component {
                        enableTransform={true} //disable transform until image is loaded
                        enableScale={true}
                        enableTranslate={true}
-                       enableResistance={true}
       >
         <View style={{flex:1,justifyContent:'center',alignItems:'center',backgroundColor:'#f00'}}>
           <CacheImage key={this.props.imageKey} imageKey={this.props.imageKey} width={100} height={100} />

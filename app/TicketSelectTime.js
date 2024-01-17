@@ -38,7 +38,7 @@ export default class TicketSelectTime extends Component{
   }
 
   componentDidMount() {
-    backHelper.init(this.props.navigator,this.props.route.id);
+    backHelper.init(this.props.navigation,this.props.route.id);
   }
 
   componentWillUnmount() {
@@ -167,7 +167,7 @@ export default class TicketSelectTime extends Component{
             // console.log('state', this.state.mStart.format(format),this.state.mEnd.format(format))
             // if(this.state.showHours) format='YYYY-MM-DD HH:mm:ss';
             this.props.onChangeDate(this.state.mStart.format(format),this.state.mEnd.format(format));
-            this.props.navigator.pop();
+            this.props.navigation.pop();
           }]}
 
           onIconClicked={this.props.onBack} />
