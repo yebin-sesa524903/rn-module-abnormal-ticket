@@ -13,20 +13,11 @@ var pop = (nav)=>{
 
 var defaultHandler = (nav,id,func)=>{
   // console.warn('backHelper',nav);
-  if(!nav) return;
-  var routes = nav.getCurrentRoutes();
-  var route = null;
-  if(routes.length>0){
-    route = routes[routes.length-1];
+  if(func){
+    func();
   }
-  // console.warn('pop route.id',route.id);
-  if(route && route.id === id){
-    if(func){
-      func();
-    }
-    else{
-      pop(nav)
-    }
+  else{
+    pop(nav)
   }
 }
 

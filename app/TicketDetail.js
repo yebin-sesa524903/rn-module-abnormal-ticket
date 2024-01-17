@@ -281,7 +281,7 @@ export default class TicketDetail extends Component {
       arrActions: [{
         title: localStr('lang_ticket_detail_edit_log'),
         click: () => {
-          this.props.navigator.push({
+          this.props.navigation.push('PageWarpper',{
             id: 'ticket_log_edit',
             component: TicketLogEdit,
             passProps: {
@@ -334,7 +334,7 @@ export default class TicketDetail extends Component {
       let imgs = log.pictures.map((img, imgIndex) => {
         return (
           <TouchableWithoutFeedback key={imgIndex} onPress={() => {
-            this.props.navigator.push({
+            this.props.navigation.push('PageWarpper',{
               id: 'ticket_log_edit',
               component: PhotoShowView,
               passProps: {
@@ -447,7 +447,7 @@ export default class TicketDetail extends Component {
   }
 
   _writeLog() {
-    this.props.navigator.push({
+    this.props.navigation.push('PageWarpper',{
       id: 'ticket_log_edit',
       component: TicketLogEdit,
       passProps: {
@@ -621,7 +621,7 @@ export default class TicketDetail extends Component {
             arrActions: [{
               title: localStr('lang_ticket_detail_change_executors'),
               click: () => {
-                this.props.navigator.push({
+                this.props.navigation.push('PageWarpper',{
                   id: 'ticket_select_executors',
                   component: TicketSelectExecutors,
                   passProps: {
@@ -652,14 +652,14 @@ export default class TicketDetail extends Component {
                         }
                       })
                     },
-                    onBack: () => this.props.navigator.pop()
+                    onBack: () => this.props.navigation.pop()
                   }
                 })
               }
             }, {
               title: localStr('lang_ticket_detail_change_time'),
               click: () => {
-                this.props.navigator.push({
+                this.props.navigation.push('PageWarpper',{
                   id: 'ticket_select_time',
                   component: TicketSelectTime,
                   passProps: {
@@ -698,7 +698,7 @@ export default class TicketDetail extends Component {
         title={localStr('lang_ticket_detail')}
         navIcon="back"
         onIconClicked={() => {
-          this.props.navigator.pop()
+          this.props.navigation.pop()
         }}
         actions={this._actions}
         onActionSelected={actionSelected}
