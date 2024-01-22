@@ -50,11 +50,9 @@ import {
   apiEditTicket,
   apiGetTicketExecutors, apiIgnoreTicket, apiRejectTicket, apiSubmitTicket,
   apiTicketDetail,
-  apiTicketExecute,
+  apiTicketExecute, customerId,
   userId
 } from "./middleware/bff";
-import ImagePicker from "./components/ImagePicker";
-import RNFS, { DocumentDirectoryPath } from 'react-native-fs';
 import TicketLogEdit from "./TicketLogEdit";
 import CacheImage from "./CacheImage";
 import TicketSelectTime from "./TicketSelectTime";
@@ -65,7 +63,7 @@ import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Colors from "../../../app/utils/const/Colors";
 import SndAlert from "../../../app/utils/components/SndAlert";
 // import Share from "react-native-share";
-
+import appPrivilegeHelper from "../../../app/utils/privilegeHelper";
 class Avatar extends Component {
 
   _renderImage(radius) {
@@ -289,10 +287,10 @@ export default class TicketDetail extends Component {
               tid: this.state.rowData.id,
               log,
               callBack: () => {
-                this.props.navigator.pop();
+                this.props.navigation.pop();
                 this._loadTicketDetail();
               },
-              onBack: () => this.props.navigator.pop()
+              onBack: () => this.props.navigation.pop()
             }
           })
         }
@@ -339,7 +337,7 @@ export default class TicketDetail extends Component {
               component: PhotoShowView,
               passProps: {
                 index: imgIndex,
-                onBack: () => this.props.navigator.pop(),
+                onBack: () => this.props.navigation.pop(),
                 data: log.pictures
               }
             })
@@ -454,10 +452,10 @@ export default class TicketDetail extends Component {
         title: localStr('lang_ticket_detail_add_log'),
         tid: this.state.rowData.id,
         callBack: () => {
-          this.props.navigator.pop();
+          this.props.navigation.pop();
           this._loadTicketDetail();
         },
-        onBack: () => this.props.navigator.pop()
+        onBack: () => this.props.navigation.pop()
       }
     })
   }
@@ -627,16 +625,11 @@ export default class TicketDetail extends Component {
                   passProps: {
                     executors: this.state.rowData.executors,
                     title: localStr('lang_ticket_detail_change_executors'),
-                    assets: this.state.rowData.assets.map(item => {
-                      return {
-                        // locationId:item.locationId,
-                        // locationType:item.locationType,
-                        locationId: item.assetId,
-                        locationType: item.assetType,
-                        // assetId:item.assetId,
-                        // assetType:item.assetType
-                      }
-                    }),
+                    assets: {
+                      customerId: customerId,
+                      filterHierarchy: false,
+                      privilegeCode: appPrivilegeHelper.CodeMap.OMTicketExecute,
+                    },
                     onChangeExecutors: (users) => {
                       let data = users;//[].concat(users).concat(this.state.rowData.executors);
                       apiEditTicket({
@@ -684,7 +677,7 @@ export default class TicketDetail extends Component {
                         }
                       })
                     },
-                    onBack: () => this.props.navigator.pop()
+                    onBack: () => this.props.navigation.pop()
                   }
                 })
               }

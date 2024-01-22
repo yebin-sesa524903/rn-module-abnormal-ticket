@@ -195,32 +195,20 @@ export default class TicketList extends Component {
   }
 
   _getLocationInfo(hierarchies, locationId) {
-    let locationMsg = '';
-    let parentName = '';
-    let parentParentName = '';
-    let parentId = 0;
-    for (let hierarchy of hierarchies) {
-      if (locationId == hierarchy.id) {
-        locationMsg = hierarchy.name;
-        parentId = hierarchy.parentId;
-        break;
+    let locations = [];
+    let findParent = function (id) {
+      for (let hierarchy of hierarchies) {
+        if (hierarchy.id === id){
+          locations.push(hierarchy.name);
+          if (hierarchy.parentId !== undefined){
+            findParent(hierarchy.parentId);
+          }
+          break
+        }
       }
     }
-    let parParentId = 0;
-    for (let hierarchy of hierarchies) {
-      if (parentId == hierarchy.id) {
-        parentName = hierarchy.name;
-        parParentId = hierarchy.parentId;
-        break;
-      }
-    }
-    for (let hierarchy of hierarchies) {
-      if (parParentId == hierarchy.id) {
-        parentParentName = hierarchy.name;
-        break;
-      }
-    }
-    return parentParentName + '/' + parentName + '/' + locationMsg;
+    findParent(locationId);
+    return locations.reverse().join('/');
   }
 
   loadTicketList(date, pageNo) {
@@ -473,7 +461,7 @@ export default class TicketList extends Component {
     )
   }
 
-  _goBack = () => this.props.navigator.pop();
+  _goBack = () => this.props.navigation.pop();
 
   _renderTop() {
     //如果是工单筛选，显示工单筛选，否则显示日历

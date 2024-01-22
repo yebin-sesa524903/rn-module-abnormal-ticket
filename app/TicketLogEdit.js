@@ -65,9 +65,9 @@ export default class LogEditView extends Component {
       component: ImagePicker,
       passProps: {
         max: 20 - this.state.log.pictures.length,
-        onBack: () => this.props.navigator.pop(),
+        onBack: () => this.props.navigation.pop(),
         done: (data) => {
-          this.props.navigator.pop();
+          this.props.navigation.pop();
           let log = this.state.log;
           log.pictures = log.pictures.concat(data)
           this.setState({ log })
@@ -133,7 +133,7 @@ export default class LogEditView extends Component {
       component: PhotoShowView,
       passProps: {
         index: index,
-        onBack: () => this.props.navigator.pop(),
+        onBack: () => this.props.navigation.pop(),
         data: this.state.log.pictures
       }
     })

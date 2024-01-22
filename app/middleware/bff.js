@@ -310,17 +310,10 @@ export async function apiDownloadFile(key) {
 }
 
 export async function apiGetTicketExecutors(assets) {
-  let arr = assets.map(item => {
-    return {
-      locationId: item.locationId,
-      locationType: item.locationType
-    }
-  })
-  arr = assets;
   return await defaultFetch({
-    url: `ticket/edit/executors`,
+    url: `ticket/inventory/executors`,
     verb: 'post',
-    body: arr
+    body: assets
   })
 }
 
