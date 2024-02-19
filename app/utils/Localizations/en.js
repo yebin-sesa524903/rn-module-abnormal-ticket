@@ -14,7 +14,7 @@ export default {
 
   lang_ticket_status_type:['To Do','In Progress','Submitted','Rejected','Completed','Ignored'],
   lang_ticket_name:'Work Name',
-  lang_ticket_filter_time:'Time',
+  lang_ticket_filter_time:'Recommended Execution Time',
   lang_ticket_filter_ok:'Confirm',
   lang_ticket_filter_reset:'Reset',
   lang_ticket_filter_status:'Status',

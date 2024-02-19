@@ -14,7 +14,7 @@ export default {
 
   lang_ticket_status_type: ['待执行', '执行中', '待审批', '已驳回', '已完成', '已忽略'],
   lang_ticket_name: '工单名称',
-  lang_ticket_filter_time: '时间',
+  lang_ticket_filter_time: '建议执行时间',
   lang_ticket_filter_ok: '确定',
   lang_ticket_filter_reset: '重置',
   lang_ticket_filter_status: '工单状态',
