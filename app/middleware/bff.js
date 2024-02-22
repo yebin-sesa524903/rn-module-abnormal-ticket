@@ -117,7 +117,7 @@ let defaultFetch = async function (options) {
       //   console.log('data',data)
       //   return data//reader.result;
       // }
-      console.log('\n请求参数:' + body + '\n请求地址:' + url + '\n请求结果:' + JSON.stringify(data) + '\n\n');
+      console.log('\n请求参数:' + body + '\n请求地址:' + url + '\n请求结果:' , data, + '\n\n');
       return data;
     }).catch(err => {
       return new Promise((resolve) => {
@@ -151,6 +151,19 @@ export async function apiTicketList(date, pageNo) {
     body: {
       searchDate: date,
       pageNo,
+      ticketTypes: [9, 10, 2]
+    }
+  })
+}
+
+//请求工单列表
+export async function apiDownloadTicketList(date) {
+  return await defaultFetch({
+    url: 'ticket/ticketList',//需要替换成下载接口
+    verb: 'post',
+    body: {
+      searchDate: date,
+      pageNo:1,
       ticketTypes: [9, 10, 2]
     }
   })

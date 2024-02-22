@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import {
   DeviceEventEmitter,
   Image, InteractionManager,
@@ -21,26 +21,34 @@ import { LIST_BG, CLEAN_FILTER_BG, CLEAN_FILTER_BORDER, GREEN } from "./styles/c
 import TouchFeedback from "./components/TouchFeedback";
 import TicketRow from "./TicketRow";
 import { getTicketFilter, getTicketList, setTicketFilter } from "./store";
-import { getLanguage, localStr } from "./utils/Localizations/localization";
+import { getLanguage, localFormatStr, localStr } from "./utils/Localizations/localization";
 import TicketFilter from "./TicketFilter";
 import TicketDetail from "./TicketDetail";
 import {
+  apiDownloadTicketList,
   apiQueryTicketList,
   apiTicketCount,
   apiTicketList, customerId,
 } from "./middleware/bff";
 import moment from "moment";
 
+import SndAlert from "../../../app/utils/components/SndAlert";
+
 import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
 import { apiHierarchyList } from "./middleware/bff";
-import Colors, {isDarkMode} from "../../../app/utils/const/Colors";
+import Colors, { isDarkMode } from "../../../app/utils/const/Colors";
+import { checkDisk, downloadTickets, getTicketsData } from "./utils/offlineUtil";
+import RingRound from "./components/RingRound";
+import NetInfo from "@react-native-community/netinfo";
+import { getCacheDays, getCacheTicketByDate } from "./utils/sqliteHelper";
+import TicketSync from "./TicketSync";
 const MP = Platform.OS === 'ios' ? (isPhoneX() ? 0 : 10) : 0;
 const CODE_OK = '0';
 const DAY_FORMAT = 'YYYY-MM-DD';
 
-const TICKET_TYPE_MAP = {
+export const TICKET_TYPE_MAP = {
   10: localStr('lang_status_1'),
   20: localStr('lang_status_2'),
   30: localStr('lang_status_3'),
@@ -60,6 +68,11 @@ export default class TicketList extends Component {
         privilegeHelper.hasAuth(CodeMap.OMTicketRead))
     }
   }
+
+  static contextTypes = {
+    showSpinner: PropTypes.func,
+    hideHud: PropTypes.func
+  };
 
   componentDidMount() {
     InteractionManager.runAfterInteractions((() => {
@@ -81,10 +94,17 @@ export default class TicketList extends Component {
       })
     }))
 
+    this._netChangeListener = NetInfo.addEventListener(
+      (isConnected) => {
+        this._clearFilter()
+      }
+    );
+
   }
 
   componentWillUnmount() {
     this._initListener && this._initListener.remove();
+    this._netChangeListener && this._netChangeListener()
   }
 
   loadTicketCount(start, end) {
@@ -119,7 +139,7 @@ export default class TicketList extends Component {
     if (this.state.refreshing) return null;
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.seBgContainer }}>
-        <Image resizeMode={'contain'} source={isDarkMode() ? require('./images/empty_box/empty_box_dark.png') : require('./images/empty_box/empty_box.png')} style={{width: 128 * 0.5, height: 80 * 0.5}} />
+        <Image resizeMode={'contain'} source={isDarkMode() ? require('./images/empty_box/empty_box_dark.png') : require('./images/empty_box/empty_box.png')} style={{ width: 128 * 0.5, height: 80 * 0.5 }} />
         <Text style={{ fontSize: 14, color: Colors.seTextDisabled, marginTop: 8 }}>{localStr('lang_empty_data')}</Text>
       </View>
     )
@@ -176,6 +196,7 @@ export default class TicketList extends Component {
       treeType: 'fmhc',
       type: '1'
     }).then((res) => {
+      this._hierarchyList = res.data;
       let ticketData = this.state.ticketData;
       for (const ticketDatum of ticketData) {
         for (const dataObj of ticketDatum.data) {
@@ -198,22 +219,52 @@ export default class TicketList extends Component {
     let locations = [];
     let findParent = function (id) {
       for (let hierarchy of hierarchies) {
-        if (hierarchy.id === id){
+        if (hierarchy.id === id) {
           locations.push(hierarchy.name);
-          if (hierarchy.parentId !== undefined){
+          if (hierarchy.parentId !== undefined) {
             findParent(hierarchy.parentId);
           }
           break
         }
       }
     }
-    findParent(locationId);
+    if (locationId) {
+      findParent(locationId);
+    }
     return locations.reverse().join('/');
   }
 
-  loadTicketList(date, pageNo) {
-    this.setState({ refreshing: true, showEmpty: false, ticketData: [], error: null })
+  loadTicketList = async (date, pageNo) => {
     date = moment(date).format(DAY_FORMAT);
+    //处理离线显示
+    if (!global.isConnected()) {
+      //读取离线数据并显示
+      console.log('offline date', date);
+      let cacheData = await getCacheTicketByDate(date) || [];
+      let markedDate = await getCacheDays();
+      console.log(JSON.stringify(cacheData), JSON.stringify(markedDate))
+      let section = [];
+      //这里假设已经根据状态排序了
+      cacheData.forEach(item => {
+        let group = section.find(g => g.state === item.ticketState);
+        if (group) {
+          group.data.push(item);
+        } else {
+          group = {
+            state: item.ticketState,
+            stateName: item.ticketStateLabel,
+            title: TICKET_TYPE_MAP[item.ticketState],//item.ticketStateLabel,
+            isFolder: false,
+            data: [item]
+          }
+          section.push(group);
+        }
+      })
+      this.setState({ ticketData: section, markedDate, error: null, showEmpty: cacheData.length === 0, refreshing: false })
+      return;
+    }
+    this.setState({ refreshing: true, showEmpty: false, ticketData: [], error: null })
+
     //处理加载中等。。。
     apiTicketList(date, pageNo).then(data => {
       this.setState({ refreshing: false })
@@ -258,15 +309,20 @@ export default class TicketList extends Component {
   }
 
   _renderRightButton() {
+    let disableDownload = !global.isConnected() || !this.state.ticketData || this.state.ticketData.length === 0;
     return (
       <View style={{ position: 'absolute', marginTop: -10, right: 14 + (this.props.paddingRight || 0), padding: 6, flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flexDirection: 'row', marginRight: -6 }}>
-          {
+          {global.isConnected() &&
             <TouchableOpacity style={{ padding: 6 }} onPress={this._clickFilter}>
               <Icon name="filter" size={24} color={'#fff'} />
             </TouchableOpacity>
           }
-
+          {
+            <TouchableOpacity disabled={disableDownload} style={{ padding: 6 }} onPress={this._downloadTickets}>
+              <Icon name="download" size="sm" color={!disableDownload ? "#fff" : '#ffffff88'} />
+            </TouchableOpacity>
+          }
           {false &&
             <TouchableOpacity style={{ padding: 6 }} onPress={() => {
               if (this.props.onCreateTicket) this.props.onCreateTicket();
@@ -320,11 +376,12 @@ export default class TicketList extends Component {
 
   _gotoDetail = (rowData) => {
     console.log('rowData', rowData)
-    this.props.navigation.push('PageWarpper',{
+    this.props.navigation.push('PageWarpper', {
       id: 'service_ticket_detail',
       component: TicketDetail,
       passProps: {
         ticketId: rowData.id,
+        offline: !global.isConnected(),//进入详情之前就要决定详情是显示在线还是离线内容
         ticketChanged: () => this._onRefresh()
       }
     })
@@ -367,9 +424,9 @@ export default class TicketList extends Component {
     if (this.state.showEmpty) return this._renderEmpty();
     if (!this.state.ticketData || this.state.ticketData.length === 0)
       return (
-          <View style={{flex:1, backgroundColor: Colors.seBgContainer}}>
-            <Loading />
-          </View>
+        <View style={{ flex: 1, backgroundColor: Colors.seBgContainer }}>
+          <Loading />
+        </View>
       )
     return (
       <SectionList style={{ flex: 1, paddingHorizontal: 16, backgroundColor: Colors.seBgLayout }} sections={this.state.ticketData}
@@ -417,10 +474,39 @@ export default class TicketList extends Component {
   _clearFilter = () => {
     this.setState({
       showFilterResult: false,
-      openFilter:false,
+      openFilter: false,
     })
     setTicketFilter({})
     this.loadTicketList(this.state.selectedDate, 1)
+  }
+
+  _downloadTickets = async () => {
+    if (!await checkDisk()) {
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_offline_disk_not_enough'));
+      return;
+    }
+    let date = moment(this.state.selectedDate).format(DAY_FORMAT);
+    this.context.showSpinner();
+    try {
+      let data = await apiDownloadTicketList(date)
+      //这里需要根据获取的层级数据，补齐层级信息
+      data = getTicketsData();
+      console.log(data, this._hierarchyList)
+      for (const dataObj of data) {
+        for (const re of this._hierarchyList) {
+          if (re.id == dataObj.objectId) {
+            dataObj.locationInfo = this._getLocationInfo(this._hierarchyList, re.id);
+          }
+        }
+      }
+      await downloadTickets(date, data)
+      //这里是否需要判断空间下
+      this.context.hideHud();
+    } catch (e) {
+      console.log('download ticket error', e)
+      //出现异常，关闭对话框
+      this.context.hideHud();
+    }
   }
 
   _renderClearView() {
@@ -435,7 +521,7 @@ export default class TicketList extends Component {
             backgroundColor: Colors.seTextInverse,
             borderColor: CLEAN_FILTER_BORDER,
             borderWidth: 0,
-            marginBottom:12,
+            marginBottom: 12,
             borderRadius: 14
           }}>
             <Text style={{ fontSize: 14, color: Colors.seBrandNomarl }}>{localStr('lang_ticket_clear_filter')}</Text>
@@ -523,6 +609,73 @@ export default class TicketList extends Component {
     );
   }
 
+  _offlineView() {
+    if (global.isConnected()) return null;
+    return (
+      <TouchableOpacity style={{
+        paddingVertical: 7, paddingHorizontal: 16, alignItems: 'center',
+        flexDirection: 'row', backgroundColor: '#fffbe6'
+      }} onPress={this._gotoSync}>
+        <Icon2 type="icon_info" color="#ff9500" size={12} />
+        <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff9500', marginLeft: 5 }}>
+          {localStr('lang_offline_tip1')}
+        </Text>
+      </TouchableOpacity>
+    )
+  }
+
+  _gotoSync = () => {
+    this.props.navigation.push('PageWarpper', {
+      id: 'ticket_sync',
+      component: TicketSync,
+      passProps: {
+        onBack: () => { }
+      }
+    })
+  }
+
+  _autoSyncView() {
+    if (global.isConnected() && this.state.waitingSyncTickets > 0) {
+      //表示正在同步中...
+      if (this.state.syncFailCount > 0) {
+        return (
+          <TouchFeedback onPress={this._gotoSync}>
+            <View style={{
+              paddingVertical: 7, paddingHorizontal: 16, alignItems: 'center',
+              flexDirection: 'row', backgroundColor: '#ffe9e9'
+            }}>
+              <Icon2 type="icon_info_down" color="#ff4d4d" size={12} />
+              <View style={{ flex: 1 }}>
+                <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff4d4d', marginLeft: 5 }}>
+                  {localFormatStr('lang_offline_tip3', 1)}
+                </Text>
+              </View>
+              <Icon2 type="icon_asset_folder" color="#ff4d4d" size={16} />
+            </View>
+          </TouchFeedback>
+        );
+      }
+      return (
+        <TouchFeedback onPress={this._gotoSync}>
+          <View style={{
+            paddingVertical: 7, paddingHorizontal: 16, alignItems: 'center',
+            flexDirection: 'row', backgroundColor: '#fffbe6'
+          }}>
+            <RingRound>
+              <Icon2 type="icon_sync" size={13} color="#ff9500" />
+            </RingRound>
+            <View style={{ flex: 1 }}>
+              <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff9500', marginLeft: 5 }}>
+                {localStr('lang_offline_tip2')}
+              </Text>
+            </View>
+            <Icon2 type="icon_asset_folder" color="#ff9500" size={16} />
+          </View>
+        </TouchFeedback>
+      );
+    }
+  }
+
   render() {
     if (!this.state.hasPermission) {
       return this._renderNoPermission()
@@ -535,6 +688,8 @@ export default class TicketList extends Component {
         <View style={{ flex: 1 }}>
           <View style={{ height: 6, backgroundColor: Colors.seBrandNomarl }} />
           {this._renderTop()}
+          {this._offlineView()}
+          {this._autoSyncView()}
           {this._getView()}
         </View>
         {this._renderFilter()}

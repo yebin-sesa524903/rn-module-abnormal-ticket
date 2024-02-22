@@ -92,4 +92,18 @@ export default {
   lang_ticket_item_suggest_time:'建议执行时间：',
   lang_ticket_filter_types:['诊断', '行为异常','报警'],
   lang_ticket_filter_show_type:'工单类型',
+
+  lang_offline_disk_not_enough:'您的手机存储空间小于2GB，无法下载工单',
+  lang_offline_tip1:'无法连接网络，自动为您开启离线模式，仅显示已下载工单',
+  lang_offline_tip2:'离线工单自动同步中…',
+  lang_offline_tip3:'{0}个工单同步失败，请查看处理',//{}里为占位符，
+
+  lang_offline_sync_view_title:'同步列表',
+  lang_offline_sync_view_cover:'覆盖',
+  lang_offline_sync_view_give_up:'放弃',
+  lang_offline_sync_view_retry:'重试',
+
+  lang_offline_sync_status_fail:'同步失败',
+  lang_offline_sync_status_waiting:'等待中',
+  lang_offline_sync_status_doing:'正在同步'
 };

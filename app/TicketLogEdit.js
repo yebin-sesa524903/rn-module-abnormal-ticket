@@ -17,19 +17,20 @@ import {
 import Toolbar from './components/Toolbar';
 import Icon from './components/Icon';
 
-import { BLACK, GRAY, LIST_BG, PICBORDERCOLOR, DOCBKGCOLOR, ADDICONCOLOR } from './styles/color.js';
+import moment from 'moment';
 
 import TouchFeedback from './components/TouchFeedback.js';
 
 import ImagePicker from "./components/ImagePicker";
 import RNFS, { DocumentDirectoryPath } from "react-native-fs";
-import { apiCreateLog, apiDownloadFile, apiDownloadFile2, apiUploadFile } from "./middleware/bff";
+import { apiCreateLog, apiDownloadFile, apiDownloadFile2, apiUploadFile, userId, userName } from "./middleware/bff";
 import CacheImage from "./CacheImage";
 import { localStr } from "./utils/Localizations/localization";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import Loading from './components/Loading';
 import Colors from "../../../app/utils/const/Colors";
 import SndAlert from "../../../app/utils/components/SndAlert";
+import { cacheTicketLogOperate, TICKET_LOG_ADD, TICKET_LOG_UPDATE } from "./utils/sqliteHelper";
 
 const CODE_OK = '0'
 
@@ -60,7 +61,7 @@ export default class LogEditView extends Component {
     return this.props.checkAuth();
   }
   _openImagePicker() {
-    this.props.navigation.push('PageWarpper',{
+    this.props.navigation.push('PageWarpper', {
       id: 'imagePicker',
       component: ImagePicker,
       passProps: {
@@ -71,11 +72,13 @@ export default class LogEditView extends Component {
           let log = this.state.log;
           log.pictures = log.pictures.concat(data)
           this.setState({ log })
-          this._uploadImages();
+          if (!this.props.offline)//非离线模式下需要上传图片
+            this._uploadImages();
         }
       }
     });
   }
+
 
   _uploadImages() {
     if (this._uploading) return null;
@@ -128,7 +131,7 @@ export default class LogEditView extends Component {
 
   _goToDetail(index) {
     //查看照片详情
-    this.props.navigation.push('PageWarpper',{
+    this.props.navigation.push('PageWarpper', {
       id: 'ticket_log_edit',
       component: PhotoShowView,
       passProps: {
@@ -157,7 +160,33 @@ export default class LogEditView extends Component {
   _imageLoadComplete(item) {
     this.props.dataChanged('image', 'uploaded', item);
   }
+
+  async _saveOfflineLog() {
+    if (this.state.log.id) {
+      //有id，说明是修改
+      await cacheTicketLogOperate(TICKET_LOG_UPDATE, this.state.log)
+    } else {
+      let log = {
+        ...this.state.log,
+        id: String(Date.now()),
+        ticketId: this.props.tid,
+        localCreate: true,
+        createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+        userName: userName,
+        userId: userId
+      }
+      //没有id，说明是新增
+      await cacheTicketLogOperate(TICKET_LOG_ADD, log)
+    }
+    //通知刷新
+    this.props.callBack();
+  }
+
   _saveLog() {
+    if (this.props.offline) {
+      this._saveOfflineLog().then();
+      return;
+    }
     let data = {
       id: this.props.tid,
       content: this.state.log.content,
@@ -214,7 +243,7 @@ export default class LogEditView extends Component {
           }} source={{ uri: item.uri }} />
         )
         //如果还没上传完，则给一个loading
-        if (!item.key) {
+        if (!item.key && !this.props.offline) {
           if (item.error) {
             //说明上传失败，给一个提示重试
             child = (
@@ -293,6 +322,7 @@ export default class LogEditView extends Component {
 
   _canEnable() {
     if (!this.state.log.content || this.state.log.content.trim().length === 0) return false;
+    if (this.props.offline) return true;
     let pic = this.state.log.pictures;
     if (!pic || pic.length === 0) return true;
     return !pic.find(item => item.uri && !item.key);
@@ -364,7 +394,7 @@ export default class LogEditView extends Component {
 
 
 
-var styles = global.amStyleProxy(()=>StyleSheet.create({
+var styles = global.amStyleProxy(() => StyleSheet.create({
   input: {
     justifyContent: 'flex-start',
     alignItems: 'flex-start',

@@ -64,6 +64,12 @@ import Colors from "../../../app/utils/const/Colors";
 import SndAlert from "../../../app/utils/components/SndAlert";
 // import Share from "react-native-share";
 import appPrivilegeHelper from "../../../app/utils/privilegeHelper";
+import {
+  cacheTicketLogOperate, cacheTicketModify,
+  getTicketFromCache,
+  getTicketLogsFromCache,
+  TICKET_LOG_DELETE
+} from "./utils/sqliteHelper";
 class Avatar extends Component {
 
   _renderImage(radius) {
@@ -149,7 +155,7 @@ export default class TicketDetail extends Component {
       );
     }
     return (
-      <View style={{ paddingBottom: 14, backgroundColor: Colors.seBgContainer,margin:10,marginBottom:0,borderRadius:12 }}>
+      <View style={{ paddingBottom: 14, backgroundColor: Colors.seBgContainer, margin: 10, marginBottom: 0, borderRadius: 12 }}>
         <View style={{
           paddingTop: 15, paddingBottom: 12, paddingLeft: 16,
           flexDirection: 'row', alignItems: 'center', paddingRight: 16,
@@ -195,7 +201,7 @@ export default class TicketDetail extends Component {
     }
 
     return (
-      <View style={{ paddingBottom: 0, backgroundColor: Colors.seBgContainer,borderRadius:12,margin:10,marginBottom:0 }}>
+      <View style={{ paddingBottom: 0, backgroundColor: Colors.seBgContainer, borderRadius: 12, margin: 10, marginBottom: 0 }}>
         <View style={{
           paddingTop: 16, paddingBottom: 12, paddingLeft: 16,
           flexDirection: 'row', alignItems: 'center'
@@ -272,20 +278,22 @@ export default class TicketDetail extends Component {
   }
 
   clickLog(log, index) {
+
     //判断日志是否自己创建，不是的无效
-    if (log.userId !== userId) return null;
+    //if (log.userId !== userId) return null;
     this.setState({
       modalVisible: true,
       arrActions: [{
         title: localStr('lang_ticket_detail_edit_log'),
         click: () => {
-          this.props.navigation.push('PageWarpper',{
+          this.props.navigation.push('PageWarpper', {
             id: 'ticket_log_edit',
             component: TicketLogEdit,
             passProps: {
               title: localStr('lang_ticket_detail_edit_log'),
               tid: this.state.rowData.id,
               log,
+              offline: this.props.offline,
               callBack: () => {
                 this.props.navigation.pop();
                 this._loadTicketDetail();
@@ -304,6 +312,21 @@ export default class TicketDetail extends Component {
               { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
               {
                 text: localStr('lang_ticket_log_del_ok'), onPress: async () => {
+                  //处理离线删除日志
+                  if (this.props.offline) {
+                    try {
+                      await cacheTicketLogOperate(TICKET_LOG_DELETE, log)
+                    } catch (e) {
+                      console.log('----->deletelog', e)
+                    }
+
+                    let rowData = this.state.rowData;
+                    rowData.ticketLogs.splice(index, 1);
+                    rowData.ticketLogs = [].concat(rowData.ticketLogs);
+                    this.setState({ rowData })
+                    return;
+                  }
+
                   apiDelTicketLog({
                     id: log.ticketId,
                     logId: log.id
@@ -332,7 +355,7 @@ export default class TicketDetail extends Component {
       let imgs = log.pictures.map((img, imgIndex) => {
         return (
           <TouchableWithoutFeedback key={imgIndex} onPress={() => {
-            this.props.navigation.push('PageWarpper',{
+            this.props.navigation.push('PageWarpper', {
               id: 'ticket_log_edit',
               component: PhotoShowView,
               passProps: {
@@ -343,7 +366,7 @@ export default class TicketDetail extends Component {
             })
           }}>
             <View style={{ width: this.picWid + 10, height: this.picWid + 10 }}>
-              <CacheImage borderWidth={1} space={10} key={img.key} imageKey={img.key} width={this.picWid - 2} height={this.picWid - 2} />
+              <CacheImage uri={img.uri} borderWidth={1} space={10} key={img.key} imageKey={img.key} width={this.picWid - 2} height={this.picWid - 2} />
             </View>
 
           </TouchableWithoutFeedback>
@@ -368,7 +391,7 @@ export default class TicketDetail extends Component {
       )
     })
     return (
-      <View style={{ backgroundColor: Colors.seBgContainer, margin: 10,marginBottom:0,borderRadius:12 }}>
+      <View style={{ backgroundColor: Colors.seBgContainer, margin: 10, marginBottom: 0, borderRadius: 12 }}>
         <View style={{ marginLeft: 16 }}>
           {this._getTab()}
           <View style={{ height: 1, backgroundColor: Colors.seBorderSplit }} />
@@ -387,6 +410,13 @@ export default class TicketDetail extends Component {
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {
           text: localStr('lang_ticket_filter_ok'), onPress: async () => {
+            if (this.props.offline) {
+              await cacheTicketModify(this.state.rowData.id, 1, 50);
+              this.showToast(localStr('lang_ticket_close_toast'))
+              this._loadTicketDetail();
+              return;
+            }
+
             //审批通过
             apiCloseTicket({ id: this.state.rowData.id }).then(ret => {
               if (ret.code === CODE_OK) {
@@ -432,7 +462,13 @@ export default class TicketDetail extends Component {
     )
   }
 
-  _executeTicket = () => {
+  _executeTicket = async () => {
+    if (this.props.offline) {
+      await cacheTicketModify(this.state.rowData.id, 3, { status: 20 });
+      this.showToast(localStr('lang_ticket_execute_toast'))
+      this._loadTicketDetail();
+      return;
+    }
     apiTicketExecute(this.state.rowData.id).then(ret => {
       if (ret.code === CODE_OK) {
         this.props.ticketChanged && this.props.ticketChanged();
@@ -445,12 +481,13 @@ export default class TicketDetail extends Component {
   }
 
   _writeLog() {
-    this.props.navigation.push('PageWarpper',{
+    this.props.navigation.push('PageWarpper', {
       id: 'ticket_log_edit',
       component: TicketLogEdit,
       passProps: {
         title: localStr('lang_ticket_detail_add_log'),
         tid: this.state.rowData.id,
+        offline: this.props.offline,
         callBack: () => {
           this.props.navigation.pop();
           this._loadTicketDetail();
@@ -468,6 +505,10 @@ export default class TicketDetail extends Component {
         { text: localStr('lang_ticket_filter_cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
         {
           text: localStr('lang_ticket_detail_ignore'), onPress: async () => {
+            if (this.props.offline) {
+              await cacheTicketModify(this.state.rowData.id, 1, 60)
+              return;
+            }
             apiIgnoreTicket({
               id: this.state.rowData.id
             }).then(ret => {
@@ -483,12 +524,20 @@ export default class TicketDetail extends Component {
       ])
   }
 
-  _submitTicket() {
+  async _submitTicket() {
     let ticketLogs = this.state.rowData.ticketLogs;
     if (!ticketLogs || ticketLogs.length === 0) {
       SndAlert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
       return;
     }
+
+    if (this.props.offline) {
+      await cacheTicketModify(this.state.rowData.id, 1, 30)
+      this.showToast(localStr('lang_ticket_submit_toast'))
+      this._loadTicketDetail();
+      return;
+    }
+
     apiSubmitTicket({ id: this.state.rowData.id }).then(ret => {
       if (ret.code === CODE_OK) {
         this.props.ticketChanged && this.props.ticketChanged();
@@ -550,6 +599,7 @@ export default class TicketDetail extends Component {
     if (status === STATE_PENDING_AUDIT && privilegeHelper.hasAuth(CodeMap.OMTicketFull)) {//表示已提交工单
       return this._renderSubmittedButton();
     }
+    console.log('----->111', privilegeHelper.hasAuth(CodeMap.OMTicketExecute), this.state.isExecutor, status)
     //执行中和已驳回操作一样
     if (this.state.isExecutor && (status === STATE_STARTING || status === STATE_REJECTED) && privilegeHelper.hasAuth(CodeMap.OMTicketExecute) && !isScollView) {
       return (
@@ -619,7 +669,7 @@ export default class TicketDetail extends Component {
             arrActions: [{
               title: localStr('lang_ticket_detail_change_executors'),
               click: () => {
-                this.props.navigation.push('PageWarpper',{
+                this.props.navigation.push('PageWarpper', {
                   id: 'ticket_select_executors',
                   component: TicketSelectExecutors,
                   passProps: {
@@ -652,7 +702,7 @@ export default class TicketDetail extends Component {
             }, {
               title: localStr('lang_ticket_detail_change_time'),
               click: () => {
-                this.props.navigation.push('PageWarpper',{
+                this.props.navigation.push('PageWarpper', {
                   id: 'ticket_select_time',
                   component: TicketSelectTime,
                   passProps: {
@@ -709,33 +759,58 @@ export default class TicketDetail extends Component {
     this._loadTicketDetail();
   }
 
+  async _loadOfflineData() {
+    let cacheData = await getTicketFromCache(this.props.ticketId);
+    if (cacheData) {
+      //还需要读取日志表里面的内容
+      let logs = await getTicketLogsFromCache(this.props.ticketId);
+      cacheData.ticketLogs = logs;
+      this._processData({ data: cacheData })
+    } else {
+      this.setState({
+        errorMessage: localStr('lang_http_no_content'), isFetching: false
+      })
+    }
+  }
+
+  _processData(data) {
+    let isCreateUser = data.data.createUser === userId;
+    let isExecutor = false;//data.data.executors.incl
+    if (data.data.executors) {
+      let find = data.data.executors.find(item => item.userId === userId);
+      if (find) isExecutor = true;
+    }
+    //如果是工单创建者也能执行，后面记得删除
+    if (!isExecutor && isCreateUser) isExecutor = true;
+
+    let rejectData = null
+    if (data.data.ticketState === STATE_REJECTED) {
+      rejectData = data.data.ticketOperateLogs.filter(item => item.operationType === REJECT_OPERATION_TYPE)
+        .sort((a, b) => {
+          return moment(b.createTime).toDate().getTime() - moment(a.createTime).toDate().getTime()
+        })[0];
+    }
+    this.setState({
+      rowData: data.data,
+      isCreateUser,
+      rejectData,
+      isFetching: false,
+      isExecutor
+    })
+  }
+
   _loadTicketDetail() {
+    if (this.props.offline) {
+      this._loadOfflineData();
+      return;
+    }
+
     //获取工单详情
     this.setState({ isFetching: true })
     apiTicketDetail(this.props.ticketId).then(data => {
       if (data.code === CODE_OK) {
         //获取详情ok
-        let isCreateUser = data.data.createUser === userId;
-        let isExecutor = false;//data.data.executors.incl
-        if (data.data.executors) {
-          let find = data.data.executors.find(item => item.userId === userId);
-          if (find) isExecutor = true;
-        }
-
-        let rejectData = null
-        if (data.data.ticketState === STATE_REJECTED) {
-          rejectData = data.data.ticketOperateLogs.filter(item => item.operationType === REJECT_OPERATION_TYPE)
-            .sort((a, b) => {
-              return moment(b.createTime).toDate().getTime() - moment(a.createTime).toDate().getTime()
-            })[0];
-        }
-        this.setState({
-          rowData: data.data,
-          isCreateUser,
-          rejectData,
-          isFetching: false,
-          isExecutor
-        })
+        this._processData(data)
       } else {
         this.setState({
           errorMessage: data.msg, isFetching: false
