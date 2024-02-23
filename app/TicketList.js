@@ -39,7 +39,14 @@ import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
 import { apiHierarchyList } from "./middleware/bff";
 import Colors, { isDarkMode } from "../../../app/utils/const/Colors";
-import { checkDisk, downloadTickets, getTicketsData } from "./utils/offlineUtil";
+import {
+  checkDisk,
+  downloadTickets, getSyncErrorCount,
+  getTicketsData,
+  isSynchronizing,
+  startSyncTasks,
+  SYNC_UPDATE_NOTIFY
+} from "./utils/offlineUtil";
 import RingRound from "./components/RingRound";
 import NetInfo from "@react-native-community/netinfo";
 import { getCacheDays, getCacheTicketByDate } from "./utils/sqliteHelper";
@@ -93,18 +100,27 @@ export default class TicketList extends Component {
         this.loadTicketList(new Date(), 1);
       })
     }))
-
+    this._netChangeListener && this._netChangeListener.remove()
     this._netChangeListener = NetInfo.addEventListener(
       (isConnected) => {
         this._clearFilter()
+        if(isConnected) {
+          //尝试做同步
+          startSyncTasks().then();
+        }
       }
     );
+
+    this._changedListener = DeviceEventEmitter.addListener(SYNC_UPDATE_NOTIFY,()=>{
+      this.setState({})
+    })
 
   }
 
   componentWillUnmount() {
     this._initListener && this._initListener.remove();
-    this._netChangeListener && this._netChangeListener()
+    this._netChangeListener && this._netChangeListener();
+    this._changedListener && this._changedListener.remove();
   }
 
   loadTicketCount(start, end) {
@@ -635,9 +651,10 @@ export default class TicketList extends Component {
   }
 
   _autoSyncView() {
-    if (global.isConnected() && this.state.waitingSyncTickets > 0) {
+    let errCount = getSyncErrorCount();
+    if (global.isConnected() && (isSynchronizing || errCount > 0)) {
       //表示正在同步中...
-      if (this.state.syncFailCount > 0) {
+      if (errCount > 0) {
         return (
           <TouchFeedback onPress={this._gotoSync}>
             <View style={{
@@ -647,7 +664,7 @@ export default class TicketList extends Component {
               <Icon2 type="icon_info_down" color="#ff4d4d" size={12} />
               <View style={{ flex: 1 }}>
                 <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff4d4d', marginLeft: 5 }}>
-                  {localFormatStr('lang_offline_tip3', 1)}
+                  {localFormatStr('lang_offline_tip3', errCount)}
                 </Text>
               </View>
               <Icon2 type="icon_asset_folder" color="#ff4d4d" size={16} />

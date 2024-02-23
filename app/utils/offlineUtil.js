@@ -1,31 +1,25 @@
 import {
   cacheDownloadTickets,
-  clearCacheTicket,
+  clearCacheTicket, clearTicket,
   getCacheTicketByDate,
   TICKET_LOG_DELETE,
   TICKET_TYPE_SAVE_SIGN
 } from "./sqliteHelper";
 import { Platform, Dimensions } from 'react-native';
-
+import {DeviceEventEmitter} from 'react-native'
 import RNFS, { DocumentDirectoryPath, ExternalDirectoryPath } from 'react-native-fs';
 import RNFetchBlob from 'react-native-fetch-blob';
-
+import moment from 'moment';
 
 import {
   getDownloadTimeByTicketId, getUnSyncTickets, updateImageUpload,
   TICKET_LOG_ADD, TICKET_LOG_UPDATE,
 } from "./sqliteHelper";
-import { apiTicketDetail, getBaseUri, getCookie } from "../middleware/bff";
+import {apiSyncTickets, apiTicketDetail, apiUploadFile, getBaseUri, getCookie} from "../middleware/bff";
 
 const dirPath = Platform.OS === 'ios' ? DocumentDirectoryPath : ExternalDirectoryPath
-const pathPre = Platform.OS === 'ios' ? '' : 'file://';
 
-/**
- * 运维工单里使用获取图片的地址是：let downUrl = getBaseUri()+'document/get?id='+cacheKey;其中cachekey就是日志图片里的key
- *
- * 下载工单中的图片和文档
- * @returns {Promise<void>}
- */
+
 export async function downloadImages(imgs) {
   if (imgs && imgs.length > 0) {
     for (let i = 0; i < imgs.length; i++) {
@@ -70,13 +64,24 @@ export let isSynchronizing = false;
 
 export let syncInfo = {}
 
+export function getSyncErrorCount() {
+  let count = 0;
+  for(let key in syncInfo) {
+    if(syncInfo[key] && syncInfo[key].status > 1) count++;
+  }
+  return count;
+}
+
 export async function startSyncTasks() {
+  console.log('startSyncTasks----------->')
   if (!isSynchronizing) {
     isSynchronizing = true;
     try {
       let ret = await syncUploadImages();
       if (!global.isConnected() || !ret) {
         //同步过程中断网了
+        isSynchronizing = false;
+        sendSyncUpdateNotify();
         return;
       };
       //图片上传完成了，就开始做任务了
@@ -88,6 +93,11 @@ export async function startSyncTasks() {
         }
       })
       for (let task of tasks) {
+        if(!global.isConnected()) {
+          isSynchronizing = false;
+          sendSyncUpdateNotify();
+          return;
+        }
         await syncTask(task);
       }
 
@@ -95,42 +105,98 @@ export async function startSyncTasks() {
       console.log('同步任务异常-------->', e)
     }
     isSynchronizing = false;
+    sendSyncUpdateNotify();
+    //如果到了这里，说明上一次的同步流程走完整了，不需要再重复一次
+    if(delayCallback) clearTimeout(delayCallback);
+    delayCallback = null;
+  }else {
+    if(delayCallback) clearTimeout(delayCallback);
+    delayCallback = setTimeout(()=>{
+      startSyncTasks();
+    },1000);
   }
+
 }
+
+let delayCallback = null;
 
 const CODE_OK = '0'
 
-async function syncTask(task) {
-  //第一步，根据工单id获取最新的工单详情
-  //如果网络异常，或者保存，就是当前任务失败
-  let res = null
-  try {
-    res = await apiTicketDetail(task.id)
-    if (res.code === CODE_OK) {
+export const SYNC_UPDATE_NOTIFY = 'SYNC_UPDATE_NOTIFY';
 
-    } else {
-      //掉接口失败了
-    }
-  } catch (e) {
-    console.log('同步获取详情失败!', task)
-  }
-
-
-  //第二步，如果最新状态是已关闭，现在多了忽略，则提示用户 工单已完成了
-
-  //第三步，判断最新的工单详情的操作记录的时间 与本地记录的操作时间做比较，
-  //如果服务器时间最新，提示 是覆盖，还是 放弃
-
-  //第四部 如果没有冲突，调用同步接口进行同步，同步完成后删除对应的本地缓存
+//当有任务更新时，发一个通知
+function sendSyncUpdateNotify() {
+  DeviceEventEmitter.emit(SYNC_UPDATE_NOTIFY)
 }
 
+export async function giveUpTask(tid) {
+  await clearTicket(tid);
+  syncInfo[tid] = undefined;
+  sendSyncUpdateNotify();
+}
 
-/**
- *
- * @param doSync 直接进行同步
- * @param doUpdateSyncData 不同步，重新查询一下待同步数据，之后走旧流程
- * @returns {Promise<boolean>}
- */
+export async function syncTask(task,force) {
+  syncInfo[task.id].status = 1;//标识当前任务为进行中
+  sendSyncUpdateNotify();
+  //第一步，根据工单id获取最新的工单详情
+  //如果网络异常，或者保存，就是当前任务失败
+  console.log('syncTask',task);
+  if(!force) {
+    let res = null
+    try {
+      res = await apiTicketDetail(task.id)
+      if (res.code === CODE_OK) {
+        res = res.data;
+      } else {
+        //掉接口失败了
+        syncInfo[task.id].status = 2;
+        sendSyncUpdateNotify();
+        return;
+      }
+    } catch (e) {
+      console.log('同步获取详情失败!', task)
+      syncInfo[task.id].status = 2;
+      sendSyncUpdateNotify();
+      return;
+    }
+    //第二步，如果最新状态是已关闭，现在多了忽略，则提示用户 工单已完成了
+    if(res.ticketState === 60 || res.ticketState === 50){
+      syncInfo[task.id].status = 4;
+      sendSyncUpdateNotify();
+      return;
+    }
+
+    //第三步，判断最新的工单详情的操作记录的时间 与本地记录的操作时间做比较，
+    //如果服务器时间最新，提示 是覆盖，还是 放弃
+    let serverLastUpdateDate = res.ticketOperateLogs[0].createTime;
+    if(moment(serverLastUpdateDate).isAfter(task.beginTime)) {
+      syncInfo[task.id].status = 3;
+      sendSyncUpdateNotify();
+      return;
+    }
+  }
+
+  //第四部 如果没有冲突，调用同步接口进行同步，同步完成后删除对应的本地缓存
+  try {
+    let res = await apiSyncTickets(task.id,task.data)
+    if (res.code === CODE_OK) {
+      //同步成功了
+      await clearTicket(task.id)
+      sendSyncUpdateNotify();
+    } else {
+      //掉接口失败了
+      syncInfo[task.id].status = 2;
+      sendSyncUpdateNotify();
+      return;
+    }
+  } catch (e) {
+    console.log('同步接口失败!', task)
+    syncInfo[task.id].status = 2;
+    sendSyncUpdateNotify();
+    return;
+  }
+}
+
 export async function syncUploadImages() {
   //从数据库待同步表里面找出所有需要同步的图片
   let arr = await getUnSyncTickets();
@@ -200,6 +266,9 @@ export async function syncUploadImages() {
             item.uri = undefined;
             await updateImageUpload(item.id, JSON.stringify(item.content));
           } else {
+            //如果同步时上传图片失败，如何处理？目前是删除此条图片
+            item.content.pictures.splice(item.index,1);
+            await updateImageUpload(item.id, JSON.stringify(item.content));
           }
         } else {
           //没有网络，就不再上传了
@@ -214,21 +283,13 @@ export async function syncUploadImages() {
 export async function updateBase64Image(url, filename) {
   try {
     let content = await RNFS.readFile(url, 'base64');
-    let ret = await fetch(getBaseUri() + 'document/upload', {
-      method: 'post',
-      headers: {
-        Cookie: getCookie()
-      },
-      body: {
-        content,
-        name: filename
-      }
-    });
-    if (ret.status === 200) {
+    let ret = await apiUploadFile({
+      content: content,
+      name: filename
+    })
+    if (ret.code === CODE_OK) {
       //上传成功会返回图片key,这个是需要记录的
-      let data = await ret.json()
-      if (data.code === '0') return data.data.key;
-      return null;
+      return ret.data.key;
     }
     return false;
   } catch (e) {
@@ -279,17 +340,14 @@ export async function querySyncTask() {
       } else if (item.operation_type === TICKET_LOG_ADD) {
         //添加日志
         let log = JSON.parse(item.new_content);
-        let logData = {
-          "TicketId": log.ticketId,
-          "Content": log.content,
-          "Pictures": log.pictures,
-        }
+        log.id = undefined;
+        log.localCreate = undefined;
         op = {
           OperationType: 5,
           Payload: {
             OperateTime: item.operation_time,
             OperationType: 1,
-            TicketLogContent: logData
+            TicketLogContent: log
           }
         }
       } else if (item.operation_type === TICKET_LOG_UPDATE) {

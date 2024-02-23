@@ -2,11 +2,11 @@
 
 import React, { Component } from 'react';
 import {
-  View, Text, ScrollView
+  View, Text, ScrollView,DeviceEventEmitter,TouchableOpacity as TouchFeedback,
 } from 'react-native';
 import PropTypes from 'prop-types';
 // import Text from '../Text';
-import TouchFeedback from './components/TouchFeedback';
+// import TouchFeedback from './components/TouchFeedback';
 import Toolbar from './components/Toolbar';
 
 import Icon from './components/Icon';
@@ -16,7 +16,7 @@ import moment from 'moment';
 import RingRound from './components/RingRound.js'
 import { TICKET_TYPE_MAP } from "./TicketList";
 import { localStr } from "./utils/Localizations/localization";
-import { querySyncTask } from "./utils/offlineUtil";
+import {giveUpTask, querySyncTask, SYNC_UPDATE_NOTIFY, syncInfo, syncTask} from "./utils/offlineUtil";
 import { getTicketFromCache, getTicketLogsFromCache } from "./utils/sqliteHelper";
 
 //0为开始，1进行中 2同步失败 3覆盖或者放弃 4工单已关闭
@@ -39,18 +39,35 @@ export default class TicketSync extends Component {
     this._loadSyncTasks().then();
   }
 
+  componentWillUnmount(){
+    this._changedListener && this._changedListener.remove();
+  }
 
+  componentDidMount(){
+    this._changedListener = DeviceEventEmitter.addListener(SYNC_UPDATE_NOTIFY,()=>{
+      this._loadSyncTasks().then();
+    })
+  }
 
   async _loadSyncTasks() {
-
     try {
       let tasks = await querySyncTask();
-
-      let ids = tasks.map(task => `"${task.id}"`).join(',');
+      let ids = tasks.map(task => `${task.id}`).join(',');
       let tickets = await getTicketFromCache(ids, true)
+      if(!tickets) {
+        //没有查询到待同步内容，则返回上级页面
+        this.props.navigation.pop()
+        return;
+      }
       //这里还需要根据进行中的同步状态做处理
       tickets.forEach(t => {
-        t.syncStatus = 1
+        let task = syncInfo[t.id];
+        if(task) {
+          t.syncStatus = task.status;
+        }else {
+          t.syncStatus = 0;
+        }
+
       })
       this.setState({ data: tickets })
     } catch (e) {
@@ -59,7 +76,6 @@ export default class TicketSync extends Component {
   }
 
   _getToolbar() {
-
     let action = [];
     let actionClick = [() => { }];
     return (
@@ -161,15 +177,23 @@ export default class TicketSync extends Component {
 
   //放弃修改的工单
   _onGiveUp = async (ticketId) => {
-
+    //所谓放弃就是删除本地操作记录
+    giveUpTask(ticketId).then()
   }
 
   _onRetry = async (ticketId) => {
-
+    console.log('--->onRetry')
+    //对当前操作再走一次同步流程
+    let task = syncInfo[ticketId];
+    console.log(task,ticketId,syncInfo)
+    if(task) await syncTask(task.task,false)
   }
 
   _onCover = async (ticketId) => {
-
+    //覆盖就是强制把本地操作同步到后端
+    let task = syncInfo[ticketId];
+    console.log(task,ticketId,syncInfo)
+    if(task) await syncTask(task.task,true)
   }
 
   _getDateDisplay(rowData) {
@@ -230,7 +254,7 @@ export default class TicketSync extends Component {
             <Text style={{ fontSize: 13, color: '#888', marginLeft: 3 }}>{localStr('lang_offline_sync_status_fail')}</Text>
             <View style={{ marginTop: -10, marginRight: -10 }}>
               <TouchFeedback onPress={() => {
-                this._onRetry(row.Id).then()
+                this._onRetry(row.id).then()
               }}>
                 <Text style={{ paddingHorizontal: 10, paddingTop: 10, fontSize: 13, color: '#3dcd58' }}>{localStr('lang_offline_sync_view_retry')}</Text>
               </TouchFeedback>
@@ -284,7 +308,7 @@ export default class TicketSync extends Component {
             </Text>
           </View>
         </View>
-        {this._getSyncStatusView(row.syncStatus, row.Id, row.isService)}
+        {this._getSyncStatusView(row.syncStatus, row.id, row.isService)}
       </View>
     )
   }

@@ -5,6 +5,7 @@ import privilegeHelper from "../utils/privilegeHelper";
 import { localStr } from "../utils/Localizations/localization";
 import { DeviceEventEmitter } from "react-native";
 import {getLanguage} from "../../../../app/utils/Localizations/localization";
+import {startSyncTasks} from "../utils/offlineUtil";
 let _BASEURL = "";
 
 export function getBaseUri() {
@@ -169,6 +170,15 @@ export async function apiDownloadTicketList(date) {
   })
 }
 
+//请求工单列表
+export async function apiSyncTickets(tid,body) {
+  return await defaultFetch({
+    url: `tickets/submit/${tid}`,//需要替换成同步接口
+    verb: 'post',
+    body
+  })
+}
+
 //工单筛选
 export function filterTicketList() {
 
@@ -269,6 +279,10 @@ export async function configCookie(data) {
   //   verb:'post',
   //   body:body
   // })
+
+  if(global.isConnected()){
+    startSyncTasks().then();
+  }
 }
 
 //获取工单详情
