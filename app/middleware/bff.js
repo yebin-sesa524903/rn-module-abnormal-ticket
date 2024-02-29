@@ -4,8 +4,8 @@ import RNFetchBlobFile from "react-native-fetch-blob/class/RNFetchBlobFile";
 import privilegeHelper from "../utils/privilegeHelper";
 import { localStr } from "../utils/Localizations/localization";
 import { DeviceEventEmitter } from "react-native";
-import {getLanguage} from "../../../../app/utils/Localizations/localization";
-import {startSyncTasks} from "../utils/offlineUtil";
+import { getLanguage } from "../../../../app/utils/Localizations/localization";
+import { startSyncTasks } from "../utils/offlineUtil";
 let _BASEURL = "";
 
 export function getBaseUri() {
@@ -16,9 +16,9 @@ export function getCookie() {
   return setCookie;
 }
 
-function configLan(){
+function configLan() {
   let lan = getLanguage()
-  if(lan === 'en') {
+  if (lan === 'en') {
     return `en-US`
   }
   return `zh-CN`
@@ -31,7 +31,7 @@ let defaultFetch = async function (options) {
     "Content-Type": "application/json",
     'Accept': 'application/json',
     'Cache-Control': 'no-store',
-    'Accept-Language':configLan(),
+    'Accept-Language': configLan(),
   };
   //headers[tokenKey] = token;
   //headers['Cookie'] = token;
@@ -118,7 +118,7 @@ let defaultFetch = async function (options) {
       //   console.log('data',data)
       //   return data//reader.result;
       // }
-      console.log('\n请求参数:' + body + '\n请求地址:' + url + '\n请求结果:' , data, + '\n\n');
+      console.log('\n请求参数:' + body + '\n请求地址:' + url + '\n请求结果:', data, + '\n\n');
       return data;
     }).catch(err => {
       return new Promise((resolve) => {
@@ -160,20 +160,20 @@ export async function apiTicketList(date, pageNo) {
 //请求工单列表
 export async function apiDownloadTicketList(date) {
   return await defaultFetch({
-    url: 'ticket/ticketList',//需要替换成下载接口
+    url: 'ticket/downloadTicket',//需要替换成下载接口
     verb: 'post',
     body: {
       searchDate: date,
-      pageNo:1,
+      // pageNo: 1,
       ticketTypes: [9, 10, 2]
     }
   })
 }
 
 //请求工单列表
-export async function apiSyncTickets(tid,body) {
+export async function apiSyncTickets(tid, body) {
   return await defaultFetch({
-    url: `tickets/submit/${tid}`,//需要替换成同步接口
+    url: `ticket/syncTicket`,//需要替换成同步接口
     verb: 'post',
     body
   })
@@ -233,12 +233,21 @@ export async function apiQueryTicketList(filter) {
       }
     })
   }
+  /**
+   * executeStartDate
+executeEndDate
+   */
   if (filter.StartTime) {
-    data.startDate = moment(filter.StartTime).format(DAY_FORMAT);
+    data.executeStartDate = moment(filter.StartTime).format(DAY_FORMAT);
+
   }
   if (filter.EndTime) {
-    data.endDate = moment(filter.EndTime).format(DAY_FORMAT);
+    data.executeEndDate = moment(filter.EndTime).format(DAY_FORMAT);
+
   }
+  //searchDate
+  data.startDate = filter.day;
+  data.endDate = filter.day;
   if (filter.ticketName) data.title = filter.ticketName;
   // data.locations=[
   //   {
@@ -253,7 +262,7 @@ export async function apiQueryTicketList(filter) {
   })
 }
 
-export function updateAbnormalCustomerId(id){
+export function updateAbnormalCustomerId(id) {
   customerId = id;
 }
 
@@ -280,7 +289,7 @@ export async function configCookie(data) {
   //   body:body
   // })
 
-  if(global.isConnected()){
+  if (global.isConnected()) {
     startSyncTasks().then();
   }
 }

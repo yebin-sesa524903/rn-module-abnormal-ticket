@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import {
-  View, Text, ScrollView,DeviceEventEmitter,TouchableOpacity as TouchFeedback,
+  View, Text, ScrollView, DeviceEventEmitter, TouchableOpacity as TouchFeedback,
 } from 'react-native';
 import PropTypes from 'prop-types';
 // import Text from '../Text';
@@ -16,19 +16,14 @@ import moment from 'moment';
 import RingRound from './components/RingRound.js'
 import { TICKET_TYPE_MAP } from "./TicketList";
 import { localStr } from "./utils/Localizations/localization";
-import {giveUpTask, querySyncTask, SYNC_UPDATE_NOTIFY, syncInfo, syncTask} from "./utils/offlineUtil";
+import { giveUpTask, querySyncTask, SYNC_UPDATE_NOTIFY, syncInfo, syncTask } from "./utils/offlineUtil";
 import { getTicketFromCache, getTicketLogsFromCache } from "./utils/sqliteHelper";
+import Colors, { isDarkMode } from "../../../app/utils/const/Colors";
 
-//0为开始，1进行中 2同步失败 3覆盖或者放弃 4工单已关闭
-let STATUS_TEXT = ['',
-  '',
-  '同步失败',
-  '该工单已被其他用户执行，确认覆盖？若放弃将获取云端最新数据',
-  '该工单已被其他用户关闭，将获取云端最新数据。',
-  '没有层级权限',
-  '工单不存在',
-  '工单状态不一致',
-
+let STATUS_TEXT = ['', '',
+  localStr('lang_offline_sync_status_fail'),
+  localStr('lang_offline_sync_error_conflict'),
+  localStr('lang_offline_sync_error_close')
 ];
 
 export default class TicketSync extends Component {
@@ -39,12 +34,12 @@ export default class TicketSync extends Component {
     this._loadSyncTasks().then();
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     this._changedListener && this._changedListener.remove();
   }
 
-  componentDidMount(){
-    this._changedListener = DeviceEventEmitter.addListener(SYNC_UPDATE_NOTIFY,()=>{
+  componentDidMount() {
+    this._changedListener = DeviceEventEmitter.addListener(SYNC_UPDATE_NOTIFY, () => {
       this._loadSyncTasks().then();
     })
   }
@@ -54,7 +49,7 @@ export default class TicketSync extends Component {
       let tasks = await querySyncTask();
       let ids = tasks.map(task => `${task.id}`).join(',');
       let tickets = await getTicketFromCache(ids, true)
-      if(!tickets) {
+      if (!tickets) {
         //没有查询到待同步内容，则返回上级页面
         this.props.navigation.pop()
         return;
@@ -62,9 +57,9 @@ export default class TicketSync extends Component {
       //这里还需要根据进行中的同步状态做处理
       tickets.forEach(t => {
         let task = syncInfo[t.id];
-        if(task) {
+        if (task) {
           t.syncStatus = task.status;
-        }else {
+        } else {
           t.syncStatus = 0;
         }
 
@@ -101,12 +96,12 @@ export default class TicketSync extends Component {
             <TouchFeedback onPress={() => {
               this._onCover(ticketId).then();
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_offline_sync_view_cover')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_offline_sync_view_cover')}</Text>
             </TouchFeedback>
             <TouchFeedback onPress={() => {
               this._onGiveUp(ticketId).then()
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
             </TouchFeedback>
           </View>
         )
@@ -117,7 +112,7 @@ export default class TicketSync extends Component {
             <TouchFeedback onPress={() => {
               this._onGiveUp(ticketId).then()
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_ticket_filter_ok')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_ticket_filter_ok')}</Text>
             </TouchFeedback>
           </View>
         )
@@ -128,12 +123,12 @@ export default class TicketSync extends Component {
             <TouchFeedback onPress={() => {
               this._onRetry(ticketId).then();
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_offline_sync_view_retry')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_offline_sync_view_retry')}</Text>
             </TouchFeedback>
             <TouchFeedback onPress={() => {
               this._onGiveUp(ticketId).then()
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
             </TouchFeedback>
           </View>
         )
@@ -144,7 +139,7 @@ export default class TicketSync extends Component {
             <TouchFeedback onPress={() => {
               this._onGiveUp(ticketId).then()
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
             </TouchFeedback>
           </View>
         )
@@ -155,7 +150,7 @@ export default class TicketSync extends Component {
             <TouchFeedback onPress={() => {
               this._onGiveUp(ticketId).then()
             }}>
-              <Text style={{ padding: 10, fontSize: 13, color: '#3dcd58', lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
+              <Text style={{ padding: 10, fontSize: 13, color: Colors.seGreen, lineHeight: 18 }}>{localStr('lang_offline_sync_view_give_up')}</Text>
             </TouchFeedback>
           </View>
         )
@@ -164,8 +159,8 @@ export default class TicketSync extends Component {
       return (
         <View style={{ flexDirection: 'row', marginBottom: 20 }}>
           <View style={{ flexDirection: 'row', flex: 1, marginRight: 20 }}>
-            <Icon style={{ marginTop: 2 }} type="icon_info_down" color="#ff4d4d" size={14} />
-            <Text style={{ marginLeft: 8, fontSize: 13, lineHeight: 18, color: '#ff4d4d' }}>{STATUS_TEXT[status]}</Text>
+            <Icon style={{ marginTop: 2 }} type="icon_info_down" color={Colors.seRed} size={14} />
+            <Text style={{ marginLeft: 8, fontSize: 13, lineHeight: 18, color: Colors.seRed }}>{STATUS_TEXT[status]}</Text>
           </View>
           {actionView}
         </View>
@@ -185,15 +180,15 @@ export default class TicketSync extends Component {
     console.log('--->onRetry')
     //对当前操作再走一次同步流程
     let task = syncInfo[ticketId];
-    console.log(task,ticketId,syncInfo)
-    if(task) await syncTask(task.task,false)
+    console.log(task, ticketId, syncInfo)
+    if (task) await syncTask(task.task, false)
   }
 
   _onCover = async (ticketId) => {
     //覆盖就是强制把本地操作同步到后端
     let task = syncInfo[ticketId];
-    console.log(task,ticketId,syncInfo)
-    if(task) await syncTask(task.task,true)
+    console.log(task, ticketId, syncInfo)
+    if (task) await syncTask(task.task, true)
   }
 
   _getDateDisplay(rowData) {
@@ -232,8 +227,8 @@ export default class TicketSync extends Component {
       case 0:
         statusView = (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon2 name="pause-circle" size='13' color="#fbb325" />
-            <Text style={{ fontSize: 13, color: '#888', marginLeft: 3 }}>{localStr('lang_offline_sync_status_waiting')}</Text>
+            <Icon2 name="pause-circle" size='13' color={Colors.seYellow} />
+            <Text style={{ fontSize: 13, color: Colors.seTextPrimary, marginLeft: 3 }}>{localStr('lang_offline_sync_status_waiting')}</Text>
           </View>
         );
         break;
@@ -241,22 +236,22 @@ export default class TicketSync extends Component {
         statusView = (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <RingRound>
-              <Icon2 name="sync" size='13' color="#3dcd58" />
+              <Icon2 name="sync" size='13' color={Colors.seGreen} />
             </RingRound>
-            <Text style={{ fontSize: 13, color: '#888', marginLeft: 3 }}>{localStr('lang_offline_sync_status_doing')}</Text>
+            <Text style={{ fontSize: 13, color: Colors.seTextPrimary, marginLeft: 3 }}>{localStr('lang_offline_sync_status_doing')}</Text>
           </View>
         );
         break;
       case 2://同步失败
         statusView = (
           <View style={{ flexDirection: 'row' }}>
-            <Icon2 style={{ alignSelf: 'center', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }} name="close-circle" size='13' color="#ff4d4d" />
-            <Text style={{ fontSize: 13, color: '#888', marginLeft: 3 }}>{localStr('lang_offline_sync_status_fail')}</Text>
+            <Icon2 style={{ alignSelf: 'center', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }} name="close-circle" size='13' color={Colors.seRed} />
+            <Text style={{ fontSize: 13, color: Colors.seTextPrimary, marginLeft: 3 }}>{localStr('lang_offline_sync_status_fail')}</Text>
             <View style={{ marginTop: -10, marginRight: -10 }}>
               <TouchFeedback onPress={() => {
                 this._onRetry(row.id).then()
               }}>
-                <Text style={{ paddingHorizontal: 10, paddingTop: 10, fontSize: 13, color: '#3dcd58' }}>{localStr('lang_offline_sync_view_retry')}</Text>
+                <Text style={{ paddingHorizontal: 10, paddingTop: 10, fontSize: 13, color: Colors.seGreen }}>{localStr('lang_offline_sync_view_retry')}</Text>
               </TouchFeedback>
             </View>
           </View>
@@ -265,45 +260,45 @@ export default class TicketSync extends Component {
       case 3://覆盖放弃
         statusView = (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon2 name="pause-circle" size="13" color="#fbb325" />
-            <Text style={{ fontSize: 13, color: '#888', marginLeft: 3 }}>{localStr('lang_offline_sync_status_waiting')}</Text>
+            <Icon2 name="pause-circle" size="13" color={Colors.seYellow} />
+            <Text style={{ fontSize: 13, color: Colors.seTextPrimary, marginLeft: 3 }}>{localStr('lang_offline_sync_status_waiting')}</Text>
           </View>
         );
         break;
       case 4://工单已关闭
         statusView = (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon2 name="close-circle" size="13" color="#ff4d4d" />
-            <Text style={{ fontSize: 13, color: '#888', marginLeft: 3 }}>{localStr('lang_offline_sync_status_fail')}</Text>
+            <Icon2 name="close-circle" size="13" color={Colors.seRed} />
+            <Text style={{ fontSize: 13, color: Colors.seTextPrimary, marginLeft: 3 }}>{localStr('lang_offline_sync_status_fail')}</Text>
           </View>
         );
         break;
     }
     return (
       <View key={index}>
-        <View style={{ marginBottom: 10, backgroundColor: '#fff', padding: 10, paddingHorizontal: 16, borderRadius: 2 }}>
+        <View style={{ marginBottom: 10, backgroundColor: Colors.seBgContainer, padding: 10, paddingHorizontal: 16, borderRadius: 2 }}>
           <View style={{
-            flexDirection: 'row', backgroundColor: '#fafafa', margin: -16, marginTop: -10,
+            flexDirection: 'row', backgroundColor: Colors.seShadowColor, margin: -16, marginTop: -10,
             padding: 10, paddingVertical: 12, borderTopLeftRadius: 2, borderTopRightRadius: 2
           }}>
-            <Text numberOfLines={1} style={{ fontSize: 13, flex: 1, color: '#888', marginRight: 8 }}>{`${date} | ${ticketStatus}`}</Text>
+            <Text numberOfLines={1} style={{ fontSize: 13, flex: 1, color: Colors.seTextPrimary, marginRight: 8 }}>{`${date} | ${ticketStatus}`}</Text>
             {statusView}
           </View>
 
           <View style={{ marginTop: 32 }}>
-            <Text numberOfLines={1} style={{ fontSize: 17, fontWeight: '500', color: '#333' }}>
+            <Text numberOfLines={1} style={{ fontSize: 17, fontWeight: '500', color: Colors.seTextTitle }}>
               {row.assets ? row.assets.map(a => a.assetName).join('、') : ''}
             </Text>
           </View>
           <View style={{ marginTop: 12 }}>
-            <Text numberOfLines={2} style={{ fontSize: 15, lineHeight: 23, color: '#888' }}>
+            <Text numberOfLines={2} style={{ fontSize: 15, lineHeight: 23, color: Colors.seTextPrimary }}>
               {row.content || ''}
             </Text>
           </View>
-          <View style={{ flex: 1, height: 1, backgroundColor: '#f2f2f2', marginVertical: 10 }}></View>
+          <View style={{ flex: 1, height: 1, backgroundColor: Colors.seBorderSplit, marginVertical: 10 }}></View>
           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <Icon type="arrow_location" color="#b2b2b2" size={12} />
-            <Text numberOfLines={1} style={{ fontSize: 13, color: "#b2b2b2", marginLeft: 4 }}>
+            <Icon type="arrow_location" color={Colors.seTextPrimary} size={12} />
+            <Text numberOfLines={1} style={{ fontSize: 13, color: Colors.seTextPrimary, marginLeft: 4 }}>
               {row.locationInfo || ''}
             </Text>
           </View>
@@ -318,7 +313,7 @@ export default class TicketSync extends Component {
       return this._renderRow(item, index);
     });
     return (
-      <View style={{ flex: 1, backgroundColor: '#f2f2f2' }}>
+      <View style={{ flex: 1, backgroundColor: Colors.seBgLayout }}>
         {this._getToolbar()}
         <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingVertical: 10 }}>
           {rows}

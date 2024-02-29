@@ -6,7 +6,7 @@ import {
   TICKET_TYPE_SAVE_SIGN
 } from "./sqliteHelper";
 import { Platform, Dimensions } from 'react-native';
-import {DeviceEventEmitter} from 'react-native'
+import { DeviceEventEmitter } from 'react-native'
 import RNFS, { DocumentDirectoryPath, ExternalDirectoryPath } from 'react-native-fs';
 import RNFetchBlob from 'react-native-fetch-blob';
 import moment from 'moment';
@@ -15,7 +15,7 @@ import {
   getDownloadTimeByTicketId, getUnSyncTickets, updateImageUpload,
   TICKET_LOG_ADD, TICKET_LOG_UPDATE,
 } from "./sqliteHelper";
-import {apiSyncTickets, apiTicketDetail, apiUploadFile, getBaseUri, getCookie} from "../middleware/bff";
+import { apiSyncTickets, apiTicketDetail, apiUploadFile, getBaseUri, getCookie, userId, userName } from "../middleware/bff";
 
 const dirPath = Platform.OS === 'ios' ? DocumentDirectoryPath : ExternalDirectoryPath
 
@@ -66,8 +66,8 @@ export let syncInfo = {}
 
 export function getSyncErrorCount() {
   let count = 0;
-  for(let key in syncInfo) {
-    if(syncInfo[key] && syncInfo[key].status > 1) count++;
+  for (let key in syncInfo) {
+    if (syncInfo[key] && syncInfo[key].status > 1) count++;
   }
   return count;
 }
@@ -93,7 +93,7 @@ export async function startSyncTasks() {
         }
       })
       for (let task of tasks) {
-        if(!global.isConnected()) {
+        if (!global.isConnected()) {
           isSynchronizing = false;
           sendSyncUpdateNotify();
           return;
@@ -107,13 +107,13 @@ export async function startSyncTasks() {
     isSynchronizing = false;
     sendSyncUpdateNotify();
     //如果到了这里，说明上一次的同步流程走完整了，不需要再重复一次
-    if(delayCallback) clearTimeout(delayCallback);
+    if (delayCallback) clearTimeout(delayCallback);
     delayCallback = null;
-  }else {
-    if(delayCallback) clearTimeout(delayCallback);
-    delayCallback = setTimeout(()=>{
+  } else {
+    if (delayCallback) clearTimeout(delayCallback);
+    delayCallback = setTimeout(() => {
       startSyncTasks();
-    },1000);
+    }, 1000);
   }
 
 }
@@ -135,13 +135,13 @@ export async function giveUpTask(tid) {
   sendSyncUpdateNotify();
 }
 
-export async function syncTask(task,force) {
+export async function syncTask(task, force) {
   syncInfo[task.id].status = 1;//标识当前任务为进行中
   sendSyncUpdateNotify();
   //第一步，根据工单id获取最新的工单详情
   //如果网络异常，或者保存，就是当前任务失败
-  console.log('syncTask',task);
-  if(!force) {
+  console.log('syncTask', task);
+  if (!force) {
     let res = null
     try {
       res = await apiTicketDetail(task.id)
@@ -160,7 +160,7 @@ export async function syncTask(task,force) {
       return;
     }
     //第二步，如果最新状态是已关闭，现在多了忽略，则提示用户 工单已完成了
-    if(res.ticketState === 60 || res.ticketState === 50){
+    if (res.ticketState === 60 || res.ticketState === 50) {
       syncInfo[task.id].status = 4;
       sendSyncUpdateNotify();
       return;
@@ -169,7 +169,7 @@ export async function syncTask(task,force) {
     //第三步，判断最新的工单详情的操作记录的时间 与本地记录的操作时间做比较，
     //如果服务器时间最新，提示 是覆盖，还是 放弃
     let serverLastUpdateDate = res.ticketOperateLogs[0].createTime;
-    if(moment(serverLastUpdateDate).isAfter(task.beginTime)) {
+    if (moment(serverLastUpdateDate).isAfter(task.beginTime)) {
       syncInfo[task.id].status = 3;
       sendSyncUpdateNotify();
       return;
@@ -178,7 +178,7 @@ export async function syncTask(task,force) {
 
   //第四部 如果没有冲突，调用同步接口进行同步，同步完成后删除对应的本地缓存
   try {
-    let res = await apiSyncTickets(task.id,task.data)
+    let res = await apiSyncTickets(task.id, task.data)
     if (res.code === CODE_OK) {
       //同步成功了
       await clearTicket(task.id)
@@ -267,7 +267,7 @@ export async function syncUploadImages() {
             await updateImageUpload(item.id, JSON.stringify(item.content));
           } else {
             //如果同步时上传图片失败，如何处理？目前是删除此条图片
-            item.content.pictures.splice(item.index,1);
+            item.content.pictures.splice(item.index, 1);
             await updateImageUpload(item.id, JSON.stringify(item.content));
           }
         } else {
@@ -299,6 +299,17 @@ export async function updateBase64Image(url, filename) {
 
 }
 
+/**
+ *
+ * {
+        "userId": 814256, // 用户id
+        "userName": "tian_test", // 用户名称
+        "ticketId": 2756062101154816, // 工单id
+        "operationType": 1, // 操作类型
+        "operationTime": "2024-02-22 14:25:24" // 操作时间
+    },
+ */
+
 //TODO 注意，参数字段名需要和后端确定
 export async function querySyncTask() {
   //读取本地
@@ -313,22 +324,32 @@ export async function querySyncTask() {
       });
       //获取指定工单对应的下载时间（判断冲突时需要使用到）
       let downloadTime = await getDownloadTimeByTicketId(item.ticket_id);
-      let op = null;
+      let op = op = {
+        "userId": userId, // 用户id
+        "userName": userName, // 用户名称
+        "ticketId": item.ticket_id, // 工单id
+        "operationType": 1, // 操作类型
+        "operationTime": item.operation_time // 操作时间
+      };
       if (item.operation_type === 3) {//执行工单状态需要单独区分，因为添加了定位信息
         //let content=JSON.parse(item.new_content);
-        op = { "OperationType": 1, "Payload": { 'StartDateTime': item.operation_time, } };
+        // op = { "OperationType": 1, "Payload": { 'StartDateTime': item.operation_time, } };
+        op.operationType = 1;
       } else if (item.operation_type === 1) {
         //状态更新
         switch (String(item.new_status)) {
           case '50'://完成工单
-            op = { "OperationType": 4, "Payload": { 'CloseDateTime': item.operation_time } };
+            // op = { "OperationType": 4, "Payload": { 'CloseDateTime': item.operation_time } };
+            op.operationType = 4;
             break;
           case '30'://提交工单
-            op = { "OperationType": 2, "Payload": { 'AuthDateTime': item.operation_time } };
+            // op = { "OperationType": 2, "Payload": { 'AuthDateTime': item.operation_time } };
+            op.operationType = 2;
             break;
           case '60'://忽略工单
             //TODO 假设忽略工单对应的操作是5，这个需要和后端协商确定
-            op = { "OperationType": 5, "Payload": { 'IgnoreDateTime': item.operation_time } };
+            // op = { "OperationType": 5, "Payload": { 'IgnoreDateTime': item.operation_time } };
+            op.operationType = 6;
             break;
         }
       } else if (item.operation_type === 2) {
@@ -342,33 +363,48 @@ export async function querySyncTask() {
         let log = JSON.parse(item.new_content);
         log.id = undefined;
         log.localCreate = undefined;
-        op = {
-          OperationType: 5,
-          Payload: {
-            OperateTime: item.operation_time,
-            OperationType: 1,
-            TicketLogContent: log
-          }
+        // op = {
+        //   OperationType: 5,
+        //   Payload: {
+        //     OperateTime: item.operation_time,
+        //     OperationType: 1,
+        //     TicketLogContent: log
+        //   }
+        // }
+        op.operationType = 5;
+        op.ticketLog = {
+          ...log,
+          operationType: 1,
         }
       } else if (item.operation_type === TICKET_LOG_UPDATE) {
         //修改日志
-        op = {
-          OperationType: 5,
-          Payload: {
-            OperateTime: item.operation_time,
-            OperationType: 2,
-            TicketLogContent: JSON.parse(item.new_content)
-          }
+        // op = {
+        //   OperationType: 5,
+        //   Payload: {
+        //     OperateTime: item.operation_time,
+        //     OperationType: 2,
+        //     TicketLogContent: JSON.parse(item.new_content)
+        //   }
+        // }
+        op.operationType = 5;
+        op.ticketLog = {
+          ...JSON.parse(item.new_content),
+          operationType: 2,
         }
       } else if (item.operation_type === TICKET_LOG_DELETE) {
         //删除日志
-        op = {
-          OperationType: 5,
-          Payload: {
-            OperateTime: item.operation_time,
-            OperationType: 3,
-            TicketLogContent: JSON.parse(item.new_content)
-          }
+        // op = {
+        //   OperationType: 5,
+        //   Payload: {
+        //     OperateTime: item.operation_time,
+        //     OperationType: 3,
+        //     TicketLogContent: JSON.parse(item.new_content)
+        //   }
+        // }
+        op.operationType = 5;
+        op.ticketLog = {
+          ...JSON.parse(item.new_content),
+          operationType: 3,
         }
       }
 
@@ -527,7 +563,135 @@ function getOne() {
     },
     "msg": "操作成功"
   }
-  return oneTicket;
+
+  let toTicket = {
+    "code": "0",
+    "data": {
+      "id": "693237389103726592",
+      "ownerId": "",
+      "ownerType": null,
+      "objectId": "113",
+      "objectType": 25,
+      "ticketCode": "113_10_20231113_000001",
+      "sysClass": 1,
+      "sysClassLabel": "空调",
+      "ticketState": 20,
+      "ticketStateLabel": "执行中",
+      "ticketType": 10,
+      "ticketTypeLabel": "异常行为工单",
+      "title": "行为异常工单",
+      "customerId": 1,
+      "content": "行为异常工单",
+      "startTime": "2023-11-13 00:00:00",
+      "endTime": "2023-11-15 23:59:59",
+      "extensionProperties": null,
+      "assets": [
+        {
+          "assetId": 116,
+          "assetType": 26,
+          "assetName": "节能设备_测试2",
+          "locationId": 113,
+          "locationType": 25,
+          "locationName": "测试门店2",
+          "extensionProperties": null
+        }
+      ],
+      "executors": [
+        {
+          "userId": 814235,
+          "userName": "test_admin"
+        },
+        {
+          "userId": 814245,
+          "userName": "qa_admin"
+        }
+      ],
+      "ticketLogs": [
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "id": "2818227407480832",
+          "ticketId": "693237389103726592",
+          "content": "123",
+          "createTime": "2023-12-22 10:24:35",
+          "pictures": [
+            {
+              "key": "2818227308178432",
+              "name": "图像-B7227C8A-9125-46EF-852D-14444EBB257A.png"
+            }
+          ]
+        },
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "id": "2806869531929600",
+          "ticketId": "693237389103726592",
+          "content": "qwr",
+          "createTime": "2023-12-18 10:07:40",
+          "pictures": []
+        }
+      ],
+      "ticketOperateLogs": [
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "operationType": 20,
+          "operationDescription": "新加日志",
+          "content": null,
+          "createTime": "2023-12-22 10:24:35"
+        },
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "operationType": 20,
+          "operationDescription": "新加日志",
+          "content": null,
+          "createTime": "2023-12-18 10:07:40"
+        },
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "operationType": 30,
+          "operationDescription": "开始执行",
+          "content": null,
+          "createTime": "2023-12-18 10:07:06"
+        },
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "operationType": 11,
+          "operationDescription": "更新工单",
+          "content": null,
+          "createTime": "2023-12-18 10:07:02"
+        },
+        {
+          "userId": 814235,
+          "userName": "test_admin",
+          "operationType": 11,
+          "operationDescription": "更新工单",
+          "content": null,
+          "createTime": "2023-12-18 10:06:50"
+        },
+        {
+          "userId": 813928,
+          "userName": "admin",
+          "operationType": 10,
+          "operationDescription": "创建工单",
+          "content": null,
+          "createTime": "2023-11-13 11:38:57"
+        }
+      ],
+      "createUser": 813928,
+      "createUserName": "admin",
+      "createTime": "2023-11-13T11:38:56.640+08:00",
+      "updateTime": "2023-12-18T10:07:06.837+08:00",
+      "updateUser": 814235,
+      "updateUserName": "test_admin",
+      "rejectReason": null
+    },
+    "msg": "操作成功"
+  }
+  return toTicket;
 }
 
 
@@ -559,7 +723,7 @@ export async function checkDisk() {
 //根据日期下载离线工单
 export async function downloadTickets(date, data) {
   console.log(date, data)
-  await clearCacheTicket();
+  // await clearCacheTicket();
   //第一部，从数据里找出图片，然后下载到本地
   let imgs = findImagesFromDownloadTickets(data);
   await downloadImages(imgs);

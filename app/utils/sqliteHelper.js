@@ -27,13 +27,13 @@ export async function getCacheTicketCount() {
 
 }
 
-//将下载的工单保存在本地数据库中
+
 export async function cacheDownloadTickets(downloadDate, arrTickets) {
   if (!sqLite) {
     sqLite = SQLite.getInstance();
   }
   let lastUpdateTime = moment().format('YYYY-MM-DD HH:mm:ss');
-  //找到所有工单里面的工单日志，需要删除对应的工单日志
+
   let ticket_log_ids = [];
   arrTickets.forEach(item => {
     ticket_log_ids = ticket_log_ids.concat(item.ticketLogs.map(log => log.id));
@@ -42,7 +42,7 @@ export async function cacheDownloadTickets(downloadDate, arrTickets) {
   let ids = arrTickets.map(item => item.id);
   let result = await sqLite.cmdSql('select ticket_id from ticket_operation GROUP BY ticket_id', [])
   let needDeleteIds = [].concat(ids);
-  if (result.rows.length > 0) {//删除所有下载中不包括已修改的ID
+  if (result.rows.length > 0) {
     for (let i = 0; i < result.rows.length; i++) {
       let index = needDeleteIds.findIndex(item => item === result.rows.item(i).ticket_id);
       if (index >= 0) {
@@ -51,9 +51,9 @@ export async function cacheDownloadTickets(downloadDate, arrTickets) {
       }
     }
   } else {
-    needDeleteIds = ids;//删除所有下载中的id
+    needDeleteIds = ids;
   }
-  //删除指定ids 需要从日志表和工单表中删除
+
   await sqLite.cmdSql(`delete from ticket_logs where ticket_id in (${needDeleteIds.join(',')})`, [])
   await sqLite.cmdSql(`delete from tickets where ticket_id in (${needDeleteIds.join(',')})`, [])
   //开始插入缓存数据
@@ -66,7 +66,7 @@ export async function cacheDownloadTickets(downloadDate, arrTickets) {
     let content = item.content || '';
     await sqLite.cmdSql("INSERT INTO tickets(ticket_id,ticket_detail,download_date,status,content) values(?,?,?,?,?)",
       [ticket_id, ticket_detail, download_date, status, content])
-    //保存对应的工单日志到数据库
+
     if (item.ticketLogs && item.ticketLogs.length > 0) {
       for (let log of item.ticketLogs) {
         await sqLite.cmdSql('insert into ticket_logs(log_id,ticket_id,log_detail) values(?,?,?)',
@@ -76,7 +76,7 @@ export async function cacheDownloadTickets(downloadDate, arrTickets) {
   }
 }
 
-//判断指定的工单是否缓存到本地
+
 export async function isTicketInCache(ticketId, tableName = 'tickets') {
   if (!sqLite) {
     sqLite = SQLite.getInstance();
@@ -111,9 +111,6 @@ export async function updateImageUpload(pid, content, tableName = 'ticket_operat
   await sqLite.cmdSql(ticketUpdateSql, ticketUpdateParams);
 }
 
-//保存工单本地的修改，状态和巡检内容保存
-//type==1,type===2,type=3那么newStatusOrContents字段存储状态和gps定位信息，格式如下:{status:1,gps:{lat,lng}}
-//说明 服务报告本地修改 只用到了 operation 1:修改状态 和 2：修改内容
 export async function cacheTicketModify(ticketId, type, newStatusOrContents, isService = false) {
   if (!sqLite) {
     sqLite = SQLite.getInstance();
@@ -132,7 +129,6 @@ export async function cacheTicketModify(ticketId, type, newStatusOrContents, isS
     let tableName = isService ? 'service_tickets' : 'tickets';
     ticketUpdateSql = `UPDATE ${tableName} SET status = ? WHERE ticket_id = ? `;
     ticketUpdateParams = [new_status, ticket_id];
-    //只有处理关闭工单才这么处理
     if (typeof newStatusOrContents === 'object') {
       new_status = newStatusOrContents.status;
       new_content = newStatusOrContents.content;
@@ -142,81 +138,22 @@ export async function cacheTicketModify(ticketId, type, newStatusOrContents, isS
       if (ticket) {
         await sqLite.cmdSql('UPDATE tickets SET ticket_detail = ? WHERE ticket_id = ? ', [JSON.stringify(ticket), ticket_id])
       }
-
-      // //更新处理意见
-      // getTicketFromCache(ticket_id).then(ticket=>{
-      //   if(ticket){
-      //     ticket.ChiefOperatorConductResult=newStatusOrContents.content;
-      //     sqLite.executeSql(
-      //       'UPDATE tickets SET ticket_detail = ? WHERE ticket_id = ? ', [JSON.stringify(ticket),ticket_id],()=>{
-      //       }
-      //     );
-      //   }
-      // });
     }
 
   } else if (type === 2) {
-
-    //数据格式：{ticket,summary,content,update},update为只修改项目,同步解析和同步中对图片处理部分，需要根据此格式进行调整
-    //判断有没有修改巡检项
     let onlyContent = newStatusOrContents.content;
     if (onlyContent) {
-      //有修改
       let tableName = isService ? 'service_tickets' : 'tickets';
       ticketUpdateSql = `UPDATE ${tableName} SET content = ?,ticket_detail = ? WHERE ticket_id = ? `;
       ticketUpdateParams = [JSON.stringify(onlyContent), newStatusOrContents.ticket, ticket_id];
     }
     new_content = JSON.stringify(newStatusOrContents);
-
-
-    /**  保留思路
-    //由于现在离线巡检项同步只同步修改部分，这里数据有调整,分为完整的巡检项full,和修改部分update
-    new_content=newStatusOrContents.update;
-    ticketUpdateSql='UPDATE tickets SET content = ? WHERE ticket_id = ? ';
-    ticketUpdateParams=[newStatusOrContents.full,ticket_id];
-    **/
-
   } else if (type === 3) {//开始执行
     new_status = newStatusOrContents.status;
     ticketUpdateSql = 'UPDATE tickets SET status = ? WHERE ticket_id = ? ';
     ticketUpdateParams = [new_status, ticket_id];
-    // if(newStatusOrContents.urgenceTicket){
-    //     //如果是抢修工单，还需要修改UserTicketStatus值为3
-    //     getTicketFromCache(ticket_id).then(ticket=>{
-    //         if(ticket&&ticket.TicketType===7){
-    //             ticket.UserTicketStatus=3;
-    //             sqLite.executeSql(
-    //                 'UPDATE tickets SET ticket_detail = ? WHERE ticket_id = ? ', [JSON.stringify(ticket),ticket_id],()=>{
-    //                     console.warn('更新抢修工单状态');
-    //                 }
-    //             );
-    //         }
-    //     });
-    // }
     new_content = JSON.stringify(newStatusOrContents);
-    // operation_type=1;
   }
-  // else if(type===TICKET_TYPE_SAVE_SIGN || type === TICKET_TYPE_SAVE_SIGN_BZ){
-  //   //离线保存签名到数据库,保存到操作表就是base64,保存到工单详情表的字段是
-  //   new_content=newStatusOrContents;
-  //   ticketUpdateSql=null;
-  //   getTicketFromCache(ticket_id).then(ticket=>{
-  //     if(ticket){
-  //       if(type===TICKET_TYPE_SAVE_SIGN)
-  //         ticket.SignFilePath='data:image/jpeg;base64,'+newStatusOrContents;
-  //       else{
-  //         ticket.ChiefOperatorSignFilePath='data:image/jpeg;base64,'+newStatusOrContents;
-  //       }
-  //       sqLite.executeSql(
-  //         'UPDATE tickets SET ticket_detail = ? WHERE ticket_id = ? ', [JSON.stringify(ticket),ticket_id],()=>{
-  //           console.warn('更新抢修工单状态');
-  //         }
-  //       );
-  //     }
-  //   });
-  // }else{
-  //   throw('error:unsupport type is not 1 or 2');
-  // }
   if (ticketUpdateSql) {
     await sqLite.cmdSql(ticketUpdateSql, ticketUpdateParams)
   }
@@ -226,8 +163,6 @@ export async function cacheTicketModify(ticketId, type, newStatusOrContents, isS
 
 }
 
-
-// 删除某工单+所有操作数据
 export async function clearTicket(ticketId, isService = false) {
   if (!sqLite) {
     sqLite = SQLite.getInstance();
@@ -238,7 +173,7 @@ export async function clearTicket(ticketId, isService = false) {
   await sqLite.cmdSql(`delete from ${tableName} where ticket_id = ?`, [ticketId])
   await sqLite.cmdSql("delete from ticket_logs where ticket_id = ?", [ticketId])
 }
-//清除缓存的所有工单数据，
+
 export async function clearCacheTicket() {
   if (!sqLite) {
     sqLite = SQLite.getInstance();
@@ -268,7 +203,6 @@ export async function getTicketLogsFromCache(ticketId) {
   return logs;
 }
 
-//从缓存中取指定的工单
 export async function getTicketFromCache(ticketId, multi) {
   if (!sqLite) {
     sqLite = SQLite.getInstance();
@@ -291,7 +225,6 @@ export async function getTicketFromCache(ticketId, multi) {
       let ticket = JSON.parse(results.rows.item(0).ticket_detail);
       ticket.content = results.rows.item(0).content;
       ticket.ticketState = results.rows.item(0).status;
-      //说明查询到了
       return ticket;
     }
   } else {

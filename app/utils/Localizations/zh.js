@@ -89,21 +89,25 @@ export default {
   lang_http_no_content: '无内容',
   lang_http_401: '未授权',
 
-  lang_ticket_item_suggest_time:'建议执行时间：',
-  lang_ticket_filter_types:['诊断', '行为异常','报警'],
-  lang_ticket_filter_show_type:'工单类型',
+  lang_ticket_item_suggest_time: '建议执行时间：',
+  lang_ticket_filter_types: ['诊断', '行为异常', '报警'],
+  lang_ticket_filter_show_type: '工单类型',
 
-  lang_offline_disk_not_enough:'您的手机存储空间小于2GB，无法下载工单',
-  lang_offline_tip1:'无法连接网络，自动为您开启离线模式，仅显示已下载工单',
-  lang_offline_tip2:'离线工单自动同步中…',
-  lang_offline_tip3:'{0}个工单同步失败，请查看处理',//{}里为占位符，
+  lang_offline_disk_not_enough: '您的手机存储空间小于2GB，无法下载工单',
+  lang_offline_tip1: '无法连接网络，自动为您开启离线模式，仅显示已下载工单',
+  lang_offline_tip2: '离线工单自动同步中…',
+  lang_offline_tip3: '{0}个工单同步失败，请查看处理',//{}里为占位符，
 
-  lang_offline_sync_view_title:'同步列表',
-  lang_offline_sync_view_cover:'覆盖',
-  lang_offline_sync_view_give_up:'放弃',
-  lang_offline_sync_view_retry:'重试',
+  lang_offline_sync_view_title: '同步列表',
+  lang_offline_sync_view_cover: '覆盖',
+  lang_offline_sync_view_give_up: '放弃',
+  lang_offline_sync_view_retry: '重试',
 
-  lang_offline_sync_status_fail:'同步失败',
-  lang_offline_sync_status_waiting:'等待中',
-  lang_offline_sync_status_doing:'正在同步'
+  lang_offline_sync_status_fail: '同步失败',
+  lang_offline_sync_status_waiting: '等待中',
+  lang_offline_sync_status_doing: '正在同步',
+  lang_offline_sync_error_conflict: '该工单已被其他用户执行，确认覆盖？若放弃将获取云端最新数据。',
+  lang_offline_sync_error_close: '该工单已被其他用户关闭，将获取云端最新数据。',
+
+  lang_offline_download_ticket_error: '下载工单失败，请检查网络后重试！',
 };

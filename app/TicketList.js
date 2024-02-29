@@ -104,14 +104,14 @@ export default class TicketList extends Component {
     this._netChangeListener = NetInfo.addEventListener(
       (isConnected) => {
         this._clearFilter()
-        if(isConnected) {
+        if (isConnected) {
           //尝试做同步
           startSyncTasks().then();
         }
       }
     );
 
-    this._changedListener = DeviceEventEmitter.addListener(SYNC_UPDATE_NOTIFY,()=>{
+    this._changedListener = DeviceEventEmitter.addListener(SYNC_UPDATE_NOTIFY, () => {
       this.setState({})
     })
 
@@ -164,7 +164,8 @@ export default class TicketList extends Component {
   queryTicketList(filter) {
     if (!filter.pageNo) filter.pageNo = 1;
     this.setState({ refreshing: true, showEmpty: false, ticketData: [], error: null });
-    apiQueryTicketList(filter).then(data => {
+    let params = { ...filter, day: moment(this.state.selectedDate).format(DAY_FORMAT) }
+    apiQueryTicketList(params).then(data => {
       this.setState({ refreshing: false })
       if (data.code === CODE_OK) {
         if (!data.data || data.data.length === 0) {
@@ -505,8 +506,13 @@ export default class TicketList extends Component {
     this.context.showSpinner();
     try {
       let data = await apiDownloadTicketList(date)
+      if (data.code !== CODE_OK) {
+        this.context.hideHud();
+        SndAlert.alert(localStr('lang_offline_download_ticket_error'), localStr('lang_offline_disk_not_enough'));
+        return;
+      }
       //这里需要根据获取的层级数据，补齐层级信息
-      data = getTicketsData();
+      data = data.data;
       console.log(data, this._hierarchyList)
       for (const dataObj of data) {
         for (const re of this._hierarchyList) {
@@ -630,10 +636,10 @@ export default class TicketList extends Component {
     return (
       <TouchableOpacity style={{
         paddingVertical: 7, paddingHorizontal: 16, alignItems: 'center',
-        flexDirection: 'row', backgroundColor: '#fffbe6'
-      }} onPress={this._gotoSync}>
-        <Icon2 type="icon_info" color="#ff9500" size={12} />
-        <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff9500', marginLeft: 5 }}>
+        flexDirection: 'row', backgroundColor: Colors.seBgContainer
+      }}>
+        <Icon2 type="icon_info" color={Colors.seYellow} size={12} />
+        <Text numberOfLines={1} style={{ fontSize: 12, color: Colors.seYellow, marginLeft: 5 }}>
           {localStr('lang_offline_tip1')}
         </Text>
       </TouchableOpacity>
@@ -659,15 +665,15 @@ export default class TicketList extends Component {
           <TouchFeedback onPress={this._gotoSync}>
             <View style={{
               paddingVertical: 7, paddingHorizontal: 16, alignItems: 'center',
-              flexDirection: 'row', backgroundColor: '#ffe9e9'
+              flexDirection: 'row', backgroundColor: Colors.seBgContainer
             }}>
-              <Icon2 type="icon_info_down" color="#ff4d4d" size={12} />
+              <Icon2 type="icon_info_down" color={Colors.seRed} size={12} />
               <View style={{ flex: 1 }}>
-                <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff4d4d', marginLeft: 5 }}>
+                <Text numberOfLines={1} style={{ fontSize: 12, color: Colors.seRed, marginLeft: 5 }}>
                   {localFormatStr('lang_offline_tip3', errCount)}
                 </Text>
               </View>
-              <Icon2 type="icon_asset_folder" color="#ff4d4d" size={16} />
+              <Icon2 type="icon_asset_folder" color={Colors.seRed} size={16} />
             </View>
           </TouchFeedback>
         );
@@ -676,17 +682,17 @@ export default class TicketList extends Component {
         <TouchFeedback onPress={this._gotoSync}>
           <View style={{
             paddingVertical: 7, paddingHorizontal: 16, alignItems: 'center',
-            flexDirection: 'row', backgroundColor: '#fffbe6'
+            flexDirection: 'row', backgroundColor: Colors.seBgContainer
           }}>
             <RingRound>
-              <Icon2 type="icon_sync" size={13} color="#ff9500" />
+              <Icon2 type="icon_sync" size={13} color={Colors.seYellow} />
             </RingRound>
             <View style={{ flex: 1 }}>
-              <Text numberOfLines={1} style={{ fontSize: 12, color: '#ff9500', marginLeft: 5 }}>
+              <Text numberOfLines={1} style={{ fontSize: 12, color: Colors.seYellow, marginLeft: 5 }}>
                 {localStr('lang_offline_tip2')}
               </Text>
             </View>
-            <Icon2 type="icon_asset_folder" color="#ff9500" size={16} />
+            <Icon2 type="icon_asset_folder" color={Colors.seYellow} size={16} />
           </View>
         </TouchFeedback>
       );
