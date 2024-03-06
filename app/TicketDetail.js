@@ -743,7 +743,7 @@ export default class TicketDetail extends Component {
         onIconClicked={() => {
           this.props.navigation.pop()
         }}
-        actions={this._actions}
+        actions={this.props.offline ? [] : this._actions}
         onActionSelected={actionSelected}
       />
     );
@@ -781,7 +781,7 @@ export default class TicketDetail extends Component {
       if (find) isExecutor = true;
     }
     //如果是工单创建者也能执行，后面记得删除
-    if (!isExecutor && isCreateUser) isExecutor = true;
+    // if (!isExecutor && isCreateUser) isExecutor = true;
 
     let rejectData = null
     if (data.data.ticketState === STATE_REJECTED) {

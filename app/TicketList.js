@@ -508,7 +508,7 @@ export default class TicketList extends Component {
       let data = await apiDownloadTicketList(date)
       if (data.code !== CODE_OK) {
         this.context.hideHud();
-        SndAlert.alert(localStr('lang_offline_download_ticket_error'), localStr('lang_offline_disk_not_enough'));
+        SndAlert.alert(localStr('lang_alert_title'), localStr('lang_offline_disk_not_enough'));
         return;
       }
       //这里需要根据获取的层级数据，补齐层级信息
@@ -524,10 +524,12 @@ export default class TicketList extends Component {
       await downloadTickets(date, data)
       //这里是否需要判断空间下
       this.context.hideHud();
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_offline_download_complete'));
     } catch (e) {
       console.log('download ticket error', e)
       //出现异常，关闭对话框
       this.context.hideHud();
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_offline_download_ticket_error'));
     }
   }
 

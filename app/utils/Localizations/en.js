@@ -93,21 +93,22 @@ export default {
   lang_ticket_filter_types: ['Diagnosis', 'Behavior', 'Alarm'],
   lang_ticket_filter_show_type: 'Type',
 
-  lang_offline_disk_not_enough: '您的手机存储空间小于2GB，无法下载工单',
-  lang_offline_tip1: '无法连接网络，自动为您开启离线模式，仅显示已下载工单',
-  lang_offline_tip2: '离线工单自动同步中…',
-  lang_offline_tip3: '{0}个工单同步失败，请查看处理',//{}里为占位符，
+  lang_offline_disk_not_enough: 'Your phone storage space is less than 2GB, and tickets cannot be downloaded. ',
+  lang_offline_tip1: 'Network connection failed. Offline mode are automatically turned on and only downloaded tickets are displayed.',
+  lang_offline_tip2: 'Offline tickets are being automatically synchronized.',
+  lang_offline_tip3: '{0} tickets synchronization failed, please check.',
 
-  lang_offline_sync_view_title: '同步列表',
-  lang_offline_sync_view_cover: '覆盖',
-  lang_offline_sync_view_give_up: '放弃',
-  lang_offline_sync_view_retry: '重试',
+  lang_offline_sync_view_title: 'Synchronization list',
+  lang_offline_sync_view_cover: 'Overwrite',
+  lang_offline_sync_view_give_up: 'Cancel',
+  lang_offline_sync_view_retry: 'Retry',
 
-  lang_offline_sync_status_fail: '同步失败',
-  lang_offline_sync_status_waiting: '等待中',
-  lang_offline_sync_status_doing: '正在同步',
-  lang_offline_sync_error_conflict: '该工单已被其他用户执行，确认覆盖？若放弃将获取云端最新数据。',
-  lang_offline_sync_error_close: '该工单已被其他用户关闭，将获取云端最新数据。',
+  lang_offline_sync_status_fail: 'Synchronization Failed',
+  lang_offline_sync_status_waiting: 'Waiting',
+  lang_offline_sync_status_doing: 'Synchronizing',
+  lang_offline_sync_error_conflict: 'The ticket has been executed by another user. Confirm to overwrite it? Click cancel to get the latest data from the cloud.',
+  lang_offline_sync_error_close: 'The ticket has been closed by another user. The latest data will be downloaded from the cloud.',
 
-  lang_offline_download_ticket_error: '下载工单失败，请检查网络后重试！',
+  lang_offline_download_ticket_error: 'Ticket download failed. Please check the network and retry.',
+  lang_offline_download_complete: 'The tickets has been downloaded',
 };
