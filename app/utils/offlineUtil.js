@@ -149,7 +149,7 @@ export async function syncTask(task, force) {
         res = res.data;
       } else {
         //掉接口失败了
-        syncInfo[task.id].status = 2;
+        syncInfo[task.id].status = res.code === '10010' ? 5 : 2;
         sendSyncUpdateNotify();
         return;
       }

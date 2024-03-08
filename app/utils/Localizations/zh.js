@@ -108,6 +108,7 @@ export default {
   lang_offline_sync_status_doing: '正在同步',
   lang_offline_sync_error_conflict: '该工单已被其他用户执行，确认覆盖？若放弃将获取云端最新数据。',
   lang_offline_sync_error_close: '该工单已被其他用户关闭，将获取云端最新数据。',
+  lang_offline_sync_error_not_exist: '该工单不存在',
 
   lang_offline_download_ticket_error: '下载工单失败，请检查网络后重试！',
   lang_offline_download_complete: '工单下载完成',

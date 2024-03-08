@@ -23,7 +23,8 @@ import Colors, { isDarkMode } from "../../../app/utils/const/Colors";
 let STATUS_TEXT = ['', '',
   localStr('lang_offline_sync_status_fail'),
   localStr('lang_offline_sync_error_conflict'),
-  localStr('lang_offline_sync_error_close')
+  localStr('lang_offline_sync_error_close'),
+  localStr('lang_offline_sync_error_not_exist')
 ];
 
 export default class TicketSync extends Component {
@@ -117,7 +118,7 @@ export default class TicketSync extends Component {
           </View>
         )
       }
-      if (status === 5) {
+      if (false && status === 5) {
         actionView = (
           <View style={{ flexDirection: 'row', marginTop: -10, marginRight: -10 }}>
             <TouchFeedback onPress={() => {
@@ -133,7 +134,7 @@ export default class TicketSync extends Component {
           </View>
         )
       }
-      if (status === 6) {
+      if (status === 5) {
         actionView = (
           <View style={{ marginTop: -10, marginRight: -10 }}>
             <TouchFeedback onPress={() => {

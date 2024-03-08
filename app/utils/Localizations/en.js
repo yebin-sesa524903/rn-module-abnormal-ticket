@@ -108,6 +108,7 @@ export default {
   lang_offline_sync_status_doing: 'Synchronizing',
   lang_offline_sync_error_conflict: 'The ticket has been executed by another user. Confirm to overwrite it? Click cancel to get the latest data from the cloud.',
   lang_offline_sync_error_close: 'The ticket has been closed by another user. The latest data will be downloaded from the cloud.',
+  lang_offline_sync_error_not_exist: 'The ticket does not exist',
 
   lang_offline_download_ticket_error: 'Ticket download failed. Please check the network and retry.',
   lang_offline_download_complete: 'The tickets has been downloaded',
