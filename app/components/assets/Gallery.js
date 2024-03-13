@@ -8,10 +8,10 @@ import {
 import PropTypes from 'prop-types';
 
 import ViewPager from './ViewPager.js';
-import {createResponder} from 'react-native-gesture-responder';
+import { createResponder } from 'react-native-gesture-responder';
 import Text from '../Text';
 import NetworkImage from '../NetworkImage';
-import {isPhoneX} from "../../utils";
+import { isPhoneX } from "../../utils";
 
 export default class Gallery extends Component {
 
@@ -28,7 +28,7 @@ export default class Gallery extends Component {
 
   componentWillMount() {
     function onResponderReleaseOrTerminate(evt, gestureState) {
-      var shouldScroll=this.shouldScrollViewPager(evt, gestureState);
+      var shouldScroll = this.shouldScrollViewPager(evt, gestureState);
       if (this.activeResponder) {
         if (this.activeResponder === this.viewPagerResponder
           && !shouldScroll
@@ -91,7 +91,7 @@ export default class Gallery extends Component {
 
     this.viewPagerResponder = {
       onStart: (evt, gestureState) => {
-        var instance=this.getViewPagerInstance();
+        var instance = this.getViewPagerInstance();
         if (!instance) {
           console.warn('0instance is release...');
           return;
@@ -99,7 +99,7 @@ export default class Gallery extends Component {
         instance.onResponderGrant(evt, gestureState);
       },
       onMove: (evt, gestureState) => {
-        var instance=this.getViewPagerInstance();
+        var instance = this.getViewPagerInstance();
         if (!instance) {
           console.warn('1instance is release...');
           return;
@@ -107,7 +107,7 @@ export default class Gallery extends Component {
         instance.onResponderMove(evt, gestureState);
       },
       onEnd: (evt, gestureState, disableSettle) => {
-        var instance=this.getViewPagerInstance();
+        var instance = this.getViewPagerInstance();
         if (!instance) {
           console.warn('2instance is release...');
           return;
@@ -118,7 +118,7 @@ export default class Gallery extends Component {
 
     this.imageResponder = {
       onStart: ((evt, gestureState) => {
-        var instance=this.getCurrentImageTransformer();
+        var instance = this.getCurrentImageTransformer();
         if (!instance) {
           console.warn('3instance is release...');
           return;
@@ -126,7 +126,7 @@ export default class Gallery extends Component {
         this.getCurrentImageTransformer().onResponderGrant(evt, gestureState);
       }),
       onMove: (evt, gestureState) => {
-        var instance=this.getCurrentImageTransformer();
+        var instance = this.getCurrentImageTransformer();
         if (!instance) {
           console.warn('4instance is release...');
           return;
@@ -134,7 +134,7 @@ export default class Gallery extends Component {
         this.getCurrentImageTransformer().onResponderMove(evt, gestureState);
       },
       onEnd: (evt, gestureState) => {
-        var instance=this.getCurrentImageTransformer();
+        var instance = this.getCurrentImageTransformer();
         if (!instance) {
           console.warn('5instance is release...');
           return;
@@ -202,7 +202,7 @@ export default class Gallery extends Component {
   }
 
   getViewPagerInstance() {
-    var instance=this.refs['galleryViewPager'];
+    var instance = this.refs['galleryViewPager'];
     if (!instance) {
       // console.warn('galleryVadfasdfiewPager is null...');
       return;
@@ -259,12 +259,11 @@ export default class Gallery extends Component {
   onPageScroll(e) {
     this.props.onPageScroll && this.props.onPageScroll(e);
   }
-  _renderText(context)
-  {
+  _renderText(context) {
     if (context) {
       return (
         <View style={styles.bottom}>
-          <Text style={{fontSize:15,color:'white'}} >
+          <Text style={{ fontSize: 15, color: 'white' }} >
             {context}
           </Text>
         </View>
@@ -272,19 +271,19 @@ export default class Gallery extends Component {
     }
   }
   _renderPage(pageData, pageId, layout) {
-    var { onViewTransformed, onTransformGestureReleased, ...other} = this.props;
-    var context=this.props.texts[pageId];
+    var { onViewTransformed, onTransformGestureReleased, ...other } = this.props;
+    var context = this.props.texts[pageId];
 
-    var {width} = Dimensions.get('window');
+    var { width } = Dimensions.get('window');
     var imageWidth = width;
     var imageHeight = parseInt(imageWidth * 2 / 3);
 
     return (
-      <View style={{flex:1,backgroundColor:'black',justifyContent:'center'}}
-        >
+      <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}
+      >
         <NetworkImage
           cusRef={((ref) => {
-             this.imageRefs.set(pageId, ref);
+            this.imageRefs.set(pageId, ref);
           }).bind(this)}
           other={other}
           resizeMode={'cover'}
@@ -292,9 +291,9 @@ export default class Gallery extends Component {
           height={768}
           zoomAble={true}
           useOrigin={true}
-          defaultSource = {require('../../images/building_default/building.png')}
+          defaultSource={require('../../images/building_default/building.png')}
           thumbImageInfo={this.props.thumbImageInfo}
-          render={pageId===String(this.props.index)}
+          render={pageId === String(this.props.index)}
           name={pageData}>
         </NetworkImage>
 
@@ -306,25 +305,24 @@ export default class Gallery extends Component {
   resetHistoryImageTransform() {
     let transformer = this.getImageTransformer(this.currentPage + 1);
     if (transformer) {
-      transformer.forceUpdateTransform({scale: 1, translateX: 0, translateY: 0});
+      transformer.forceUpdateTransform({ scale: 1, translateX: 0, translateY: 0 });
     }
 
     transformer = this.getImageTransformer(this.currentPage - 1);
     if (transformer) {
-      transformer.forceUpdateTransform({scale: 1, translateX: 0, translateY: 0});
+      transformer.forceUpdateTransform({ scale: 1, translateX: 0, translateY: 0 });
     }
   }
-  resetCurrIndex(index)
-  {
+  resetCurrIndex(index) {
     // console.warn('resetCurrIndex...',index);
-    this.currentPage=index;
-    this.getViewPagerInstance().setPage(index,true);
+    this.currentPage = index;
+    this.getViewPagerInstance().setPage(index, true);
   }
 }
 
 Gallery.propTypes = {
   images: PropTypes.array,
-  thumbImageInfo:PropTypes.object,
+  thumbImageInfo: PropTypes.object,
   // initialPage: PropTypes.number,
   pageMargin: PropTypes.number,
   onPageSelected: PropTypes.func,
@@ -333,11 +331,11 @@ Gallery.propTypes = {
 
   onSingleTapConfirmed: PropTypes.func,
   onGalleryStateChanged: PropTypes.func,
-  renderPage:PropTypes.func,
-  onPageChanged:PropTypes.func,
-  index:PropTypes.number,
-  datas:PropTypes.array,
-  texts:PropTypes.array,
+  renderPage: PropTypes.func,
+  onPageChanged: PropTypes.func,
+  index: PropTypes.number,
+  datas: PropTypes.array,
+  texts: PropTypes.array,
 }
 
 var styles = StyleSheet.create({
@@ -354,16 +352,16 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     // borderColor: 'gray'
   },
-  bottom:{
-    zIndex:2,
-    position:'absolute',
-    bottom:isPhoneX()?32:16,
-    left:16,
-    right:0,
-    flex:1,
-    backgroundColor:'rgba(0,0,0,.6)',
-    justifyContent:'center',
-    paddingHorizontal:10,
-    paddingVertical:5,
+  bottom: {
+    zIndex: 2,
+    position: 'absolute',
+    bottom: isPhoneX() ? 32 : 16,
+    left: 16,
+    right: 16,
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,.6)',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
 });

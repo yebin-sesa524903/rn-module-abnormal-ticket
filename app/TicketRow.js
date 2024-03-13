@@ -35,7 +35,7 @@ f5222d
 F0fff0
 3dcd58
  */
-const STATUS_COLORS = ()=>[
+const STATUS_COLORS = () => [
   {
     border: Colors.seBorderBase,
     bg: Colors.seFill3,
@@ -186,6 +186,8 @@ export default class TicketRow extends Component {
         return localTypes[0]
       case 10:
         return localTypes[1]
+      case 4:
+        return localTypes[3]
     }
     return ''
   }

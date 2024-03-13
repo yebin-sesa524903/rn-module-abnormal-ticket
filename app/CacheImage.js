@@ -9,10 +9,13 @@ import Colors from "../../../app/utils/const/Colors";
 const dirPath = Platform.OS === 'ios' ? DocumentDirectoryPath : ExternalDirectoryPath
 const pathPre = Platform.OS === 'ios' ? '' : 'file://';
 
+import { getImageUrlByKey } from '../../../app/containers/fmcs/plantOperation/utils/Utils';
+
 export default class CacheImage extends Component {
 
   constructor(props) {
     super(props)
+    console.log("--->CacheImage")
     this.imageDownloadBegin = this.imageDownloadBegin.bind(this);
     this.imageDownloadProgress = this.imageDownloadProgress.bind(this);
     this._stopDownload = this._stopDownload.bind(this);
@@ -69,7 +72,7 @@ export default class CacheImage extends Component {
             if (this.jobId) {
               this._stopDownload();
             }
-            let downUrl = getBaseUri() + 'document/get?id=' + cacheKey;
+            let downUrl = getImageUrlByKey(cacheKey)//getBaseUri() + 'document/get?id=' + cacheKey;
             // var headers={};
             // headers[TOKENHEADER]=token;
             // headers[HEADERDEVICEID]=deviceid;

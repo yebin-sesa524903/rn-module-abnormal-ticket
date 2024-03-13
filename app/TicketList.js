@@ -33,7 +33,7 @@ import {
 import moment from "moment";
 
 import SndAlert from "../../../app/utils/components/SndAlert";
-
+import AssetSiteSelect from '../../../app/containers/assetManager/container/AssetSiteSelect';
 import { isPhoneX } from "./utils";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Loading from "rn-module-abnormal-ticket/app/components/Loading";
@@ -325,6 +325,16 @@ export default class TicketList extends Component {
     this.setState({ openFilter: true })
   }
 
+  _createTicket = () => {
+    this.props.navigation.push('PageWarpper', {
+      id: 'create_ticket',
+      component: AssetSiteSelect,
+      passProps: {
+        onBack: () => { }
+      }
+    })
+  }
+
   _renderRightButton() {
     let disableDownload = !global.isConnected() || !this.state.ticketData || this.state.ticketData.length === 0;
     return (
@@ -340,13 +350,12 @@ export default class TicketList extends Component {
               <Icon name="download" size="sm" color={!disableDownload ? "#fff" : '#ffffff88'} />
             </TouchableOpacity>
           }
-          {false &&
-            <TouchableOpacity style={{ padding: 6 }} onPress={() => {
-              if (this.props.onCreateTicket) this.props.onCreateTicket();
-            }}>
+          {
+            <TouchableOpacity style={{ padding: 6 }} onPress={this._createTicket}>
               <Icon name="plus" size='sm' color="#fff" />
             </TouchableOpacity>
           }
+
         </View>
       </View>
     );

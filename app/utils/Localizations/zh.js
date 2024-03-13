@@ -90,7 +90,7 @@ export default {
   lang_http_401: '未授权',
 
   lang_ticket_item_suggest_time: '建议执行时间：',
-  lang_ticket_filter_types: ['诊断', '行为异常', '报警'],
+  lang_ticket_filter_types: ['诊断', '行为异常', '报警', '现场'],
   lang_ticket_filter_show_type: '工单类型',
 
   lang_offline_disk_not_enough: '您的手机存储空间小于2GB，无法下载工单',
@@ -112,4 +112,6 @@ export default {
 
   lang_offline_download_ticket_error: '下载工单失败，请检查网络后重试！',
   lang_offline_download_complete: '工单下载完成',
+
+  lang_ticket_detail_attachments: '附件',
 };

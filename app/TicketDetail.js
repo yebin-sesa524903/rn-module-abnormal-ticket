@@ -24,7 +24,7 @@ import Icon from './components/Icon.js';
 import Bottom from './components/Bottom.js';
 import Loading from './components/Loading';
 import { isPhoneX } from './utils';
-
+import Immutable from 'immutable';
 import SchActionSheet from './components/actionsheet/SchActionSheet';
 // import AssetsText from '../AssetsText';
 // import ViewShot from "react-native-view-shot";
@@ -70,6 +70,12 @@ import {
   getTicketLogsFromCache,
   TICKET_LOG_DELETE
 } from "./utils/sqliteHelper";
+
+import FileOpener from 'react-native-file-opener'
+import RNFS, { DocumentDirectoryPath } from "react-native-fs";
+import { getBaseUri, getCookie } from './middleware/bff';
+import CreateTicket from "../../../app/containers/ticket/CreateTicket.js";
+import { getImageUrlByKey } from '../../../app/containers/fmcs/plantOperation/utils/Utils';
 class Avatar extends Component {
 
   _renderImage(radius) {
@@ -120,6 +126,8 @@ export default class TicketDetail extends Component {
         return localTypes[0]
       case 10:
         return localTypes[1]
+      case 4:
+        return localTypes[3]
     }
     return ''
   }
@@ -212,44 +220,151 @@ export default class TicketDetail extends Component {
       </View>
     );
   }
-  // _getDocumentsView(){
-  //   var {rowData} = this.props;
-  //   var startTime = moment(rowData.get('StartTime')).format('YYYY-MM-DD'),
-  //     endTime = moment(rowData.get('EndTime')).format('YYYY-MM-DD');
-  //   var executor = rowData.get('ExecutorNames').join('、');
-  //   var documents = rowData.get('Documents').map((item)=> {return {name:item.get('DocumentName'),id:item.get('DocumentId'),size:item.get('Size')}}).toArray();
-  //   var content = [
-  //     // {label:'执行时间',value:`${startTime} 至 ${endTime}`},
-  //     // {label:'执行人',value:executor},
-  //     {label:'作业文档',value:documents}
-  //   ];
-  //   var style={marginHorizontal:16,marginBottom:16};
-  //   if (Platform.OS === 'ios') {
-  //     style={marginHorizontal:16,marginBottom:8,marginTop:8};
-  //   }
-  //   if (!documents||documents.length===0) {
-  //     return ;
-  //   }
-  //   return (
-  //     <View style={{backgroundColor:'white'}}>
-  //       <View style={{paddingBottom:15,paddingHorizontal:16,}}>
-  //         <View style={{paddingTop:16,paddingBottom:11,
-  //           flexDirection:'row',alignItems:'center',
-  //         }}>
-  //           <Text style={{fontSize:17,color:'black',fontWeight:'bold'}}>{'作业文档'}</Text>
-  //         </View>
-  //         {
-  //           content.map((item,index) => {
-  //             return (
-  //               <LabelValue key={index} style={{marginBottom:0,}} label={item.label} value={item.value} forceStoped={this.state.forceStoped}/>
-  //             )
-  //           })
-  //         }
-  //       </View>
-  //       <ListSeperator marginWithLeft={16}/>
-  //     </View>
-  //   )
-  // }
+
+  _getExt(name) {
+    return name.substring(name.lastIndexOf('.') + 1).toLowerCase()
+  }
+
+  isImageFile(ext) {
+    return ['png', 'jpg', 'jpeg', 'bmp', 'webp'].includes(ext)
+  }
+
+  _openAttachment = (item) => {
+    let ext = this._getExt(item.name)
+    // function isImageFile(ext) {
+    //   return ['png', 'jpg', 'jpeg', 'bmp', 'webp'].includes(ext)
+    // }
+    if (this.isImageFile(ext)) {
+      let imgs = this.state.rowData.extensionProperties.attachments.filter(a => this.isImageFile(this._getExt(a.name)));
+      console.log(imgs, imgs.indexOf(item))
+      this.props.navigation.push('PageWarpper', {
+        id: 'ticket_attachments_preview',
+        component: PhotoShowView,
+        passProps: {
+          index: imgs.indexOf(item),
+          onBack: () => this.props.navigation.pop(),
+          data: imgs
+        }
+      })
+    } else {
+      //是文件，那么按照文件处理
+      this._openFile(item).then()
+    }
+
+  }
+
+  _openFile = async (file) => {
+    let name = file.name;
+    let type = name.substr(name.lastIndexOf('.') + 1).toLowerCase();
+    const mimetype = {
+      'txt': 'text/plain',
+      'ppt': 'application/vnd.ms-powerpoint',
+      'pptx': 'application/vnd.ms-powerpoint',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.ms-excel',
+      'doc': 'application/msword',
+      'docx': 'application/msword',
+      'pdf': 'application/pdf',
+      'dwg': 'image/vnd.dwg'
+    }
+    type = mimetype[type];
+    //需要先下载文件，在传递文件路径
+    try {
+      let filePath = `${DocumentDirectoryPath}/${file.key}`;
+      let ret = await RNFS.exists(filePath);
+      let openFile = (filePath, type) => {
+        if (Platform.OS === 'ios') {
+          FileOpener.open(filePath, type, {}).then(() => {
+            console.log('success!!');
+          }, (e) => {
+            console.log('e', e);
+          });
+        } else {
+          FileOpener.open(filePath, type).then(() => {
+            console.log('success!!');
+          }, (e) => {
+            console.log('e', e);
+          });
+        }
+      }
+
+      if (ret) {
+        openFile(filePath, type);
+        return;
+      }
+      //开始下载文件了
+      await RNFS.downloadFile({
+        fromUrl: getImageUrlByKey(file.key),//storage.getOssBucket()+`/lego-bff/bff/ledger/rest/downloadFile?id=${file.key}`,
+        toFile: filePath,
+      }).promise;
+      openFile(filePath, type);
+    } catch (err) {
+      //文件下载失败
+      console.log('download error', err);
+      return false;
+    }
+  }
+
+  _getDocumentsView() {
+    let rowData = this.state.rowData;
+    if (!rowData.extensionProperties || !rowData.extensionProperties.attachments || rowData.extensionProperties.attachments.length === 0) return;
+    let attachments = rowData.extensionProperties.attachments.map((item, index) => {
+      let isImg = this.isImageFile(this._getExt(item.name));
+      return (
+        <TouchableOpacity key={index} style={{ marginBottom: 8 }} onPress={() => this._openAttachment(item)}>
+          <Text style={{ fontSize: 14, color: Colors.seBrandNomarl }}>{item.name}</Text>
+        </TouchableOpacity>
+      )
+    })
+    return (
+      <View style={{ paddingBottom: 0, paddingHorizontal: 16, backgroundColor: Colors.seBgContainer, borderRadius: 12, margin: 10, marginBottom: 0 }}>
+        <View style={{
+          paddingTop: 16, paddingBottom: 12, paddingLeft: 0,
+          flexDirection: 'row', alignItems: 'center'
+        }}>
+          <Text style={{ fontSize: 16, color: Colors.seTextTitle, fontWeight: '600' }}>{localStr('lang_ticket_detail_attachments')}</Text>
+        </View>
+        {attachments}
+      </View>
+    )
+
+    var startTime = moment(rowData.get('StartTime')).format('YYYY-MM-DD'),
+      endTime = moment(rowData.get('EndTime')).format('YYYY-MM-DD');
+    var executor = rowData.get('ExecutorNames').join('、');
+    var documents = rowData.get('Documents').map((item) => { return { name: item.get('DocumentName'), id: item.get('DocumentId'), size: item.get('Size') } }).toArray();
+    var content = [
+      // {label:'执行时间',value:`${startTime} 至 ${endTime}`},
+      // {label:'执行人',value:executor},
+      { label: '作业文档', value: documents }
+    ];
+    var style = { marginHorizontal: 16, marginBottom: 16 };
+    if (Platform.OS === 'ios') {
+      style = { marginHorizontal: 16, marginBottom: 8, marginTop: 8 };
+    }
+    if (!documents || documents.length === 0) {
+      return;
+    }
+    return (
+      <View style={{ backgroundColor: 'white' }}>
+        <View style={{ paddingBottom: 15, paddingHorizontal: 16, }}>
+          <View style={{
+            paddingTop: 16, paddingBottom: 11,
+            flexDirection: 'row', alignItems: 'center',
+          }}>
+            <Text style={{ fontSize: 17, color: 'black', fontWeight: 'bold' }}>{'作业文档'}</Text>
+          </View>
+          {
+            content.map((item, index) => {
+              return (
+                <LabelValue key={index} style={{ marginBottom: 0, }} label={item.label} value={item.value} forceStoped={this.state.forceStoped} />
+              )
+            })
+          }
+        </View>
+        <ListSeperator marginWithLeft={16} />
+      </View>
+    )
+  }
   _getIDView() {
     let rowData = this.state.rowData;
     let strId = rowData.ticketCode || '';
@@ -627,6 +742,21 @@ export default class TicketDetail extends Component {
     return null;
   }
 
+  _editTicket = () => {
+    this.props.navigation.push('PageWarpper', {
+      id: 'ticket_edit',
+      component: CreateTicket,
+      passProps: {
+        ticketInfo: Immutable.fromJS(this.state.rowData),
+        onPostingCallback: () => {
+          this.props.navigation.pop();
+          this._loadTicketDetail();
+        },
+        onBack: () => this.props.navigation.pop()
+      }
+    })
+  }
+
   _getToolbar(data) {
     this._actions = [];
     let actionSelected = [];
@@ -744,7 +874,7 @@ export default class TicketDetail extends Component {
           this.props.navigation.pop()
         }}
         actions={this.props.offline ? [] : this._actions}
-        onActionSelected={actionSelected}
+        onActionSelected={[this._editTicket]}
       />
     );
   }
@@ -956,7 +1086,7 @@ export default class TicketDetail extends Component {
             {this._renderRejection()}
             {this._getAssetView()}
             {this._getTaskView()}
-            {/*{this._getDocumentsView()}*/}
+            {this._getDocumentsView()}
             {this._getLogMessage()}
             {this._getIDView()}
             <View style={{ height: 10, flex: 1, }}>

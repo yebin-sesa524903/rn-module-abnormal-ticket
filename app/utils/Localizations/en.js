@@ -90,7 +90,7 @@ export default {
   lang_http_401: 'Unauthorized',
 
   lang_ticket_item_suggest_time: 'Suggest Time：',
-  lang_ticket_filter_types: ['Diagnosis', 'Behavior', 'Alarm'],
+  lang_ticket_filter_types: ['Diagnosis', 'Behavior', 'Alarm', '现场'],
   lang_ticket_filter_show_type: 'Type',
 
   lang_offline_disk_not_enough: 'Your phone storage space is less than 2GB, and tickets cannot be downloaded. ',
