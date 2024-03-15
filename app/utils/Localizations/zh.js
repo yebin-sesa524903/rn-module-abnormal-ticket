@@ -114,4 +114,6 @@ export default {
   lang_offline_download_complete: '工单下载完成',
 
   lang_ticket_detail_attachments: '附件',
+  lang_ticket_use_time: '预计耗时',
+  lang_ticket_time_unit: ['小时', '天']
 };

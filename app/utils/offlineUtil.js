@@ -1,11 +1,10 @@
 import {
   cacheDownloadTickets,
-  clearCacheTicket, clearTicket,
-  getCacheTicketByDate,
+  clearTicket,
   TICKET_LOG_DELETE,
   TICKET_TYPE_SAVE_SIGN
 } from "./sqliteHelper";
-import { Platform, Dimensions } from 'react-native';
+import { Platform } from 'react-native';
 import { DeviceEventEmitter } from 'react-native'
 import RNFS, { DocumentDirectoryPath, ExternalDirectoryPath } from 'react-native-fs';
 import RNFetchBlob from 'react-native-fetch-blob';
@@ -16,7 +15,7 @@ import {
   TICKET_LOG_ADD, TICKET_LOG_UPDATE,
 } from "./sqliteHelper";
 import { apiSyncTickets, apiTicketDetail, apiUploadFile, getBaseUri, getCookie, userId, userName } from "../middleware/bff";
-
+import { getImageUrlByKey } from "../../../../app/containers/fmcs/plantOperation/utils/Utils";
 const dirPath = Platform.OS === 'ios' ? DocumentDirectoryPath : ExternalDirectoryPath
 
 
@@ -30,7 +29,7 @@ export async function downloadImages(imgs) {
         //如果不存在，那么就要开始下载了
         try {
           await RNFS.mkdir(dirPath, { NSURLIsExcludedFromBackupKey: true })
-          let downUrl = getBaseUri() + 'document/get?id=' + cacheKey;
+          let downUrl = getImageUrlByKey(cacheKey);//getBaseUri() + 'document/get?id=' + cacheKey;
           let downloadOptions = {
             fromUrl: downUrl,
             toFile: filePath,
@@ -698,6 +697,12 @@ function getOne() {
 function findImagesFromDownloadTickets(data) {
   let imgs = [];
   data.forEach(ticket => {
+    if (ticket.extensionProperties && ticket.extensionProperties.attachments
+      && ticket.extensionProperties.attachments.length > 0) {
+      ticket.extensionProperties.attachments.forEach(img => {
+        imgs.push(img.key)
+      })
+    }
     if (ticket.ticketLogs) {
       ticket.ticketLogs.forEach(log => {
         if (log.pictures) {

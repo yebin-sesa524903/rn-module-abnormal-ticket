@@ -330,7 +330,11 @@ export default class TicketList extends Component {
       id: 'create_ticket',
       component: AssetSiteSelect,
       passProps: {
-        onBack: () => { }
+        onBack: () => { },
+        callback: () => {
+          this._onRefresh();
+          this._goBack();
+        }
       }
     })
   }
@@ -345,12 +349,12 @@ export default class TicketList extends Component {
               <Icon name="filter" size={24} color={'#fff'} />
             </TouchableOpacity>
           }
-          {
+          {global.isConnected() &&
             <TouchableOpacity disabled={disableDownload} style={{ padding: 6 }} onPress={this._downloadTickets}>
               <Icon name="download" size="sm" color={!disableDownload ? "#fff" : '#ffffff88'} />
             </TouchableOpacity>
           }
-          {
+          {global.isConnected() && privilegeHelper.hasAuth(CodeMap.OMTicketFull) &&
             <TouchableOpacity style={{ padding: 6 }} onPress={this._createTicket}>
               <Icon name="plus" size='sm' color="#fff" />
             </TouchableOpacity>

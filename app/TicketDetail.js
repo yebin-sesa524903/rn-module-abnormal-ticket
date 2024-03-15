@@ -13,7 +13,7 @@ import {
 
 import Toolbar from './components/Toolbar';
 // import Share from "react-native-share";
-import { GRAY, BLACK, TAB, TAB_BORDER, GREEN, TICKET_STATUS, LINE, LIST_BG, ADDICONCOLOR } from './styles/color';
+import { GRAY, BLACK, TICKET_STATUS } from './styles/color';
 import moment from 'moment';
 
 import Button from './components/Button';
@@ -35,9 +35,7 @@ let ViewShot = View;
 const CODE_OK = '0';
 const STATE_NOT_START = 10
 const STATE_STARTING = 20
-const STATE_IGNORED = 60
 const STATE_PENDING_AUDIT = 30
-const STATE_CLOSED = 50
 const STATE_REJECTED = 40
 const REJECT_OPERATION_TYPE = 34
 
@@ -45,10 +43,9 @@ import { localStr } from "./utils/Localizations/localization";
 import NetworkImage from './components/NetworkImage'
 import {
   apiCloseTicket,
-  apiCreateTicket,
   apiDelTicketLog,
   apiEditTicket,
-  apiGetTicketExecutors, apiIgnoreTicket, apiRejectTicket, apiSubmitTicket,
+  apiIgnoreTicket, apiSubmitTicket,
   apiTicketDetail,
   apiTicketExecute, customerId,
   userId
@@ -57,7 +54,6 @@ import TicketLogEdit from "./TicketLogEdit";
 import CacheImage from "./CacheImage";
 import TicketSelectTime from "./TicketSelectTime";
 import TicketSelectExecutors from "./TicketSelectExecutors";
-import { ImageViewer } from "./ImageViewer";
 import PhotoShowView from "./components/assets/PhotoShowView";
 import privilegeHelper, { CodeMap } from "./utils/privilegeHelper";
 import Colors from "../../../app/utils/const/Colors";
@@ -73,41 +69,8 @@ import {
 
 import FileOpener from 'react-native-file-opener'
 import RNFS, { DocumentDirectoryPath } from "react-native-fs";
-import { getBaseUri, getCookie } from './middleware/bff';
 import CreateTicket from "../../../app/containers/ticket/CreateTicket.js";
 import { getImageUrlByKey } from '../../../app/containers/fmcs/plantOperation/utils/Utils';
-class Avatar extends Component {
-
-  _renderImage(radius) {
-    return (
-      <View style={{ borderWidth: 1, borderColor: '#e6e6e6', borderRadius: radius + 1 }}>
-        <NetworkImage
-          style={{ borderRadius: radius, ...this.props.style }}
-          resizeMode="cover"
-          imgType='jpg'
-          defaultSource={require('./images/building_default/building.png')}
-          width={radius * 2 - 1} height={radius * 2 - 1}
-          name={this.props.imgKey} />
-      </View>
-    );
-  }
-
-  render() {
-    let radius = this.props.radius || 15;
-    if (this.props.imgKey) return this._renderImage(radius);
-    let letter = this.props.name || '';
-    if (letter.length > 0) letter = letter[0];
-    return (
-      <View style={{
-        width: radius * 2, height: radius * 2, borderRadius: radius, backgroundColor: '#f2f2f2',
-        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#e6e6e6',
-        ...this.props.style
-      }}>
-        <Text style={{ fontSize: radius, color: '#888' }}>{letter}</Text>
-      </View>
-    )
-  }
-}
 
 export default class TicketDetail extends Component {
   constructor(props) {
@@ -132,17 +95,32 @@ export default class TicketDetail extends Component {
     return ''
   }
 
+
   _getAssetView() {
     let rowData = this.state.rowData;
     var type = this.getTicketTypeLable(rowData.ticketType);//localStr('lang_ticket_diagnose')//rowData.get('TicketType');
 
     var startTime = moment(rowData.startTime).format('MM-DD'),
       endTime = moment(rowData.endTime).format('MM-DD');
+    let displayTime = `${startTime} ${localStr('lang_ticket_to')} ${endTime}`;
+    if (rowData.ticketType === 4 && rowData.extensionProperties && rowData.extensionProperties.duration) {
+      startTime = moment(rowData.startTime).format('YYYY-MM-DD HH:mm');
+      let useTime = rowData.extensionProperties.duration;
+      let duration = `${localStr('lang_ticket_use_time')} ${useTime.value}${localStr('lang_ticket_time_unit')[parseInt(useTime.unit)]}`
+      displayTime = `${startTime} ${duration}`
+    }
 
     let assetNames = rowData.assets || [];
     assetNames = assetNames.map(item => item.assetName).join(',')
 
-    let locationNames = rowData.assets.map(item => item.locationName).join(',')
+    let locationNames = rowData.assets.map(item => item.locationName);//.join(',')
+    let filter = [];
+    locationNames.forEach(l => {
+      if (filter.indexOf(l) === -1) {
+        filter.push(l);
+      }
+    })
+    locationNames = filter.join(',')
 
     let executor = null;
     if (rowData.executors && rowData.executors.length > 0) {
@@ -179,21 +157,21 @@ export default class TicketDetail extends Component {
         <View style={styles.moreContent}>
           <Text style={{ fontSize: 15, color: Colors.seTextPrimary }}>{localStr('lang_ticket_detail_assets') + ':' + assetNames}</Text>
         </View>
-
+        <View style={{ flex: 1, flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 13 }}>
+          <Icon style={{ marginTop: 2 }} type={'arrow_location'} size={11} color={Colors.seTextPrimary} />
+          <View style={{ flex: 1, marginLeft: 4, }}>
+            <Text numberOfLines={1} style={[{ color: Colors.seTextPrimary, fontSize: 13 }]}>{locationNames}</Text>
+          </View>
+        </View>
         <View style={{ paddingHorizontal: 16, backgroundColor: '' }}>
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <View style={{ minWidth: 115, flexDirection: 'row' }}>
               <Icon type={'icon_date'} size={13} color={Colors.seTextPrimary} />
-              <View style={{ flex: 1, marginLeft: 4, }}>
-                <Text numberOfLines={1} style={[{ fontSize: 13, color: Colors.seTextPrimary }]}>{`${startTime} ${localStr('lang_ticket_to')} ${endTime}`}</Text>
+              <View style={{ marginLeft: 4, }}>
+                <Text numberOfLines={1} style={[{ fontSize: 13, color: Colors.seTextPrimary }]}>{displayTime}</Text>
               </View>
             </View>
-            <View style={{ flex: 1, flexDirection: 'row', marginLeft: 21, }}>
-              <Icon style={{ marginTop: 2 }} type={'arrow_location'} size={11} color={Colors.seTextPrimary} />
-              <View style={{ flex: 1, marginLeft: 4, }}>
-                <Text numberOfLines={1} style={[{ color: Colors.seTextPrimary, fontSize: 13 }]}>{locationNames}</Text>
-              </View>
-            </View>
+
           </View>
           {executor}
         </View>
@@ -309,7 +287,6 @@ export default class TicketDetail extends Component {
     let rowData = this.state.rowData;
     if (!rowData.extensionProperties || !rowData.extensionProperties.attachments || rowData.extensionProperties.attachments.length === 0) return;
     let attachments = rowData.extensionProperties.attachments.map((item, index) => {
-      let isImg = this.isImageFile(this._getExt(item.name));
       return (
         <TouchableOpacity key={index} style={{ marginBottom: 8 }} onPress={() => this._openAttachment(item)}>
           <Text style={{ fontSize: 14, color: Colors.seBrandNomarl }}>{item.name}</Text>
@@ -328,9 +305,6 @@ export default class TicketDetail extends Component {
       </View>
     )
 
-    var startTime = moment(rowData.get('StartTime')).format('YYYY-MM-DD'),
-      endTime = moment(rowData.get('EndTime')).format('YYYY-MM-DD');
-    var executor = rowData.get('ExecutorNames').join('、');
     var documents = rowData.get('Documents').map((item) => { return { name: item.get('DocumentName'), id: item.get('DocumentId'), size: item.get('Size') } }).toArray();
     var content = [
       // {label:'执行时间',value:`${startTime} 至 ${endTime}`},
@@ -748,9 +722,18 @@ export default class TicketDetail extends Component {
       component: CreateTicket,
       passProps: {
         ticketInfo: Immutable.fromJS(this.state.rowData),
-        onPostingCallback: () => {
-          this.props.navigation.pop();
-          this._loadTicketDetail();
+        onPostingCallback: (type) => {
+          if (type !== 'delete') {
+            this.props.navigation.pop();
+            this._loadTicketDetail();
+          } else {
+            setTimeout(() => {
+              this.props.navigation.pop(2);
+              this.props.ticketChanged && this.props.ticketChanged();
+            }, 100);
+
+          }
+
         },
         onBack: () => this.props.navigation.pop()
       }
@@ -866,6 +849,15 @@ export default class TicketDetail extends Component {
         });
       }
     }
+    let _clicks = null;
+    if (this.state.rowData && this.state.rowData.ticketType) {
+      if ([2, 4].includes(this.state.rowData.ticketType)) {
+        _clicks = [this._editTicket]
+      } else {
+        _clicks = actionSelected;
+      }
+    }
+
     return (
       <Toolbar
         title={localStr('lang_ticket_detail')}
@@ -874,7 +866,7 @@ export default class TicketDetail extends Component {
           this.props.navigation.pop()
         }}
         actions={this.props.offline ? [] : this._actions}
-        onActionSelected={[this._editTicket]}
+        onActionSelected={_clicks}
       />
     );
   }

@@ -112,4 +112,8 @@ export default {
 
   lang_offline_download_ticket_error: 'Ticket download failed. Please check the network and retry.',
   lang_offline_download_complete: 'The tickets has been downloaded',
+
+  lang_ticket_detail_attachments: '附件',
+  lang_ticket_use_time: '预计耗时',
+  lang_ticket_time_unit: ['小时', '天']
 };
