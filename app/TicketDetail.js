@@ -103,7 +103,7 @@ export default class TicketDetail extends Component {
     var startTime = moment(rowData.startTime).format('MM-DD'),
       endTime = moment(rowData.endTime).format('MM-DD');
     let displayTime = `${startTime} ${localStr('lang_ticket_to')} ${endTime}`;
-    if (rowData.ticketType === 4 && rowData.extensionProperties && rowData.extensionProperties.duration) {
+    if (rowData.extensionProperties && rowData.extensionProperties.duration) {
       startTime = moment(rowData.startTime).format('YYYY-MM-DD HH:mm');
       let useTime = rowData.extensionProperties.duration;
       let duration = `${localStr('lang_ticket_use_time')} ${useTime.value}${localStr('lang_ticket_time_unit')[parseInt(useTime.unit)]}`
@@ -857,6 +857,7 @@ export default class TicketDetail extends Component {
         _clicks = actionSelected;
       }
     }
+    _clicks = [this._editTicket]
 
     return (
       <Toolbar
