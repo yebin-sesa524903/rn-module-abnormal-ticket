@@ -1,0 +1,175 @@
+{
+  "code": "0",
+  "data": {
+    "id": "3067189133142016",
+    "ownerId": "",
+    "ownerType": null,
+    "objectId": "457",
+    "objectType": 25,
+    "ticketCode": "457_10_20240319_000001",
+    "sysClass": 1,
+    "sysClassLabel": "空调",
+    "ticketState": 10,
+    "ticketStateLabel": "未开始",
+    "ticketType": 6,
+    "ticketTypeLabel": "巡检工单",
+    "title": "巡检工单行为_0319",
+    "customerId": 1,
+    "content": "123666",
+    "startTime": "2024-03-19 00:00:00",
+    "endTime": "2024-03-19 08:00:00",
+    "extensionProperties": {
+      "assets": [
+        {
+          "assetId": 656,
+          "assetType": 26,
+          "assetName": "测试运维",
+          "locationId": 457,
+          "locationType": 25,
+          "locationName": "索菲亚",
+          "extensionProperties": null,
+          "key": 656,
+          "code": "634",
+          "name": "测试运维",
+          "path": "索菲亚"
+        }
+      ],
+      "duration": {
+        "unit": "0",
+        "value": 8
+      },
+      "siteInfo": {
+        "iconKey": "42981216-ac41-43cb-9477-254b1cad3cb6.png",
+        "id": 457,
+        "name": "索菲亚",
+        "templateId": 25,
+        "type": "md"
+      },
+      "jobFlow": {
+        "id": 31500,
+        "name": "0320遍历作业程序",
+        "mainItems": [
+          {
+            "id": 0,
+            "name": "判断类巡检名称",
+            "subItems": [
+              {
+                "name": "巡检项1",
+                "content": "巡检项1的内容",
+                "result": "false",
+                "comment": "gggg这是一个巡检项日志",
+                "pictures": [
+                  {
+                    "fileName": "123.png",
+                    "pictureId": "file-ticket-log-2655621-638466274676996020",
+                    "uploadUser": "wangjing000",
+                    "uploadTime": "2024-03-21T14:17:55.753"
+                  }
+                ],
+                "unit": null,
+                "minValue": null,
+                "maxValue": null,
+                "typeValue": 1,
+                "isException": true
+              },
+              {
+                "name": "巡检项2",
+                "content": "巡检项2的内容",
+                "result": "false",
+                "ticketLogid": 0,
+                "comment": null,
+                "pictures": [],
+                "unit": null,
+                "minValue": null,
+                "maxValue": null,
+                "valueType": 1,
+                "isException": false
+              }
+            ]
+          },
+          {
+            "id": 96928,
+            "name": "抄表类巡检名称",
+            "subItems": [
+              {
+                "name": "抄表巡检项1",
+                "content": "抄表巡检项1",
+                "result": "1",
+                "ticketLogid": 0,
+                "comment": null,
+                "pictures": null,
+                "unit": "kWh",
+                "minValue": 3,
+                "maxValue": 67,
+                "tagId": 20305619,
+                "valueType": 2,
+                "isException": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "assets": [
+      {
+        "assetId": 656,
+        "assetType": 26,
+        "assetName": "测试运维",
+        "locationId": 457,
+        "locationType": 25,
+        "locationName": "索菲亚",
+        "extensionProperties": null
+      }
+    ],
+    "executors": [
+      {
+        "userId": 814256,
+        "userName": "tian_test"
+      },
+      {
+        "userId": 814304,
+        "userName": "zhw_admin"
+      },
+      {
+        "userId": 814308,
+        "userName": "zhw_admin_full"
+      }
+    ],
+    "ticketLogs": [],
+    "ticketOperateLogs": [
+      {
+        "userId": 814256,
+        "userName": "tian_test",
+        "operationType": 11,
+        "operationDescription": "更新工单",
+        "content": null,
+        "createTime": "2024-03-20 11:31:48"
+      },
+      {
+        "userId": 813928,
+        "userName": "admin",
+        "operationType": 11,
+        "operationDescription": "更新工单",
+        "content": null,
+        "createTime": "2024-03-19 13:33:55"
+      },
+      {
+        "userId": 813928,
+        "userName": "admin",
+        "operationType": 10,
+        "operationDescription": "创建工单",
+        "content": null,
+        "createTime": "2024-03-19 08:53:04"
+      }
+    ],
+    "documents": [],
+    "createUser": 813928,
+    "createUserName": "admin",
+    "createTime": "2024-03-19T08:53:03.988+08:00",
+    "updateTime": "2024-03-20T11:31:48.184+08:00",
+    "updateUser": 814256,
+    "updateUserName": "tian_test",
+    "rejectReason": null
+  },
+  "msg": "操作成功"
+}

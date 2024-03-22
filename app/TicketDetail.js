@@ -26,9 +26,7 @@ import Loading from './components/Loading';
 import { isPhoneX } from './utils';
 import Immutable from 'immutable';
 import SchActionSheet from './components/actionsheet/SchActionSheet';
-// import AssetsText from '../AssetsText';
-// import ViewShot from "react-native-view-shot";
-// import CameraRoll from "@react-native-community/cameraroll";
+import mackTicket from './jobTicket.json'
 
 let ViewShot = View;
 
@@ -71,6 +69,7 @@ import FileOpener from 'react-native-file-opener'
 import RNFS, { DocumentDirectoryPath } from "react-native-fs";
 import CreateTicket from "../../../app/containers/ticket/CreateTicket.js";
 import { getImageUrlByKey } from '../../../app/containers/fmcs/plantOperation/utils/Utils';
+import { JobView } from 'rn-module-abnormal-ticket/app/JobView.js';
 
 export default class TicketDetail extends Component {
   constructor(props) {
@@ -91,8 +90,27 @@ export default class TicketDetail extends Component {
         return localTypes[1]
       case 4:
         return localTypes[3]
+      case 6://巡检工单
+        return localTypes[4]
+      case 15://保养工单
+        return localTypes[5]
     }
     return ''
+  }
+
+  //显示作业程序
+  _renderJob() {
+    //只有巡检和保养工单才有作业程序
+    let rowData = this.state.rowData;
+    let type = rowData.ticketType;
+    if (type !== 6 && type !== 15) return null;
+    let executePermission = (this.state.isExecutor && privilegeHelper.hasAuth(CodeMap.OMTicketExecute))
+    if (rowData.extensionProperties && rowData.extensionProperties.jobFlow) {
+      return (
+        <JobView executePermission={executePermission} navigation={this.props.navigation}
+          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} />
+      )
+    }
   }
 
 
@@ -439,6 +457,10 @@ export default class TicketDetail extends Component {
   }
 
   _getLogMessage() {
+    //如果是巡检或者保养工单，那么不显示日志
+    if ([6, 15].includes(this.state.rowData.ticketType)) {
+      return null;
+    }
     let logs = this.state.rowData.ticketLogs;
     let arr = logs.map((log, index) => {
       let imgs = log.pictures.map((img, imgIndex) => {
@@ -747,27 +769,6 @@ export default class TicketDetail extends Component {
       var status = data.ticketState;
       //如果有错误信息，不显示分享按钮
       if (!this.props.errorMessage) {
-        // this._actions = [
-        //   {
-        //     title:localStr('lang_ticket_detail_share'),
-        //     iconType:'share',
-        //     show: 'always', showWithText: false
-        //   }
-        // ];
-        //   actionSelected.push((item)=>{
-        //     if(this.refs.viewShot){
-        //
-        //       this.refs.viewShot.capture().then(uri => {
-        //         CameraRoll.saveToCameraRoll(uri);
-        //         const shareOptions = {
-        //           title: localStr('lang_ticket_detail_share'),
-        //           url: uri,
-        //           failOnCancel: false,
-        //         };
-        //         Share.open(shareOptions);
-        //       });
-        //     }
-        //   })
       }
       if ((status === STATE_NOT_START || status === STATE_STARTING || status === STATE_REJECTED)
         && (privilegeHelper.hasAuth(CodeMap.OMTicketFull))) {
@@ -931,6 +932,7 @@ export default class TicketDetail extends Component {
     //获取工单详情
     this.setState({ isFetching: true })
     apiTicketDetail(this.props.ticketId).then(data => {
+      data = mackTicket;
       if (data.code === CODE_OK) {
         //获取详情ok
         this._processData(data)
@@ -1080,6 +1082,7 @@ export default class TicketDetail extends Component {
             {this._getAssetView()}
             {this._getTaskView()}
             {this._getDocumentsView()}
+            {this._renderJob()}
             {this._getLogMessage()}
             {this._getIDView()}
             <View style={{ height: 10, flex: 1, }}>

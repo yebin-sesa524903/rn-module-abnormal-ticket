@@ -152,7 +152,7 @@ export async function apiTicketList(date, pageNo) {
     body: {
       searchDate: date,
       pageNo,
-      ticketTypes: [4, 9, 10, 2]
+      ticketTypes: [4, 9, 10, 2, 6, 15]
     }
   })
 }
@@ -165,7 +165,7 @@ export async function apiDownloadTicketList(date) {
     body: {
       searchDate: date,
       // pageNo: 1,
-      ticketTypes: [4, 9, 10, 2]
+      ticketTypes: [4, 9, 10, 2, 6, 15]
     }
   })
 }
@@ -196,7 +196,7 @@ export async function apiTicketCount(start, end) {
     body: {
       startDate: start,
       endDate: end,
-      ticketTypes: [4, 9, 10, 2]
+      ticketTypes: [4, 9, 10, 2, 6, 15]
       // locations:[
       //   {
       //     locationId:hierarchyId,
@@ -210,7 +210,7 @@ export async function apiTicketCount(start, end) {
 export async function apiQueryTicketList(filter) {
   //这里对filter做一次处理
   let data = {
-    ticketTypes: [],//[4, 9, 10, 2]
+    ticketTypes: [],//[4, 9, 10, 2,6,15]
   }
   if (filter.selectTypes && filter.selectTypes.length > 0) {
     data.ticketTypes = filter.selectTypes.map(item => {
@@ -219,6 +219,8 @@ export async function apiQueryTicketList(filter) {
         case 1: return 10;
         case 2: return 2;
         case 3: return 4;
+        case 4: return 6;
+        case 5: return 15;
       }
     })
   }
