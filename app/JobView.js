@@ -10,16 +10,104 @@ import JobRow from './JobRow';
 import TouchFeedback from './components/TouchFeedback';
 import Icon from "./components/Icon";
 import SndAlert from '../../../app/utils/components/SndAlert';
-const TXT_JOB = '作业程序';
-const TXT_EXPAND_ALL = '全部展开';
-const TXT_FOLDER_ALL = '全部折叠';
+import TicketSign from './TicketSign.js';
+import Orientation from 'react-native-orientation';
+import CacheImage from "./CacheImage";
+import { apiUploadFile } from 'rn-module-abnormal-ticket/app/middleware/bff.js';
+import moment from 'moment';
 
+const CODE_OK = '0';
 
 export class JobView extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { job: props.job, showWarning: true, expandMap: {} }
+    this.state = { job: props.job, showWarning: true, expandMap: {}, showAllExpand: true }
+  }
+
+  _makeSignName = () => {
+    return `${this.props.rowData.ticketCode}-${moment().format('YYYYMMDDHHmmss')}.jpg`;
+  }
+
+  _uploadSign = (sign) => {
+    apiUploadFile({
+      content: sign,
+      name: this._makeSignName()
+    }).then(ret => {
+      if (ret.code === CODE_OK) {
+        this.props.rowData.SignFilePath = ret.data.key;
+        this.setState({})
+        upload();
+      } else {
+        //签名失败
+        this.setState({})
+      }
+    })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.job && nextProps.job !== this.state.job) {
+      this.setState({ job: nextProps.job });
+    }
+  }
+
+  _doSign = () => {
+    Orientation.lockToLandscape();
+    this.props.navigation.push('PageWarpper', {
+      id: 'ticket_sign',
+      component: TicketSign,
+      passProps: {
+        onBack: () => this.props.navigation.pop(),
+        saveSign: (sign) => {
+          if (sign) {
+            this.props.navigation.pop();
+            console.log('sign', sign);
+            // this.props.rowData.SignFilePath = 'data:image/jpeg;base64,' + sign;
+            // this.setState({})
+            this._uploadSign(sign);
+          }
+        }
+      }
+    })
+  }
+
+  _renderSignature() {
+    //判断工单状态
+    let status = this.props.status;
+    let isTablet = false;//
+    if ([10, 60].includes(status)) {
+      return null;
+    }
+    let signView = null;
+    let signFilePath = this.props.rowData.SignFilePath;
+    if (signFilePath) {
+      //如果是base64图片开图，则是本地图片
+      if (signFilePath.indexOf('data:image/jpeg;base64,') === 0) {
+        signView = (
+          <Image resizeMode="contain" style={{ flex: 1, height: 80 }} source={{ uri: signFilePath }} />
+        )
+      } else {
+        signView = (
+          <View style={{ flex: 1 }}>
+            <CacheImage borderWidth={0} space={0} key={signFilePath} imageKey={signFilePath} height={80} />
+          </View>
+        )
+      }
+    } else {
+      signView = <Text style={{ fontSize: 15, color: Colors.seBrandNomarl }}>{localStr('lang_ticket_detail_sign_tip')}</Text>;
+    }
+
+    return (
+      <View style={{ paddingHorizontal: 16, paddingVertical: 8, paddingTop: 16, flexDirection: 'row', alignItems: 'center', }}>
+        <Text key={0} style={{
+          fontSize: 17, color: '#333',
+          fontWeight: '500'
+        }}>{localStr("lang_ticket_detail_customer_sign")}</Text>
+        <TouchFeedback key={'key'} style={{ flex: 1 }} onPress={this._doSign}>
+          {signView}
+        </TouchFeedback>
+      </View>
+    )
   }
 
   _executeCheck = () => {
@@ -29,11 +117,11 @@ export class JobView extends Component {
       setTimeout(() => {
         SndAlert.alert(
           '',
-          '开始执行工单？',
+          localStr('lang_execute_ticket_dialog_title'),
           [
-            { text: '取消', onPress: () => { } },
+            { text: localStr('lang_execute_ticket_dialog_cancel'), onPress: () => { } },
             {
-              text: '开始执行', onPress: () => {
+              text: localStr("lang_execute_ticket_dialog_ok"), onPress: () => {
                 this.props.onExecute && this.props.onExecute();
               }
             }
@@ -70,8 +158,8 @@ export class JobView extends Component {
           <Text key={0} style={{
             fontSize: 17, color: Colors.seTextTitle, flex: 1, marginLeft: 16,
             fontWeight: '500'
-          }}>{TXT_JOB}</Text>
-          <Text style={{ fontSize: 15, color: Colors.seBrandNomarl }}>{this.state.showAllExpand ? TXT_EXPAND_ALL : TXT_FOLDER_ALL}</Text>
+          }}>{localStr('lang_ticket_job')}</Text>
+          <Text style={{ fontSize: 15, color: Colors.seBrandNomarl }}>{this.state.showAllExpand ? localStr('lang_ticket_job_expand') : localStr('lang_ticket_job_fold')}</Text>
         </View>
       </TouchFeedback>
     )
@@ -85,7 +173,7 @@ export class JobView extends Component {
         <TouchFeedback key={rows.length} enabled={true} onPress={() => {
           let expandMap = this.state.expandMap;
           expandMap[index] = !expandMap[index];
-          let showAllExpand = false;//this.state.showAllExpand;
+          let showAllExpand = this.state.showAllExpand;
           //判断是否全部都展开了
           items.forEach((_, i) => {
             if (!expandMap[i]) {
@@ -116,7 +204,7 @@ export class JobView extends Component {
       rows.push(
         this.state.expandMap[index] ?
           <JobRow index={index} data={item} canEdit={canEdit} status={status}
-            imageClick={this.props.imageClick}
+            imageClick={this.props.imageClick} rowData={this.props.rowData}
             navigation={this.props.navigation}
             doExecute={this._executeCheck}
             valueChanged={item => {
@@ -146,7 +234,7 @@ export class JobView extends Component {
     let redColor = this.state.showWarning && [10, 20, 30, 40].includes(status);//已关闭工单不显示红字
     if (finishCount === count) {
       return (
-        <Text style={{ fontSize: 17, color: Colors.seTextTitle }}>已完成</Text>
+        <Text style={{ fontSize: 17, color: Colors.seTextTitle }}>{localStr("lang_status_5")}</Text>
       );
     } else {
       return (
@@ -157,9 +245,15 @@ export class JobView extends Component {
 
   render() {
     return (
-      <View style={{ margin: 10, borderRadius: 12, backgroundColor: Colors.seBgContainer, paddingBottom: 12 }}>
-        {this._renderJob()}
-      </View>
+      <>
+        <View style={{ margin: 10, borderRadius: 12, backgroundColor: Colors.seBgContainer, paddingBottom: 12 }}>
+          {this._renderJob()}
+        </View>
+        <View style={{ margin: 10, borderRadius: 12, backgroundColor: Colors.seBgContainer, paddingBottom: 12 }}>
+          {this._renderSignature()}
+        </View>
+      </>
+
     )
   }
 }

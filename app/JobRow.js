@@ -17,18 +17,8 @@ import Colors from "../../../app/utils/const/Colors";
 import PhotoShowView from "rn-module-abnormal-ticket/app/components/assets/PhotoShowView.js";
 import Icon from "./components/Icon";
 import { localStr } from './utils/Localizations/localization.js';
-import NetworkImage from "./components/NetworkImage";
 import JobRemak from 'rn-module-abnormal-ticket/app/JobRemark.js';
-const SH = Dimensions.get('window').height;
-const IS_IOS = Platform.OS === 'ios';
 
-const TXT_EXCEPTION = '异常';
-const TXT_WELL = '正常';
-const TXT_INPUT_TIP = '请输入详细说明';
-const TXT_DONE = '完成';
-const TXT_NO_CHECK = '未检';
-const TXT_NOLY_NUMBER = '仅支持数字';
-const TXT_PLEASE_INPUT = '请输入';
 
 const CHECKEDVIEW = (
   <View style={{
@@ -87,7 +77,7 @@ export default class JobRow extends Component {
           borderRadius: 2, borderWidth: 1, borderColor: Colors.seErrorBorder, marginLeft: 16,
           alignItems: 'center', justifyContent: 'center'
         }}>
-          <Text style={{ fontSize: 12, color: Colors.seErrorColor }}>{TXT_EXCEPTION}</Text>
+          <Text style={{ fontSize: 12, color: Colors.seErrorColor }}>{localStr('lang_job_row_exception')}</Text>
         </View>
       );
     }
@@ -112,7 +102,7 @@ export default class JobRow extends Component {
     let textColor = Colors.seTextSecondary;
     if (!this.props.canEdit) {
       if (value === null) {
-        value = TXT_NO_CHECK;
+        value = localStr('lang_job_row_no_check');
         textColor = Colors.seErrorColor;
       }
       msgView = null;
@@ -130,6 +120,8 @@ export default class JobRow extends Component {
         </View>
       )
     }
+    let unit = '';
+    if (row.unit) unit = `(${row.unit})`
     return (
       <View key={index} style={{
         marginLeft: 16, flex: 1, justifyContent: 'center',
@@ -137,17 +129,17 @@ export default class JobRow extends Component {
       }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ flex: 1, marginRight: 10 }}>
-            <Text numberOfLines={1} style={{ fontSize: 17, color: Colors.seTextTitle }}>{`${row.name}（${row.unit}）`}</Text>
+            <Text numberOfLines={1} style={{ fontSize: 17, color: Colors.seTextTitle }}>{`${row.name}${unit}`}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 16 }}>
             <TextInput numberOfLines={1} style={{ paddingRight: 0, fontSize: 17, textAlign: 'right', minWidth: 70, maxWidth: 120, paddingVertical: 12, color: textColor }}
-              value={String(value || '')} placeholder={TXT_PLEASE_INPUT} onFocus={e => {
+              value={String(value || '')} placeholder={localStr('lang_job_row_please_input')} onFocus={() => {
                 // this._onFocus(e);
                 this.setState({ focusTitle: row.name })
               }}
               keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : "numeric"}
               placeholderTextColor={Colors.seTextSecondary} underlineColorAndroid="transparent" onBlur={() => this._onBlur(value)}
-              returnKeyType={'done'} returnKeyLabel={TXT_DONE} editable={this.props.canEdit}
+              returnKeyType={'done'} returnKeyLabel={localStr('lang_job_row_done')} editable={this.props.canEdit}
               onChangeText={text => this._onRowChanged(index, 'result', text)}
               enablesReturnKeyAutomatically={true} />
             {invalidView}
@@ -168,9 +160,9 @@ export default class JobRow extends Component {
     }
     //如果非数字，则提示仅支持数字
     if (!isNumber || isNaN(value)) {
-      SndToast.showTip(TXT_NOLY_NUMBER);
+      SndToast.showTip(localStr('lang_job_row_only_number'));
       // if (this._toast) Toast.hide(this._toast);
-      // this._toast = Toast.show(TXT_NOLY_NUMBER, {
+      // this._toast = Toast.show(localStr('lang_job_row_only_number'), {
       //   duration: Toast.durations.LONG,
       //   position: Toast.positions.CENTER,
       // });
@@ -204,7 +196,7 @@ export default class JobRow extends Component {
           this.props.navigation.pop();
           row.comment = data.content;
           row.pictures = data.pictures.map(p => {
-            return { uri: p.uri, pictureId: p.key, fileName: p.name }
+            return { pictureId: p.key, fileName: p.filename, uploadUser: p.uploadUser, }
           });
           this.setState({})
         },
@@ -240,22 +232,22 @@ export default class JobRow extends Component {
       let txtColor = Colors.seTextPrimary;
       let invalidView = null;
       if (value === null || value === undefined) {
-        value = TXT_NO_CHECK;
+        value = localStr('lang_job_row_no_check');
         txtColor = Colors.seErrorColor;
       } else if (!value || value === 'false') {
-        value = TXT_EXCEPTION;
+        value = localStr('lang_job_row_exception');
         invalidView = (
           <View style={{
             width: 52, height: 22, backgroundColor: Colors.seErrorBg,
             borderRadius: 2, borderWidth: 1, borderColor: Colors.seErrorBorder, marginLeft: 8,
             alignItems: 'center', justifyContent: 'center'
           }}>
-            <Text style={{ fontSize: 12, color: Colors.seErrorColor }}>{TXT_EXCEPTION}</Text>
+            <Text style={{ fontSize: 12, color: Colors.seErrorColor }}>{localStr('lang_job_row_exception')}</Text>
           </View>
         );
 
       } else {
-        value = TXT_WELL;
+        value = localStr('lang_job_row_well');
       }
       return (
 
@@ -298,9 +290,9 @@ export default class JobRow extends Component {
           {msgView}
         </View>
         <View style={{ flexDirection: 'row', marginTop: 10 }}>
-          {this._renderCheckItem(TXT_WELL, (result === 'true' || result === true), true, row, index)}
+          {this._renderCheckItem(localStr('lang_job_row_well'), (result === 'true' || result === true), true, row, index)}
           <View style={{ width: 60 }} />
-          {this._renderCheckItem(TXT_EXCEPTION, (result === 'false' || result === false), false, row, index)}
+          {this._renderCheckItem(localStr('lang_job_row_exception'), (result === 'false' || result === false), false, row, index)}
         </View>
         {this._renderRemark(row)}
       </View>
@@ -323,7 +315,7 @@ export default class JobRow extends Component {
             underlineColorAndroid={'transparent'}
             textAlignVertical={'top'}
             onChangeText={text => this._onRowChanged(index, 'comment', text)}
-            value={row.comment} placeholder={TXT_INPUT_TIP}
+            value={row.comment} placeholder={localStr('lang_job_row_input_tip')}
           />
         </View>
       )
@@ -334,10 +326,10 @@ export default class JobRow extends Component {
           borderWidth: 1, marginTop: 20, paddingTop: 8, paddingBottom: 8, paddingHorizontal: 12
         }}>
           <TextInput style={{ fontSize: 15, height: 69, flex: 1, lineHeight: 23, paddingVertical: 0, color: Colors.seTextPrimary }}
-            value={String(row.comment || '')} placeholder={TXT_INPUT_TIP}
+            value={String(row.comment || '')} placeholder={localStr('lang_job_row_input_tip')}
             textAlignVertical={'top'} textAlign={'left'} multiline={true}
             placeholderTextColor={Colors.seTextSecondary} underlineColorAndroid="transparent"
-            returnKeyLabel={TXT_DONE} editable={this.props.canEdit}
+            returnKeyLabel={localStr('lang_job_row_done')} editable={this.props.canEdit}
             maxLength={1000}
             onChangeText={text => this._onRowChanged(index, 'comment', text)}
           />
@@ -347,7 +339,6 @@ export default class JobRow extends Component {
   }
 
   _renderRemark(remark) {
-    const size = 78;
     if (!remark || this.props.isOffline) return;
     let pics = remark.pictures;
     let content = remark.comment;
@@ -388,9 +379,21 @@ export default class JobRow extends Component {
   }
 
   _showItems(row, index) {
-    let type = row.typeValue || row.valueType//1:判断 2：查表
+    let type = row.valueType || row.typeValue;//1:判断 2：查表
     if (type === 2) return this._renderReadingMeterRow(row, index);
     if (type === 1) return this._renderJudgeRow(row, index);
+  }
+
+  _checkException(row, isMax, newValue) {
+    let value = isMax ? row.maxValue : row.minValue;
+    if (value === null || value === undefined) return;
+    value = Number(value);
+    if (isNaN(value)) return;
+    if (isMax) {
+      if (newValue > value) row.exception = true;
+    } else {
+      if (newValue < value) row.exception = true;
+    }
   }
 
   _onRowChanged(index, type, value) {
@@ -398,7 +401,18 @@ export default class JobRow extends Component {
       this.props.doExecute();
       return;
     }
-    this.state.data.subItems[index][type] = value;
+    let row = this.state.data.subItems[index];
+    let type2 = row.valueType || row.typeValue;
+    if (type2 === 1) {
+      //判断类
+      if (value === false || value === 'false') row.exception = true;
+    } else {
+      //抄表类
+      this._checkException(row, false, value);
+      this._checkException(row, true, value);
+    }
+    this.props.rowData.jobChanged = true;
+    row[type] = value;
     this.setState({})
   }
 

@@ -728,6 +728,8 @@ export async function checkDisk() {
 //根据日期下载离线工单
 export async function downloadTickets(date, data) {
   console.log(date, data)
+  //巡检工单的离线数据不保存
+  data = data.filter(t => t.ticketType !== 6 && t.ticketType !== 15);
   // await clearCacheTicket();
   //第一部，从数据里找出图片，然后下载到本地
   let imgs = findImagesFromDownloadTickets(data);

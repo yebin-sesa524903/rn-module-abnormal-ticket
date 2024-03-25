@@ -45,7 +45,7 @@ import {
   apiEditTicket,
   apiIgnoreTicket, apiSubmitTicket,
   apiTicketDetail,
-  apiTicketExecute, customerId,
+  apiTicketExecute, apiUpdateTicketJob, customerId,
   userId
 } from "./middleware/bff";
 import TicketLogEdit from "./TicketLogEdit";
@@ -107,8 +107,8 @@ export default class TicketDetail extends Component {
     let executePermission = (this.state.isExecutor && privilegeHelper.hasAuth(CodeMap.OMTicketExecute))
     if (rowData.extensionProperties && rowData.extensionProperties.jobFlow) {
       return (
-        <JobView executePermission={executePermission} navigation={this.props.navigation}
-          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} />
+        <JobView executePermission={executePermission} navigation={this.props.navigation} onExecute={this._executeTicket}
+          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} rowData={rowData} />
       )
     }
   }
@@ -649,6 +649,10 @@ export default class TicketDetail extends Component {
       return;
     }
 
+    if (this._isJobTicket() && this.state.rowData.jobChanged) {
+      if (!await this._saveJob()) { return }
+    }
+
     apiSubmitTicket({ id: this.state.rowData.id }).then(ret => {
       if (ret.code === CODE_OK) {
         this.props.ticketChanged && this.props.ticketChanged();
@@ -662,6 +666,42 @@ export default class TicketDetail extends Component {
         SndAlert.alert(localStr('lang_alert_title'), ret.msg);
       }
     })
+  }
+
+  _saveJob = async () => {
+    try {
+      let ret = await apiUpdateTicketJob({
+        ticketId: this.state.rowData.id,
+        ...this.state.rowData.extensionProperties.jobFlow
+      });
+      if (ret.code === CODE_OK) {
+        this._loadTicketDetail();//重新加载最新的数据
+        this.state.rowData.jobChanged = false;
+        return true;
+      } else {
+        //这里报错
+        SndAlert.alert(localStr('lang_alert_title'), ret.msg);
+        return false;
+      }
+    } catch (e) {
+      console.log('saveJob error', e);
+      return false;
+    }
+  }
+
+  _getJobSaveButton() {
+    return (
+      <TouchableOpacity onPress={this._saveJob} style={{
+        height: 40, borderColor: Colors.seBrandNomarl, borderWidth: 1, borderRadius: 2, marginHorizontal: 16,
+        justifyContent: 'center', alignItems: 'center'
+      }}>
+        <Text style={{ fontSize: 15, color: Colors.seBrandNomarl }}>{localStr('lang_ticket_job_save')}</Text>
+      </TouchableOpacity>
+    )
+  }
+
+  _isJobTicket() {
+    return [6, 15].includes(this.state.rowData.ticketType);
   }
 
   _getButton(isScollView) {
@@ -717,14 +757,14 @@ export default class TicketDetail extends Component {
         <Bottom borderColor={Colors.seBorderSplit} height={54} backgroundColor={Colors.seBgContainer}>
           <View style={{ flexDirection: 'row', flex: 1 }}>
             <View style={{ flex: 1 }}>
-              {logButton}
+              {this._isJobTicket() ? this._getJobSaveButton() : logButton}
             </View>
           </View>
           <Button
             style={[styles.button, {
               backgroundColor: Colors.seBrandNomarl,
               marginLeft: 0,
-              flex: 3,
+              flex: this._isJobTicket() ? 1 : 3,
             }]}
             textStyle={{
               fontSize: 16,
@@ -932,7 +972,7 @@ export default class TicketDetail extends Component {
     //获取工单详情
     this.setState({ isFetching: true })
     apiTicketDetail(this.props.ticketId).then(data => {
-      data = mackTicket;
+      // data = mackTicket;
       if (data.code === CODE_OK) {
         //获取详情ok
         this._processData(data)

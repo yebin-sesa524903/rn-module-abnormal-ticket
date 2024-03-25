@@ -30,7 +30,7 @@ import Colors from "../../../app/utils/const/Colors";
 import SndAlert from "../../../app/utils/components/SndAlert";
 
 const CODE_OK = '0'
-const TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 let uploadImages = [];
 

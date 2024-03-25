@@ -115,5 +115,31 @@ export default {
 
   lang_ticket_detail_attachments: '附件',
   lang_ticket_use_time: '预计耗时',
-  lang_ticket_time_unit: ['小时', '天']
+  lang_ticket_time_unit: ['小时', '天'],
+
+  lang_job_remark: '备注',
+  lang_execute_ticket_dialog_title: '开始执行工单？',
+  lang_execute_ticket_dialog_cancel: '取消',
+  lang_execute_ticket_dialog_ok: '开始执行',
+  lang_ticket_detail_customer_sign: '客户签名：',
+  lang_ticket_detail_sign_tip: '点此签名',
+
+  lang_ticket_job: '作业程序',
+  lang_ticket_job_expand: '全部展开',
+  lang_ticket_job_fold: '全部折叠',
+  lang_ticket_job_save: '保存',
+
+  lang_job_row_exception: '异常',
+  lang_job_row_well: '正常',
+  lang_job_row_input_tip: '请输入详细说明',
+  lang_job_row_done: '完成',
+  lang_job_row_no_check: '未检',
+  lang_job_row_only_number: '仅支持数字',
+  lang_job_row_please_input: '请输入',
+
+  lang_sign_title: '客户签名',
+  lang_sign_tip: '今日巡检任务已经完成，请签名验收:',
+  lang_sign_tip2: '正楷手写横向签名',
+  lang_sign_reset: '重写',
+  lang_sign_ok: '确认',
 };

@@ -382,6 +382,14 @@ export async function apiEditTicket(data) {
   })
 }
 
+export async function apiUpdateTicketJob(data) {
+  return await defaultFetch({
+    url: `ticket/updateTicketJobFlow`,
+    verb: 'post',
+    body: data
+  })
+}
+
 export async function apiCreateTicket(data) {
   return await defaultFetch({
     url: `ticket/create`,

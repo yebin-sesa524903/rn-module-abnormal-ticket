@@ -191,6 +191,10 @@ export default class TicketRow extends Component {
         return localTypes[1]
       case 4:
         return localTypes[3]
+      case 6:
+        return localTypes[4]
+      case 15:
+        return localTypes[5]
     }
     return ''
   }
