@@ -13,7 +13,7 @@ import SndAlert from '../../../app/utils/components/SndAlert';
 import TicketSign from './TicketSign.js';
 import Orientation from 'react-native-orientation';
 import CacheImage from "./CacheImage";
-import { apiUploadFile } from 'rn-module-abnormal-ticket/app/middleware/bff.js';
+import { apiSignTicket, apiUploadFile, userName, userId } from 'rn-module-abnormal-ticket/app/middleware/bff.js';
 import moment from 'moment';
 
 const CODE_OK = '0';
@@ -29,20 +29,44 @@ export class JobView extends Component {
     return `${this.props.rowData.ticketCode}-${moment().format('YYYYMMDDHHmmss')}.jpg`;
   }
 
-  _uploadSign = (sign) => {
-    apiUploadFile({
-      content: sign,
-      name: this._makeSignName()
-    }).then(ret => {
+  _uploadSign = async (sign) => {
+    try {
+      let ret = await apiUploadFile({
+        content: sign,
+        name: this._makeSignName()
+      });
       if (ret.code === CODE_OK) {
-        this.props.rowData.SignFilePath = ret.data.key;
-        this.setState({})
-        upload();
+        let signInfo = {
+          ticketId: this.props.rowData.id,
+          signFilePath: ret.data.key,
+          signTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+          signUserId: userId,
+          signUserName: userName,
+        }
+        ret = await apiSignTicket(signInfo)
+        if (ret.code === CODE_OK) {
+          this.props.rowData.extensionProperties.signInfo = signInfo
+          this.setState({})
+          return true;
+        } else {
+          SndAlert.alert(
+            '',
+            ret.msg || localStr('lang_network_error'),
+          )
+        }
       } else {
-        //签名失败
-        this.setState({})
+        SndAlert.alert(
+          '',
+          ret.msg || localStr('lang_network_error'),
+        )
       }
-    })
+    } catch (e) {
+      SndAlert.alert(
+        '',
+        String(e),
+      )
+    }
+    return false;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -58,13 +82,12 @@ export class JobView extends Component {
       component: TicketSign,
       passProps: {
         onBack: () => this.props.navigation.pop(),
-        saveSign: (sign) => {
+        saveSign: async (sign) => {
           if (sign) {
-            this.props.navigation.pop();
-            console.log('sign', sign);
-            // this.props.rowData.SignFilePath = 'data:image/jpeg;base64,' + sign;
-            // this.setState({})
-            this._uploadSign(sign);
+            let ret = await this._uploadSign(sign);
+            if (ret) {
+              this.props.navigation.pop();
+            }
           }
         }
       }
@@ -74,31 +97,30 @@ export class JobView extends Component {
   _renderSignature() {
     //判断工单状态
     let status = this.props.status;
-    let isTablet = false;//
     if ([10, 60].includes(status)) {
       return null;
     }
     let signView = null;
-    let signFilePath = this.props.rowData.SignFilePath;
-    if (signFilePath) {
+    let signInfo = this.props.rowData.extensionProperties.signInfo;
+    if (signInfo && signInfo.signFilePath) {
       //如果是base64图片开图，则是本地图片
-      if (signFilePath.indexOf('data:image/jpeg;base64,') === 0) {
+      if (signInfo.signFilePath.indexOf('data:image/jpeg;base64,') === 0) {
         signView = (
-          <Image resizeMode="contain" style={{ flex: 1, height: 80 }} source={{ uri: signFilePath }} />
+          <Image resizeMode="contain" style={{ flex: 1, height: 80 }} source={{ uri: signInfo.signFilePath }} />
         )
       } else {
         signView = (
           <View style={{ flex: 1 }}>
-            <CacheImage borderWidth={0} space={0} key={signFilePath} imageKey={signFilePath} height={80} />
+            <CacheImage borderWidth={0} space={0} key={signInfo.signFilePath} imageKey={signInfo.signFilePath} height={80} />
           </View>
         )
       }
     } else {
-      signView = <Text style={{ fontSize: 15, color: Colors.seBrandNomarl }}>{localStr('lang_ticket_detail_sign_tip')}</Text>;
+      signView = <Text style={{ fontSize: 17, color: Colors.seBrandNomarl }}>{localStr('lang_ticket_detail_sign_tip')}</Text>;
     }
 
     return (
-      <View style={{ paddingHorizontal: 16, paddingVertical: 8, paddingTop: 16, flexDirection: 'row', alignItems: 'center', }}>
+      <View style={{ padding: 16, margin: 10, borderRadius: 12, backgroundColor: Colors.seBgContainer, flexDirection: 'row', alignItems: 'center', }}>
         <Text key={0} style={{
           fontSize: 17, color: '#333',
           fontWeight: '500'
@@ -231,7 +253,7 @@ export class JobView extends Component {
       }
     }
     //显示警告 默认不显示，但是修改保存巡检结果时，需要显示
-    let redColor = this.state.showWarning && [10, 20, 30, 40].includes(status);//已关闭工单不显示红字
+    let redColor = this.props.showWarning && [10, 20, 30, 40].includes(status);//已关闭工单不显示红字
     if (finishCount === count) {
       return (
         <Text style={{ fontSize: 17, color: Colors.seTextTitle }}>{localStr("lang_status_5")}</Text>
@@ -249,9 +271,7 @@ export class JobView extends Component {
         <View style={{ margin: 10, borderRadius: 12, backgroundColor: Colors.seBgContainer, paddingBottom: 12 }}>
           {this._renderJob()}
         </View>
-        <View style={{ margin: 10, borderRadius: 12, backgroundColor: Colors.seBgContainer, paddingBottom: 12 }}>
-          {this._renderSignature()}
-        </View>
+        {this._renderSignature()}
       </>
 
     )

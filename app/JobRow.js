@@ -196,7 +196,7 @@ export default class JobRow extends Component {
           this.props.navigation.pop();
           row.comment = data.content;
           row.pictures = data.pictures.map(p => {
-            return { pictureId: p.key, fileName: p.filename, uploadUser: p.uploadUser, }
+            return { pictureId: p.key, fileName: p.filename, uploadUser: p.uploadUser, uploadTime: p.uploadTime };
           });
           this.setState({})
         },

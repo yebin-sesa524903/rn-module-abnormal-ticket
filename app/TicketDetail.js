@@ -108,7 +108,7 @@ export default class TicketDetail extends Component {
     if (rowData.extensionProperties && rowData.extensionProperties.jobFlow) {
       return (
         <JobView executePermission={executePermission} navigation={this.props.navigation} onExecute={this._executeTicket}
-          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} rowData={rowData} />
+          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} rowData={rowData} showWarning={this.state.showWarning} />
       )
     }
   }
@@ -197,6 +197,7 @@ export default class TicketDetail extends Component {
     );
   }
   _getTaskView() {
+    if (this._isJobTicket()) return null;
     let rowData = this.state.rowData;
     var content = rowData.content;
 
@@ -637,20 +638,40 @@ export default class TicketDetail extends Component {
 
   async _submitTicket() {
     let ticketLogs = this.state.rowData.ticketLogs;
-    if (!ticketLogs || ticketLogs.length === 0) {
-      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
-      return;
+    if (!this._isJobTicket()) {
+      if (!ticketLogs || ticketLogs.length === 0) {
+        SndAlert.alert(localStr('lang_alert_title'), localStr('lang_ticket_submit_invalid'));
+        return;
+      }
+    } else {
+      let check = this._checkJobInput();
+      if (check.invalidNum) {
+        return;
+      }
+      if (check.noInput) {
+        SndAlert.alert(localStr('lang_alert_title'), localStr('lang_job_save_alert_tip2'), [
+          { text: localStr('lang_job_save_alert_button1'), onPress: () => { } },
+          {
+            text: localStr("lang_toolbar_submit"), onPress: async () => {
+              let ret = await this._saveJob();
+              ret && this._submitTicket();
+            }
+          }
+        ]);
+        return;
+      } else {
+        if (this.state.rowData.jobChanged) {
+          if (!await this._saveJob()) { return }
+        }
+      }
     }
+
 
     if (this.props.offline) {
       await cacheTicketModify(this.state.rowData.id, 1, 30)
       this.showToast(localStr('lang_ticket_submit_toast'))
       this._loadTicketDetail();
       return;
-    }
-
-    if (this._isJobTicket() && this.state.rowData.jobChanged) {
-      if (!await this._saveJob()) { return }
     }
 
     apiSubmitTicket({ id: this.state.rowData.id }).then(ret => {
@@ -668,6 +689,38 @@ export default class TicketDetail extends Component {
     })
   }
 
+  _checkJobInput() {
+    this.setState({ showWarning: true })
+    //如果有非法输入，给出提示
+    let tasks = this.state.rowData.extensionProperties.jobFlow.mainItems;
+    let findNoInupt = false;
+    let find = tasks.find(task => {
+      return task.subItems.find(sub => {
+        let rowType = sub.valueType || sub.typeValue;
+        if (rowType === 2) {
+          if (sub.result === null || sub.result === undefined || sub.result.trim() === '') {
+            findNoInupt = true;
+          } else {
+            let num = Number(sub.result.trim());
+            if (isNaN(num)) {
+              SndAlert.alert(sub.name || '', localStr('lang_job_row_only_number'));
+              return true;
+            }
+          }
+        } else {
+          if (sub.result === null || sub.result === undefined || sub.result.trim() === '') {
+            findNoInupt = true;
+          }
+        }
+        return false;
+      })
+    })
+    return {
+      invalidNum: find,
+      noInput: findNoInupt
+    }
+  }
+
   _saveJob = async () => {
     try {
       let ret = await apiUpdateTicketJob({
@@ -676,7 +729,6 @@ export default class TicketDetail extends Component {
       });
       if (ret.code === CODE_OK) {
         this._loadTicketDetail();//重新加载最新的数据
-        this.state.rowData.jobChanged = false;
         return true;
       } else {
         //这里报错
@@ -689,9 +741,24 @@ export default class TicketDetail extends Component {
     }
   }
 
+  _checkAndSaveJob = async () => {
+    let check = this._checkJobInput();
+    if (check.invalidNum) {
+      return;
+    }
+    if (check.noInput) {
+      SndAlert.alert(localStr('lang_alert_title'), localStr('lang_job_save_alert_tip1'), [
+        { text: localStr('lang_job_save_alert_button1'), onPress: () => { } },
+        { text: localStr("lang_ticket_job_save"), onPress: this._saveJob }
+      ]);
+    } else {
+      await this._saveJob();
+    }
+  }
+
   _getJobSaveButton() {
     return (
-      <TouchableOpacity onPress={this._saveJob} style={{
+      <TouchableOpacity onPress={this._checkAndSaveJob} style={{
         height: 40, borderColor: Colors.seBrandNomarl, borderWidth: 1, borderRadius: 2, marginHorizontal: 16,
         justifyContent: 'center', alignItems: 'center'
       }}>
@@ -963,16 +1030,15 @@ export default class TicketDetail extends Component {
     })
   }
 
-  _loadTicketDetail() {
+  _loadTicketDetail = async () => {
     if (this.props.offline) {
       this._loadOfflineData();
       return;
     }
-
     //获取工单详情
     this.setState({ isFetching: true })
-    apiTicketDetail(this.props.ticketId).then(data => {
-      // data = mackTicket;
+    try {
+      let data = await apiTicketDetail(this.props.ticketId);
       if (data.code === CODE_OK) {
         //获取详情ok
         this._processData(data)
@@ -981,7 +1047,23 @@ export default class TicketDetail extends Component {
           errorMessage: data.msg, isFetching: false
         })
       }
-    })
+    } catch (e) {
+      this.setState({
+        errorMessage: e, isFetching: false
+      })
+    }
+
+    // apiTicketDetail(this.props.ticketId).then(data => {
+    //   // data = mackTicket;
+    //   if (data.code === CODE_OK) {
+    //     //获取详情ok
+    //     this._processData(data)
+    //   } else {
+    //     this.setState({
+    //       errorMessage: data.msg, isFetching: false
+    //     })
+    //   }
+    // })
   }
 
   componentWillUnmount() {

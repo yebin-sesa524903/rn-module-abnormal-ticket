@@ -390,6 +390,14 @@ export async function apiUpdateTicketJob(data) {
   })
 }
 
+export async function apiSignTicket(data) {
+  return await defaultFetch({
+    url: `ticket/signTicket`,
+    verb: 'post',
+    body: data
+  })
+}
+
 export async function apiCreateTicket(data) {
   return await defaultFetch({
     url: `ticket/create`,

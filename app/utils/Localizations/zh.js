@@ -142,4 +142,8 @@ export default {
   lang_sign_tip2: '正楷手写横向签名',
   lang_sign_reset: '重写',
   lang_sign_ok: '确认',
+
+  lang_job_save_alert_tip1: '您有作业程序内容未填写，确认保存吗？',
+  lang_job_save_alert_tip2: '您有作业程序内容未填写，确认提交工单？',
+  lang_job_save_alert_button1: '继续填写',
 };
