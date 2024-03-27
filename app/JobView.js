@@ -45,7 +45,8 @@ export class JobView extends Component {
         }
         ret = await apiSignTicket(signInfo)
         if (ret.code === CODE_OK) {
-          this.props.rowData.extensionProperties.signInfo = signInfo
+          this.props.rowData.extensionProperties.signInfo = signInfo;
+          this.props.changeSignInfo(signInfo)
           this.setState({})
           return true;
         } else {

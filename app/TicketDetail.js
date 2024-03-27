@@ -108,11 +108,15 @@ export default class TicketDetail extends Component {
     if (rowData.extensionProperties && rowData.extensionProperties.jobFlow) {
       return (
         <JobView executePermission={executePermission} navigation={this.props.navigation} onExecute={this._executeTicket}
-          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} rowData={rowData} showWarning={this.state.showWarning} />
+          job={rowData.extensionProperties.jobFlow} status={rowData.ticketState} rowData={rowData}
+          showWarning={this.state.showWarning} changeSignInfo={this._changeSignInfo} />
       )
     }
   }
 
+  _changeSignInfo = (signInfo) => {
+    this._detail = this._detail.setIn(['extensionProperties', 'signInfo'], Immutable.fromJS(signInfo));
+  }
 
   _getAssetView() {
     let rowData = this.state.rowData;
@@ -817,7 +821,7 @@ export default class TicketDetail extends Component {
     if (status === STATE_PENDING_AUDIT && privilegeHelper.hasAuth(CodeMap.OMTicketFull)) {//表示已提交工单
       return this._renderSubmittedButton();
     }
-    console.log('----->111', privilegeHelper.hasAuth(CodeMap.OMTicketExecute), this.state.isExecutor, status)
+
     //执行中和已驳回操作一样
     if (this.state.isExecutor && (status === STATE_STARTING || status === STATE_REJECTED) && privilegeHelper.hasAuth(CodeMap.OMTicketExecute) && !isScollView) {
       return (
@@ -850,7 +854,7 @@ export default class TicketDetail extends Component {
       id: 'ticket_edit',
       component: CreateTicket,
       passProps: {
-        ticketInfo: Immutable.fromJS(this.state.rowData),
+        ticketInfo: this._isJobTicket() ? this._detail : Immutable.fromJS(this.state.rowData),
         onPostingCallback: (type) => {
           if (type !== 'delete') {
             this.props.navigation.pop();
@@ -1041,7 +1045,10 @@ export default class TicketDetail extends Component {
       let data = await apiTicketDetail(this.props.ticketId);
       if (data.code === CODE_OK) {
         //获取详情ok
-        this._processData(data)
+        this._processData(data);
+        if (this._isJobTicket()) {
+          this._detail = Immutable.fromJS(data.data);
+        }
       } else {
         this.setState({
           errorMessage: data.msg, isFetching: false

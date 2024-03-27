@@ -71,10 +71,11 @@ export default class TicketRow extends Component {
   }
 
   _getDateDisplay() {
+    return `${moment(this.props.rowData.startTime).format('YYYY-MM-DD HH:mm')}`;
     if (this.props.rowData.ticketType === 4) {
       return `${moment(this.props.rowData.startTime).format('YYYY-MM-DD HH:mm')}`;
     }
-    return `${moment(this.props.rowData.startTime).format('YYYY-MM-DD')} ${localStr('lang_ticket_to')} ${moment(this.props.rowData.endTime).format('YYYY-MM-DD')}`;
+    // return `${moment(this.props.rowData.startTime).format('YYYY-MM-DD')} ${localStr('lang_ticket_to')} ${moment(this.props.rowData.endTime).format('YYYY-MM-DD')}`;
 
     let mStart = moment(this.props.rowData.startTime);
     let mEnd = moment(this.props.rowData.endTime);
