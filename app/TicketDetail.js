@@ -698,7 +698,7 @@ export default class TicketDetail extends Component {
       return task.subItems.find(sub => {
         let rowType = sub.valueType || sub.typeValue;
         if (rowType === 2) {
-          if (sub.result === null || sub.result === undefined || sub.result.trim() === '') {
+          if (sub.result === null || sub.result === undefined || String(sub.result).trim() === '') {
             findNoInupt = true;
           } else {
             let num = Number(sub.result.trim());
@@ -708,7 +708,7 @@ export default class TicketDetail extends Component {
             }
           }
         } else {
-          if (sub.result === null || sub.result === undefined || sub.result.trim() === '') {
+          if (sub.result === null || sub.result === undefined || String(sub.result).trim() === '') {
             findNoInupt = true;
           }
         }
