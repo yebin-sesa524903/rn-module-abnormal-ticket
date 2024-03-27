@@ -128,7 +128,7 @@ export default class TicketDetail extends Component {
     if (rowData.extensionProperties && rowData.extensionProperties.duration) {
       startTime = moment(rowData.startTime).format('YYYY-MM-DD HH:mm');
       let useTime = rowData.extensionProperties.duration;
-      let duration = `${localStr('lang_ticket_use_time')} ${useTime.value}${localStr('lang_ticket_time_unit')[parseInt(useTime.unit)]}`
+      let duration = `${localStr('lang_ticket_use_time')} ${useTime.value}${localStr('lang_ticket_time_unit')[parseInt(useTime.unit) - 1]}`
       displayTime = `${startTime} ${duration}`
     }
 
@@ -640,7 +640,7 @@ export default class TicketDetail extends Component {
       ])
   }
 
-  async _submitTicket() {
+  async _submitTicket(forceSubmit) {
     let ticketLogs = this.state.rowData.ticketLogs;
     if (!this._isJobTicket()) {
       if (!ticketLogs || ticketLogs.length === 0) {
@@ -652,13 +652,13 @@ export default class TicketDetail extends Component {
       if (check.invalidNum) {
         return;
       }
-      if (check.noInput) {
+      if (check.noInput && !forceSubmit) {
         SndAlert.alert(localStr('lang_alert_title'), localStr('lang_job_save_alert_tip2'), [
           { text: localStr('lang_job_save_alert_button1'), onPress: () => { } },
           {
             text: localStr("lang_toolbar_submit"), onPress: async () => {
               let ret = await this._saveJob();
-              ret && this._submitTicket();
+              ret && this._submitTicket(true);
             }
           }
         ]);
