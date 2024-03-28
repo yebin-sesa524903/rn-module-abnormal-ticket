@@ -143,7 +143,7 @@ export default {
   lang_sign_reset: 'Rewrite',
   lang_sign_ok: 'Confirm',
 
-  lang_job_save_alert_tip1: '您有作业程序内容未填写，确认保存吗？',
-  lang_job_save_alert_tip2: '您有作业程序内容未填写，确认提交工单？',
-  lang_job_save_alert_button1: '继续填写',
+  lang_job_save_alert_tip1: 'You have unfilled operating procedures. Confirm to save?',
+  lang_job_save_alert_tip2: 'You have unfilled operating procedures. Confirm to submit?',
+  lang_job_save_alert_button1: 'Continue to fill.',
 };

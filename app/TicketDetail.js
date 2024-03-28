@@ -725,8 +725,36 @@ export default class TicketDetail extends Component {
     }
   }
 
+  _jobFillException(jobFlow) {
+    let tasks = jobFlow.mainItems;
+    tasks.forEach(task => {
+      task.exception = null;
+      task.subItems.forEach(sub => {
+        let rowType = sub.valueType || sub.typeValue;
+        let result = sub.result;
+        if (rowType === 2) {
+          //查表
+          if (result !== null && result !== undefined && String(result).trim() !== '') {
+            result = Number(result.trim());
+            if (result < sub.minValue || result > sub.maxValue) {
+              sub.exception = true;
+              task.exception = true;
+            }
+          }
+        } else {
+          //判断
+          if (result === 'false' || result === false) {
+            sub.exception = true;
+            task.exception = true;
+          }
+        }
+      })
+    })
+  }
+
   _saveJob = async () => {
     try {
+      this._jobFillException(this.state.rowData.extensionProperties.jobFlow);
       let ret = await apiUpdateTicketJob({
         ticketId: this.state.rowData.id,
         ...this.state.rowData.extensionProperties.jobFlow
